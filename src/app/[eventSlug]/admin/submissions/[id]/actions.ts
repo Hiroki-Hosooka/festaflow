@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/session";
-import { decideSubmission } from "@/lib/data/submissions";
+import { decideSubmission, listBorrowStockStatuses } from "@/lib/data/submissions";
 import { addComment } from "@/lib/data/comments";
 import { setStockDecision } from "@/lib/data/inventory";
 import type { StockStatus } from "@/lib/database.types";
@@ -27,6 +27,16 @@ export async function decideSubmissionAction(
   const comment = String(formData.get("comment") ?? "").trim();
   if ((decision === "rejected" || decision === "returned") && !comment) {
     return { error: "却下・差し戻しの場合はコメントを入力してください。" };
+  }
+
+  if (decision === "approved") {
+    const borrowItems = await listBorrowStockStatuses(submissionId);
+    const pending = borrowItems.filter((i) => i.stock_status === "pending");
+    if (pending.length > 0) {
+      return {
+        error: `借用物品「${pending.map((i) => i.name).join("・")}」の在庫確保の判断が済んでいません。先に「確保する」または「確保できず」を選択してから承認してください。`,
+      };
+    }
   }
 
   await decideSubmission(submissionId, decision, comment);

@@ -1,6 +1,6 @@
 import { requireGroupSession } from "@/lib/session";
 import { getOrCreateSubmission, getSubmissionDetail } from "@/lib/data/submissions";
-import { listInventoryItems } from "@/lib/data/inventory";
+import { listInventoryItems, getInventoryUsage } from "@/lib/data/inventory";
 import { SubmissionForm } from "./SubmissionForm";
 
 export default async function GroupHomePage({
@@ -19,6 +19,13 @@ export default async function GroupHomePage({
   }
 
   const inventoryItems = await listInventoryItems(auth.eventId);
+  const usage = await getInventoryUsage(auth.eventId);
+  const inventoryAvailability = Object.fromEntries(
+    Array.from(usage.entries()).map(([id, u]) => [
+      id,
+      { available: u.available, requestedTotal: u.requestedTotal },
+    ])
+  );
 
   return (
     <SubmissionForm
@@ -30,6 +37,7 @@ export default async function GroupHomePage({
       fields={detail.fields}
       budgetAllocated={detail.group.budget_allocated}
       inventoryItems={inventoryItems}
+      inventoryAvailability={inventoryAvailability}
     />
   );
 }

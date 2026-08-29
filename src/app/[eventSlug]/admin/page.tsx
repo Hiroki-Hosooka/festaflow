@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/session";
 import { listSubmissionsForAdmin } from "@/lib/data/submissions";
-import { StatusBadge, type DisplayStatus } from "@/components/StatusBadge";
-import { yen } from "@/lib/format";
+import { SubmissionsList } from "./SubmissionsList";
 
 type Filter = "all" | "unsubmitted" | "pending";
 
@@ -60,63 +59,7 @@ export default async function AdminDashboardPage({
         </FilterChip>
       </div>
 
-      <div className="card overflow-hidden">
-        <div className="grid grid-cols-[110px_1fr_130px_100px_60px] px-4 py-2.5 text-[10.5px] font-bold text-[var(--muted)] bg-[var(--background)] border-b border-[var(--border)]">
-          <span>団体</span>
-          <span>企画名</span>
-          <span>予算（使用/配分）</span>
-          <span>状態</span>
-          <span />
-        </div>
-        {filtered.length === 0 && (
-          <p className="px-4 py-6 text-sm text-[var(--muted)]">該当する団体がありません。</p>
-        )}
-        {filtered.map((row) => {
-          const status: DisplayStatus = row.status ?? "unsubmitted";
-          return (
-            <div
-              key={row.groupId}
-              className="grid grid-cols-[110px_1fr_130px_100px_60px] px-4 py-3 items-center text-[12.5px] border-b border-[var(--border)] last:border-b-0"
-            >
-              <span className="inline-flex items-center gap-1.5">
-                {row.groupName}
-                {row.hasUnreadFromGroup && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full bg-[var(--accent-admin-text)] flex-none"
-                    aria-label="団体からの未読コメントがあります"
-                  />
-                )}
-              </span>
-              <span className={row.name ? "" : "text-[var(--muted-2)]"}>
-                {row.name || "—"}
-              </span>
-              <span className="text-[11px]">
-                {row.submissionId
-                  ? `${yen(row.plannedTotal)}/${yen(row.budgetAllocated)}`
-                  : "—"}
-              </span>
-              <span>
-                <StatusBadge status={status} />
-              </span>
-              {row.submissionId ? (
-                <Link
-                  href={`/${eventSlug}/admin/submissions/${row.submissionId}`}
-                  className="text-[var(--accent-admin-text)] font-semibold text-[11.5px]"
-                >
-                  確認
-                </Link>
-              ) : (
-                <Link
-                  href={`/${eventSlug}/admin/broadcasts?target=unsubmitted`}
-                  className="text-[var(--accent-admin-text)] font-semibold text-[11.5px]"
-                >
-                  催促
-                </Link>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <SubmissionsList eventSlug={eventSlug} rows={filtered} />
     </div>
   );
 }

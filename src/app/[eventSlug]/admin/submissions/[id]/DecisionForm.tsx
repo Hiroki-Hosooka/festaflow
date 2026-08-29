@@ -9,10 +9,12 @@ export function DecisionForm({
   eventSlug,
   submissionId,
   defaultComment,
+  pendingBorrowNames = [],
 }: {
   eventSlug: string;
   submissionId: string;
   defaultComment: string;
+  pendingBorrowNames?: string[];
 }) {
   const boundAction = decideSubmissionAction.bind(null, eventSlug, submissionId);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
@@ -33,6 +35,11 @@ export function DecisionForm({
           className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2.5 text-[12.5px]"
         />
       </div>
+      {pendingBorrowNames.length > 0 && (
+        <p className="text-[12.5px] text-[var(--warn-text)] leading-relaxed">
+          借用物品「{pendingBorrowNames.join("・")}」の在庫確保が未確認のため、このままでは承認できません。上の借用物品欄で先に「確保する」または「確保できず」を選択してください。
+        </p>
+      )}
       {state.error && (
         <p className="text-[13px] text-[var(--danger-text)] font-medium">{state.error}</p>
       )}

@@ -46,6 +46,7 @@ export function SubmissionForm({
   fields,
   budgetAllocated,
   inventoryItems,
+  inventoryAvailability,
 }: {
   eventSlug: string;
   groupName: string;
@@ -55,11 +56,14 @@ export function SubmissionForm({
   fields: FormFieldRow[];
   budgetAllocated: number;
   inventoryItems: InventoryItemRow[];
+  inventoryAvailability: Record<string, { available: number; requestedTotal: number }>;
 }) {
   const boundAction = saveSubmissionAction.bind(null, eventSlug);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
   const editable = submission.status === "draft" || submission.status === "returned";
+  const isUntouchedFirstVisit =
+    submission.status === "draft" && !submission.name && items.length === 0;
 
   const [name, setName] = useState(submission.name);
   const [content, setContent] = useState(submission.content);
@@ -182,6 +186,12 @@ export function SubmissionForm({
           承認されました。内容の変更が必要な場合は個別コメントで実行委員会にご連絡ください。
         </div>
       )}
+      {isUntouchedFirstVisit && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--accent-group-soft-bg)]/60 px-4 py-3 text-[13px] text-[var(--foreground)] leading-relaxed">
+          はじめまして。ここから企画を提出します。企画名・内容・物品（購入／借用）・場所を入力し、
+          いつでも「下書き保存」で保存できます。準備ができたら「提出する」で実行委員会に送信してください。
+        </div>
+      )}
 
       <BudgetBar allocated={budgetAllocated} planned={plannedTotal} />
 
@@ -277,19 +287,37 @@ export function SubmissionForm({
                 </div>
 
                 {row.kind === "borrow" ? (
-                  <select
-                    value={row.inventoryItemId ?? ""}
-                    onChange={(e) => setBorrowInventoryItem(row.key, e.target.value)}
-                    disabled={!editable}
-                    className="w-full h-8 border border-[var(--border)] rounded-md px-2 text-[13px] bg-white disabled:bg-transparent disabled:border-transparent"
-                  >
-                    <option value="">借用する物品を選択...</option>
-                    {inventoryItems.map((inv) => (
-                      <option key={inv.id} value={inv.id}>
-                        {inv.name}
-                      </option>
-                    ))}
-                  </select>
+                  <>
+                    <select
+                      value={row.inventoryItemId ?? ""}
+                      onChange={(e) => setBorrowInventoryItem(row.key, e.target.value)}
+                      disabled={!editable}
+                      className="w-full h-8 border border-[var(--border)] rounded-md px-2 text-[13px] bg-white disabled:bg-transparent disabled:border-transparent"
+                    >
+                      <option value="">借用する物品を選択...</option>
+                      {inventoryItems.map((inv) => {
+                        const available =
+                          inventoryAvailability[inv.id]?.available ?? inv.total_quantity;
+                        return (
+                          <option key={inv.id} value={inv.id}>
+                            {inv.name}（残り{Math.max(0, available)}/{inv.total_quantity}）
+                          </option>
+                        );
+                      })}
+                    </select>
+                    {row.inventoryItemId &&
+                      (() => {
+                        const available =
+                          inventoryAvailability[row.inventoryItemId]?.available ??
+                          Infinity;
+                        if (available >= row.quantity) return null;
+                        return (
+                          <p className="text-[11px] text-[var(--warn-text)]">
+                            現在の在庫残りは{Math.max(0, available)}個です。希望が競合すると実行委員会の裁定で確保できない場合があります。
+                          </p>
+                        );
+                      })()}
+                  </>
                 ) : (
                   <input
                     value={row.name}
@@ -300,6 +328,11 @@ export function SubmissionForm({
                   />
                 )}
 
+                <div className="grid grid-cols-[52px_76px_76px] gap-2 text-[10px] text-[var(--muted-2)]">
+                  <span>数量</span>
+                  <span>単価</span>
+                  <span className="text-right">小計</span>
+                </div>
                 <div className="grid grid-cols-[52px_76px_76px] gap-2 items-center">
                   <input
                     type="number"

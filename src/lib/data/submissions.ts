@@ -235,6 +235,16 @@ export async function decideSubmission(
   if (error) throw error;
 }
 
+export async function listBorrowStockStatuses(submissionId: string) {
+  const { data, error } = await supabaseAdmin()
+    .from("submission_items")
+    .select("name, stock_status")
+    .eq("submission_id", submissionId)
+    .eq("kind", "borrow");
+  if (error) throw error;
+  return data ?? [];
+}
+
 export function sumItems(items: { quantity: number; unit_price: number }[]) {
   return items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
 }

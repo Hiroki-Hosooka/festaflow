@@ -132,6 +132,9 @@ export default async function AdminSubmissionDetailPage({
             eventSlug={eventSlug}
             submissionId={submission.id}
             defaultComment=""
+            pendingBorrowNames={borrowItems
+              .filter((i) => i.stock_status === "pending")
+              .map((i) => i.name)}
           />
         </div>
       )}
