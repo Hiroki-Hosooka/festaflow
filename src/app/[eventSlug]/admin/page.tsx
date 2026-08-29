@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/session";
 import { listSubmissionsForAdmin } from "@/lib/data/submissions";
+import { getEventBySlug } from "@/lib/data/events";
+import { formatDateTime, daysUntil, toJstDatetimeLocalValue } from "@/lib/format";
+import { updateDeadlineAction, clearDeadlineAction } from "./actions";
 import { SubmissionsList } from "./SubmissionsList";
 
 type Filter = "all" | "unsubmitted" | "pending";
@@ -16,10 +19,19 @@ export default async function AdminDashboardPage({
   const { filter: filterParam } = await searchParams;
   const auth = await requireAdminSession(eventSlug);
 
-  const rows = await listSubmissionsForAdmin(auth.eventId);
+  const [rows, event] = await Promise.all([
+    listSubmissionsForAdmin(auth.eventId),
+    getEventBySlug(eventSlug),
+  ]);
 
   const submittedCount = rows.filter((r) => r.status && r.status !== "draft").length;
   const pendingCount = rows.filter((r) => r.status === "submitted").length;
+  const progressPct = rows.length > 0 ? Math.round((submittedCount / rows.length) * 100) : 0;
+
+  const boundUpdateDeadline = updateDeadlineAction.bind(null, eventSlug);
+  const boundClearDeadline = clearDeadlineAction.bind(null, eventSlug);
+  const deadline = event?.submission_deadline ?? null;
+  const daysLeft = deadline ? daysUntil(deadline) : null;
 
   const filter: Filter =
     filterParam === "unsubmitted" || filterParam === "pending" ? filterParam : "all";
@@ -45,6 +57,75 @@ export default async function AdminDashboardPage({
             確認待ち <strong className="text-[var(--foreground)]">{pendingCount}件</strong>
           </span>
         </div>
+      </div>
+
+      <div className="card px-4 py-3.5 space-y-2">
+        <div className="flex items-center justify-between text-[11.5px] text-[var(--muted)]">
+          <span>提出の進み具合</span>
+          <span className="font-semibold text-[var(--foreground)]">
+            {submittedCount}/{rows.length}団体（{progressPct}%）
+          </span>
+        </div>
+        <div className="h-2 rounded-full bg-[var(--border)] overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${progressPct}%`,
+              background: "linear-gradient(135deg, var(--accent-admin-from), var(--accent-admin-to))",
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="card px-4 py-3 flex items-center justify-between flex-wrap gap-3 text-[13px]">
+        <div>
+          <span className="text-[var(--muted)]">提出締切　</span>
+          {deadline ? (
+            <>
+              <strong>{formatDateTime(deadline)}</strong>
+              {daysLeft !== null && daysLeft < 0 && (
+                <span className="ml-2 text-[11px] text-[var(--danger-text)] font-semibold">
+                  締切を過ぎています
+                </span>
+              )}
+              {daysLeft !== null && daysLeft === 0 && (
+                <span className="ml-2 text-[11px] text-[var(--warn-text)] font-semibold">
+                  本日締切
+                </span>
+              )}
+              {daysLeft !== null && daysLeft > 0 && (
+                <span className="ml-2 text-[11px] text-[var(--muted)]">（あと{daysLeft}日）</span>
+              )}
+            </>
+          ) : (
+            <span className="text-[var(--muted-2)]">未設定</span>
+          )}
+        </div>
+        <details>
+          <summary className="cursor-pointer text-[11.5px] text-[var(--accent-admin-text)] font-semibold">
+            締切を設定・変更
+          </summary>
+          <form action={boundUpdateDeadline} className="flex items-center gap-2 mt-2 flex-wrap">
+            <input
+              type="datetime-local"
+              name="deadline"
+              defaultValue={toJstDatetimeLocalValue(deadline)}
+              aria-label="提出締切（日本時間）"
+              className="h-8 border border-[var(--border-strong)] rounded-md px-2 text-[12px]"
+            />
+            <button className="h-8 px-3 rounded-md text-[11.5px] font-semibold btn-admin">
+              保存
+            </button>
+            {deadline && (
+              <button
+                formAction={boundClearDeadline}
+                className="h-8 px-3 rounded-md text-[11.5px] text-[var(--muted)] border border-[var(--border)]"
+              >
+                締切を削除
+              </button>
+            )}
+          </form>
+        </details>
       </div>
 
       <div className="flex gap-2">

@@ -4,7 +4,7 @@ import { useActionState, useMemo, useState } from "react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BudgetBar } from "@/components/BudgetBar";
 import { saveSubmissionAction, type SubmitFormState } from "./actions";
-import { yen } from "@/lib/format";
+import { yen, daysUntil, formatRelativeTime } from "@/lib/format";
 import type { Database, ItemKind, StockStatus } from "@/lib/database.types";
 
 type SubmissionRow = Database["public"]["Tables"]["submissions"]["Row"];
@@ -47,6 +47,7 @@ export function SubmissionForm({
   budgetAllocated,
   inventoryItems,
   inventoryAvailability,
+  submissionDeadline,
 }: {
   eventSlug: string;
   groupName: string;
@@ -57,6 +58,7 @@ export function SubmissionForm({
   budgetAllocated: number;
   inventoryItems: InventoryItemRow[];
   inventoryAvailability: Record<string, { available: number; requestedTotal: number }>;
+  submissionDeadline: string | null;
 }) {
   const boundAction = saveSubmissionAction.bind(null, eventSlug);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
@@ -161,8 +163,38 @@ export function SubmissionForm({
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold">{groupName} の企画</h1>
-        <StatusBadge status={submission.status} />
+        <div className="flex items-center gap-2">
+          {editable && !isUntouchedFirstVisit && (
+            <span className="text-[10.5px] text-[var(--muted-2)]">
+              最終更新: {formatRelativeTime(submission.updated_at)}
+            </span>
+          )}
+          <StatusBadge status={submission.status} />
+        </div>
       </div>
+
+      {editable && submissionDeadline && (() => {
+        const days = daysUntil(submissionDeadline);
+        if (days < 0) {
+          return (
+            <div className="rounded-2xl border border-[var(--danger-border)] bg-[var(--status-rejected-bg)]/40 px-4 py-3 text-[13px] text-[var(--danger-text)] font-medium">
+              提出締切を過ぎています。できるだけ早く提出してください。心配な場合は個別コメントで実行委員会にご相談ください。
+            </div>
+          );
+        }
+        if (days <= 3) {
+          return (
+            <div className="rounded-2xl border border-[var(--warn-border)] bg-[var(--status-returned-bg)]/40 px-4 py-3 text-[13px] text-[var(--warn-text)] font-medium">
+              提出締切まであと{days === 0 ? "本日中" : `${days}日`}です。お忘れなく提出してください。
+            </div>
+          );
+        }
+        return (
+          <p className="text-[12px] text-[var(--muted)]">
+            提出締切まであと{days}日です。
+          </p>
+        );
+      })()}
 
       {submission.status === "returned" && submission.admin_comment && (
         <div className="rounded-2xl border border-[var(--warn-border)] bg-[var(--status-returned-bg)]/40 px-4 py-3 text-[13px] text-[var(--warn-text)]">

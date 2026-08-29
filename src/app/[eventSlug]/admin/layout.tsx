@@ -1,6 +1,7 @@
 import { requireAdminSession } from "@/lib/session";
 import { getEventBySlug } from "@/lib/data/events";
 import { getInventoryUsage } from "@/lib/data/inventory";
+import { listInboxThreads } from "@/lib/data/comments";
 import { logoutAction } from "../login/actions";
 import { NavBar } from "@/components/NavBar";
 
@@ -21,6 +22,9 @@ export default async function AdminLayout({
     (u) => u.requestedTotal > u.totalQuantity
   );
 
+  const inboxThreads = await listInboxThreads(auth.eventId);
+  const hasUnreadInbox = inboxThreads.some((t) => t.hasUnreadFromGroup);
+
   return (
     <div className="min-h-screen">
       <NavBar
@@ -30,6 +34,13 @@ export default async function AdminLayout({
         logoutAction={boundLogout}
         links={[
           { href: `/${eventSlug}/admin`, label: "企画一覧", icon: "🗂️" },
+          {
+            href: `/${eventSlug}/admin/inbox`,
+            label: "受信箱",
+            icon: "📥",
+            badge: hasUnreadInbox,
+            badgeLabel: "未読の個別コメントがあります",
+          },
           { href: `/${eventSlug}/admin/broadcasts`, label: "連絡", icon: "📣" },
           { href: `/${eventSlug}/admin/groups`, label: "団体・予算", icon: "👥" },
           { href: `/${eventSlug}/admin/fields`, label: "提出項目", icon: "🧾" },

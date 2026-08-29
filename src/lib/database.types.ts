@@ -21,6 +21,7 @@ export interface Database {
           name: string;
           admin_login_id: string;
           admin_password_hash: string;
+          submission_deadline: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & {
