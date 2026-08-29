@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+:root {
+  --background: oklch(97% 0.006 80);
+  --foreground: oklch(22% 0.012 80);
+  --muted: oklch(45% 0.012 80);
+  --muted-2: oklch(55% 0.012 80);
+  --surface: oklch(99% 0.004 80);
+  --border: oklch(90% 0.01 80);
+  --border-strong: oklch(85% 0.01 80);
+
+  /* 団体側アクセント（マゼンタ系） */
+  --accent-group-from: oklch(72% 0.19 325);
+  --accent-group-to: oklch(48% 0.22 325);
+  --accent-group-text: oklch(55% 0.13 325);
+  --accent-group-soft-bg: oklch(95% 0.045 325);
+
+  /* 管理側アクセント（アンバー系） */
+  --accent-admin-from: oklch(72% 0.19 75);
+  --accent-admin-to: oklch(48% 0.19 75);
+  --accent-admin-text: oklch(50% 0.13 75);
+
+  /* ステータス色 */
+  --status-approved-bg: oklch(91% 0.1 150);
+  --status-approved-text: oklch(34% 0.15 150);
+  --status-returned-bg: oklch(92% 0.09 75);
+  --status-returned-text: oklch(38% 0.13 75);
+  --status-rejected-bg: oklch(92% 0.09 25);
+  --status-rejected-text: oklch(42% 0.16 25);
+  --status-pending-bg: oklch(94% 0.01 80);
+  --status-pending-text: oklch(40% 0.012 80);
+  --status-unsubmitted-bg: oklch(94% 0.01 80);
+  --status-unsubmitted-text: oklch(55% 0.012 80);
+
+  --danger-border: oklch(75% 0.15 25);
+  --danger-text: oklch(45% 0.16 25);
+  --warn-border: oklch(75% 0.12 80);
+  --warn-text: oklch(45% 0.12 80);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.btn-group {
+  background: linear-gradient(135deg, var(--accent-group-from), var(--accent-group-to));
+  box-shadow: 0 8px 18px oklch(55% 0.19 325 / 0.35);
+  color: #fff;
+}
+
+.btn-admin {
+  background: linear-gradient(135deg, var(--accent-admin-from), var(--accent-admin-to));
+  box-shadow: 0 8px 18px oklch(58% 0.18 75 / 0.35);
+  color: #fff;
+}
+
+.btn-approve {
+  background: linear-gradient(135deg, oklch(74% 0.19 150), oklch(46% 0.19 150));
+  box-shadow: 0 8px 18px oklch(55% 0.18 150 / 0.35);
+  color: #fff;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  width: fit-content;
+  white-space: nowrap;
+}
