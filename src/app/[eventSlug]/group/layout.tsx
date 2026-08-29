@@ -27,14 +27,15 @@ export default async function GroupLayout({
         badgeClass="bg-[var(--accent-group-text)]"
         logoutAction={boundLogout}
         links={[
-          { href: `/${eventSlug}/group`, label: "企画" },
+          { href: `/${eventSlug}/group`, label: "企画", icon: "📋" },
           {
             href: `/${eventSlug}/group/messages`,
             label: "連絡・コメント",
+            icon: "💬",
             badge: hasUnread,
             badgeLabel: "未読のコメントがあります",
           },
-          { href: `/${eventSlug}/group/settings`, label: "合言葉の変更" },
+          { href: `/${eventSlug}/group/settings`, label: "合言葉の変更", icon: "🔑" },
         ]}
       />
       <div className="max-w-3xl mx-auto px-5 py-8">{children}</div>

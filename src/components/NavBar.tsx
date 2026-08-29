@@ -7,6 +7,7 @@ import { useState } from "react";
 export interface NavLinkItem {
   href: string;
   label: string;
+  icon?: string;
   badge?: boolean;
   badgeLabel?: string;
 }
@@ -53,6 +54,11 @@ export function NavBar({
                 isActive(l.href) ? "font-bold" : "text-[var(--muted)]"
               }`}
             >
+              {l.icon && (
+                <span aria-hidden="true" className="text-[14px] leading-none">
+                  {l.icon}
+                </span>
+              )}
               {l.label}
               {l.badge && (
                 <span
@@ -78,6 +84,11 @@ export function NavBar({
                 isActive(l.href) ? "font-bold" : "text-[var(--muted)]"
               }`}
             >
+              {l.icon && (
+                <span aria-hidden="true" className="text-[14px] leading-none">
+                  {l.icon}
+                </span>
+              )}
               {l.label}
               {l.badge && (
                 <span

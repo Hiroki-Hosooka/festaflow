@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
 import { StatusBadge, type DisplayStatus } from "@/components/StatusBadge";
 import { yen } from "@/lib/format";
 import type { SubmissionListRow } from "@/lib/data/submissions";
+import { decideSubmissionAction, type DecideFormState } from "./submissions/[id]/actions";
+
+const quickApproveInitialState: DecideFormState = {};
 
 export function SubmissionsList({
   eventSlug,
@@ -33,7 +36,7 @@ export function SubmissionsList({
       />
 
       <div className="card overflow-hidden hidden sm:block">
-        <div className="grid grid-cols-[110px_1fr_130px_100px_60px] px-4 py-2.5 text-[10.5px] font-bold text-[var(--muted)] bg-[var(--background)] border-b border-[var(--border)]">
+        <div className="grid grid-cols-[110px_1fr_130px_100px_130px] px-4 py-2.5 text-[10.5px] font-bold text-[var(--muted)] bg-[var(--background)] border-b border-[var(--border)]">
           <span>団体</span>
           <span>企画名</span>
           <span>予算（使用/配分）</span>
@@ -71,7 +74,7 @@ function actionHref(eventSlug: string, row: SubmissionListRow) {
 function TableRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRow }) {
   const status: DisplayStatus = row.status ?? "unsubmitted";
   return (
-    <div className="grid grid-cols-[110px_1fr_130px_100px_60px] px-4 py-3 items-center text-[12.5px] border-b border-[var(--border)] last:border-b-0">
+    <div className="grid grid-cols-[110px_1fr_130px_100px_130px] px-4 py-3 items-center text-[12.5px] border-b border-[var(--border)] last:border-b-0">
       <span className="inline-flex items-center gap-1.5">
         {row.groupName}
         {row.hasUnreadFromGroup && (
@@ -88,12 +91,17 @@ function TableRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRo
       <span>
         <StatusBadge status={status} />
       </span>
-      <Link
-        href={actionHref(eventSlug, row)}
-        className="text-[var(--accent-admin-text)] font-semibold text-[11.5px]"
-      >
-        {row.submissionId ? "確認" : "催促"}
-      </Link>
+      <div className="flex flex-col items-end gap-1">
+        <Link
+          href={actionHref(eventSlug, row)}
+          className="text-[var(--accent-admin-text)] font-semibold text-[11.5px]"
+        >
+          {row.submissionId ? "確認" : "催促"}
+        </Link>
+        {row.status === "submitted" && row.submissionId && (
+          <QuickApproveButton eventSlug={eventSlug} submissionId={row.submissionId} />
+        )}
+      </div>
     </div>
   );
 }
@@ -101,30 +109,67 @@ function TableRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRo
 function CardRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRow }) {
   const status: DisplayStatus = row.status ?? "unsubmitted";
   return (
-    <Link href={actionHref(eventSlug, row)} className="card block px-4 py-3.5 space-y-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-[13.5px] inline-flex items-center gap-1.5">
-          {row.groupName}
-          {row.hasUnreadFromGroup && (
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-[var(--accent-admin-text)] flex-none"
-              aria-label="団体からの未読コメントがあります"
-            />
-          )}
-        </span>
-        <StatusBadge status={status} />
-      </div>
-      <p className={`text-[12.5px] ${row.name ? "" : "text-[var(--muted-2)]"}`}>
-        {row.name || "企画名未入力"}
-      </p>
-      <div className="flex items-center justify-between text-[11px] text-[var(--muted)]">
-        <span>
-          {row.submissionId ? `${yen(row.plannedTotal)} / ${yen(row.budgetAllocated)}` : "—"}
-        </span>
-        <span className="text-[var(--accent-admin-text)] font-semibold">
-          {row.submissionId ? "確認する →" : "催促する →"}
-        </span>
-      </div>
-    </Link>
+    <div className="card px-4 py-3.5 space-y-1.5">
+      <Link href={actionHref(eventSlug, row)} className="block space-y-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-semibold text-[13.5px] inline-flex items-center gap-1.5">
+            {row.groupName}
+            {row.hasUnreadFromGroup && (
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-[var(--accent-admin-text)] flex-none"
+                aria-label="団体からの未読コメントがあります"
+              />
+            )}
+          </span>
+          <StatusBadge status={status} />
+        </div>
+        <p className={`text-[12.5px] ${row.name ? "" : "text-[var(--muted-2)]"}`}>
+          {row.name || "企画名未入力"}
+        </p>
+        <div className="flex items-center justify-between text-[11px] text-[var(--muted)]">
+          <span>
+            {row.submissionId ? `${yen(row.plannedTotal)} / ${yen(row.budgetAllocated)}` : "—"}
+          </span>
+          <span className="text-[var(--accent-admin-text)] font-semibold">
+            {row.submissionId ? "確認する →" : "催促する →"}
+          </span>
+        </div>
+      </Link>
+      {row.status === "submitted" && row.submissionId && (
+        <div className="pt-1.5 border-t border-[var(--border)] flex justify-end">
+          <QuickApproveButton eventSlug={eventSlug} submissionId={row.submissionId} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function QuickApproveButton({
+  eventSlug,
+  submissionId,
+}: {
+  eventSlug: string;
+  submissionId: string;
+}) {
+  const boundAction = decideSubmissionAction.bind(null, eventSlug, submissionId);
+  const [state, formAction, pending] = useActionState(boundAction, quickApproveInitialState);
+
+  return (
+    <form action={formAction} className="flex flex-col items-end gap-1">
+      <input type="hidden" name="decision" value="approved" />
+      <input type="hidden" name="comment" value="" />
+      <button
+        disabled={pending}
+        className="h-7 px-2.5 rounded-md text-[11px] font-semibold btn-approve disabled:opacity-60"
+        title="購入物品のみなど、確認不要な企画をその場で承認します"
+      >
+        {pending ? "承認中..." : "即承認"}
+      </button>
+      {state.error && (
+        <p className="text-[10.5px] text-[var(--danger-text)] text-right max-w-[220px] leading-snug">
+          {state.error}
+        </p>
+      )}
+    </form>
   );
 }

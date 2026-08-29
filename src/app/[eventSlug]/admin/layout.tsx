@@ -29,13 +29,14 @@ export default async function AdminLayout({
         badgeClass="bg-[var(--danger-text)]"
         logoutAction={boundLogout}
         links={[
-          { href: `/${eventSlug}/admin`, label: "企画一覧" },
-          { href: `/${eventSlug}/admin/broadcasts`, label: "連絡" },
-          { href: `/${eventSlug}/admin/groups`, label: "団体・予算" },
-          { href: `/${eventSlug}/admin/fields`, label: "提出項目" },
+          { href: `/${eventSlug}/admin`, label: "企画一覧", icon: "🗂️" },
+          { href: `/${eventSlug}/admin/broadcasts`, label: "連絡", icon: "📣" },
+          { href: `/${eventSlug}/admin/groups`, label: "団体・予算", icon: "👥" },
+          { href: `/${eventSlug}/admin/fields`, label: "提出項目", icon: "🧾" },
           {
             href: `/${eventSlug}/admin/inventory`,
             label: "在庫管理",
+            icon: "📦",
             badge: hasInventoryConflict,
             badgeLabel: "在庫の希望が競合している物品があります",
           },
