@@ -85,7 +85,21 @@ export async function getOrCreateSubmission(eventId: string, groupId: string) {
     .insert({ event_id: eventId, group_id: groupId })
     .select("*")
     .single();
-  if (insertError) throw insertError;
+  if (insertError) {
+    // layout.tsx と page.tsx が同時に初回アクセスすると二重にinsertが走りうるため、
+    // ユニーク制約違反(23505)の場合は競合相手が作った行を取り直す。
+    if (insertError.code === "23505") {
+      const { data: retried, error: retryError } = await db
+        .from("submissions")
+        .select("*")
+        .eq("event_id", eventId)
+        .eq("group_id", groupId)
+        .single();
+      if (retryError) throw retryError;
+      return retried;
+    }
+    throw insertError;
+  }
   return created;
 }
 
