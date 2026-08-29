@@ -22,3 +22,9 @@ insert into groups (event_id, name, passphrase_hash, budget_allocated) values
 -- 追加項目のデモ（管理側が後から追加した項目、という想定）
 insert into form_fields (event_id, key, label, field_type, required, sort_order) values
   ('00000000-0000-0000-0000-000000000001', 'stage_day', '実施日（1日目/2日目）', 'text', false, 0);
+
+-- Phase 2: 学校全体で共有する在庫物品のデモ
+insert into inventory_items (event_id, name, total_quantity, notes) values
+  ('00000000-0000-0000-0000-000000000001', '折りたたみ椅子', 20, '体育館倉庫'),
+  ('00000000-0000-0000-0000-000000000001', '長机', 10, ''),
+  ('00000000-0000-0000-0000-000000000001', '延長コード', 8, '');

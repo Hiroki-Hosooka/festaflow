@@ -5,19 +5,35 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { BudgetBar } from "@/components/BudgetBar";
 import { saveSubmissionAction, type SubmitFormState } from "./actions";
 import { yen } from "@/lib/format";
-import type { Database } from "@/lib/database.types";
+import type { Database, ItemKind, StockStatus } from "@/lib/database.types";
 
 type SubmissionRow = Database["public"]["Tables"]["submissions"]["Row"];
 type ItemRow = Database["public"]["Tables"]["submission_items"]["Row"];
 type FieldValueRow = Database["public"]["Tables"]["submission_field_values"]["Row"];
 type FormFieldRow = Database["public"]["Tables"]["form_fields"]["Row"];
+type InventoryItemRow = Database["public"]["Tables"]["inventory_items"]["Row"];
 
 interface EditableItem {
   key: string;
   name: string;
   quantity: number;
   unitPrice: number;
+  kind: ItemKind;
+  inventoryItemId: string | null;
+  stockStatus: StockStatus;
 }
+
+const STOCK_LABELS: Record<StockStatus, string> = {
+  pending: "在庫未確認",
+  secured: "在庫確保済み",
+  denied: "在庫確保できず",
+};
+
+const STOCK_STYLES: Record<StockStatus, string> = {
+  pending: "bg-[var(--status-pending-bg)] text-[var(--status-pending-text)]",
+  secured: "bg-[var(--status-approved-bg)] text-[var(--status-approved-text)]",
+  denied: "bg-[var(--status-rejected-bg)] text-[var(--status-rejected-text)]",
+};
 
 const initialState: SubmitFormState = {};
 
@@ -29,6 +45,7 @@ export function SubmissionForm({
   fieldValues,
   fields,
   budgetAllocated,
+  inventoryItems,
 }: {
   eventSlug: string;
   groupName: string;
@@ -37,6 +54,7 @@ export function SubmissionForm({
   fieldValues: FieldValueRow[];
   fields: FormFieldRow[];
   budgetAllocated: number;
+  inventoryItems: InventoryItemRow[];
 }) {
   const boundAction = saveSubmissionAction.bind(null, eventSlug);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
@@ -53,8 +71,21 @@ export function SubmissionForm({
           name: i.name,
           quantity: i.quantity,
           unitPrice: i.unit_price,
+          kind: i.kind,
+          inventoryItemId: i.inventory_item_id,
+          stockStatus: i.stock_status,
         }))
-      : [{ key: "new-0", name: "", quantity: 1, unitPrice: 0 }]
+      : [
+          {
+            key: "new-0",
+            name: "",
+            quantity: 1,
+            unitPrice: 0,
+            kind: "purchase",
+            inventoryItemId: null,
+            stockStatus: "pending",
+          },
+        ]
   );
   const [dynamicValues, setDynamicValues] = useState<Record<string, string>>(() => {
     const out: Record<string, string> = {};
@@ -76,7 +107,15 @@ export function SubmissionForm({
   function addItem() {
     setItemRows((rows) => [
       ...rows,
-      { key: `new-${Date.now()}-${rows.length}`, name: "", quantity: 1, unitPrice: 0 },
+      {
+        key: `new-${Date.now()}-${rows.length}`,
+        name: "",
+        quantity: 1,
+        unitPrice: 0,
+        kind: "purchase",
+        inventoryItemId: null,
+        stockStatus: "pending",
+      },
     ]);
   }
 
@@ -84,10 +123,33 @@ export function SubmissionForm({
     setItemRows((rows) => rows.filter((r) => r.key !== key));
   }
 
+  function setKind(key: string, kind: ItemKind) {
+    setItemRows((rows) =>
+      rows.map((r) =>
+        r.key === key
+          ? kind === "purchase"
+            ? { ...r, kind, inventoryItemId: null, name: "" }
+            : { ...r, kind, name: "", unitPrice: 0 }
+          : r
+      )
+    );
+  }
+
+  function setBorrowInventoryItem(key: string, inventoryItemId: string) {
+    const picked = inventoryItems.find((inv) => inv.id === inventoryItemId);
+    updateItem(key, { inventoryItemId, name: picked?.name ?? "" });
+  }
+
   const itemsJson = JSON.stringify(
     itemRows
       .filter((r) => r.name.trim().length > 0)
-      .map((r) => ({ name: r.name.trim(), quantity: r.quantity, unitPrice: r.unitPrice }))
+      .map((r) => ({
+        name: r.name.trim(),
+        quantity: r.quantity,
+        unitPrice: r.unitPrice,
+        kind: r.kind,
+        inventoryItemId: r.inventoryItemId,
+      }))
   );
   const fieldValuesJson = JSON.stringify(dynamicValues);
 
@@ -154,66 +216,113 @@ export function SubmissionForm({
         </div>
 
         <div>
-          <label className="block text-xs font-semibold mb-1">購入物品</label>
+          <label className="block text-xs font-semibold mb-1">物品（購入／借用）</label>
           <p className="text-[11px] text-[var(--muted)] mb-2">
-            「単価」は1個あたりの金額です。小計は自動で計算されます。
+            「借用」は学校の共有備品から借りる物品です。一覧にない物品は実行委員会に追加を依頼してください。
+            「単価」は1個あたりの金額です（借用は通常0円）。小計は自動で計算されます。
           </p>
-          <div className="border border-[var(--border-strong)] rounded-lg overflow-hidden">
-            <div className="grid grid-cols-[1fr_52px_76px_76px_24px] gap-2 px-3 py-2 text-[11px] font-semibold text-[var(--muted)] bg-[var(--background)] border-b border-[var(--border)]">
-              <span>品目</span>
-              <span>数量</span>
-              <span>単価</span>
-              <span className="text-right">小計</span>
-              <span />
-            </div>
+          <div className="space-y-2.5">
             {itemRows.length === 0 && (
-              <p className="px-3 py-3 text-[12.5px] text-[var(--muted)]">
-                購入物品はありません。
+              <p className="border border-[var(--border-strong)] rounded-lg px-3 py-3 text-[12.5px] text-[var(--muted)]">
+                物品はありません。
               </p>
             )}
             {itemRows.map((row) => (
               <div
                 key={row.key}
-                className="grid grid-cols-[1fr_52px_76px_76px_24px] gap-2 px-3 py-2 border-b border-[var(--border)] last:border-b-0 items-center"
+                className="border border-[var(--border-strong)] rounded-lg p-2.5 space-y-2"
               >
-                <input
-                  value={row.name}
-                  onChange={(e) => updateItem(row.key, { name: e.target.value })}
-                  disabled={!editable}
-                  placeholder="品目名"
-                  className="h-8 border border-[var(--border)] rounded-md px-2 text-[13px] disabled:bg-transparent disabled:border-transparent"
-                />
-                <input
-                  type="number"
-                  min={0}
-                  value={row.quantity}
-                  onChange={(e) => updateItem(row.key, { quantity: Number(e.target.value) })}
-                  disabled={!editable}
-                  aria-label="数量"
-                  className="h-8 border border-[var(--border)] rounded-md px-2 text-[13px] disabled:bg-transparent disabled:border-transparent"
-                />
-                <input
-                  type="number"
-                  min={0}
-                  value={row.unitPrice}
-                  onChange={(e) => updateItem(row.key, { unitPrice: Number(e.target.value) })}
-                  disabled={!editable}
-                  aria-label="単価（1個あたりの金額）"
-                  className="h-8 border border-[var(--border)] rounded-md px-2 text-[13px] disabled:bg-transparent disabled:border-transparent"
-                />
-                <span className="text-right text-[12.5px] text-[var(--muted)] tabular-nums">
-                  {yen(row.quantity * row.unitPrice)}
-                </span>
-                {editable && (
-                  <button
-                    type="button"
-                    onClick={() => removeItem(row.key)}
-                    className="text-[var(--muted-2)] text-sm"
-                    aria-label={`${row.name || "この品目"}を削除`}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex gap-1 text-[11px] font-semibold">
+                    <button
+                      type="button"
+                      disabled={!editable}
+                      onClick={() => setKind(row.key, "purchase")}
+                      className={`h-7 px-2.5 rounded-full border ${
+                        row.kind === "purchase"
+                          ? "bg-[var(--accent-group-soft-bg)] border-[var(--accent-group-text)] text-[var(--accent-group-text)]"
+                          : "border-[var(--border)] text-[var(--muted)]"
+                      }`}
+                    >
+                      購入
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!editable}
+                      onClick={() => setKind(row.key, "borrow")}
+                      className={`h-7 px-2.5 rounded-full border ${
+                        row.kind === "borrow"
+                          ? "bg-[var(--accent-group-soft-bg)] border-[var(--accent-group-text)] text-[var(--accent-group-text)]"
+                          : "border-[var(--border)] text-[var(--muted)]"
+                      }`}
+                    >
+                      借用
+                    </button>
+                    {row.kind === "borrow" && (
+                      <span className={`status-badge ${STOCK_STYLES[row.stockStatus]}`}>
+                        {STOCK_LABELS[row.stockStatus]}
+                      </span>
+                    )}
+                  </div>
+                  {editable && (
+                    <button
+                      type="button"
+                      onClick={() => removeItem(row.key)}
+                      className="text-[var(--muted-2)] text-sm"
+                      aria-label={`${row.name || "この品目"}を削除`}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                {row.kind === "borrow" ? (
+                  <select
+                    value={row.inventoryItemId ?? ""}
+                    onChange={(e) => setBorrowInventoryItem(row.key, e.target.value)}
+                    disabled={!editable}
+                    className="w-full h-8 border border-[var(--border)] rounded-md px-2 text-[13px] bg-white disabled:bg-transparent disabled:border-transparent"
                   >
-                    ×
-                  </button>
+                    <option value="">借用する物品を選択...</option>
+                    {inventoryItems.map((inv) => (
+                      <option key={inv.id} value={inv.id}>
+                        {inv.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    value={row.name}
+                    onChange={(e) => updateItem(row.key, { name: e.target.value })}
+                    disabled={!editable}
+                    placeholder="品目名"
+                    className="w-full h-8 border border-[var(--border)] rounded-md px-2 text-[13px] disabled:bg-transparent disabled:border-transparent"
+                  />
                 )}
+
+                <div className="grid grid-cols-[52px_76px_76px] gap-2 items-center">
+                  <input
+                    type="number"
+                    min={0}
+                    value={row.quantity}
+                    onChange={(e) => updateItem(row.key, { quantity: Number(e.target.value) })}
+                    disabled={!editable}
+                    aria-label="数量"
+                    className="h-8 border border-[var(--border)] rounded-md px-2 text-[13px] disabled:bg-transparent disabled:border-transparent"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    value={row.unitPrice}
+                    onChange={(e) => updateItem(row.key, { unitPrice: Number(e.target.value) })}
+                    disabled={!editable}
+                    aria-label="単価（1個あたりの金額）"
+                    className="h-8 border border-[var(--border)] rounded-md px-2 text-[13px] disabled:bg-transparent disabled:border-transparent"
+                  />
+                  <span className="text-right text-[12.5px] text-[var(--muted)] tabular-nums">
+                    {yen(row.quantity * row.unitPrice)}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

@@ -8,6 +8,8 @@ export type SubmissionStatus =
 export type FormFieldType = "text" | "textarea" | "number";
 export type BroadcastTarget = "all" | "unsubmitted";
 export type CommentSender = "admin" | "group";
+export type ItemKind = "purchase" | "borrow";
+export type StockStatus = "pending" | "secured" | "denied";
 
 export interface Database {
   public: {
@@ -97,11 +99,32 @@ export interface Database {
           quantity: number;
           unit_price: number;
           sort_order: number;
+          kind: ItemKind;
+          inventory_item_id: string | null;
+          stock_status: StockStatus;
+          secured_quantity: number;
         };
         Insert: Partial<
           Database["public"]["Tables"]["submission_items"]["Row"]
         > & { submission_id: string; name: string };
         Update: Partial<Database["public"]["Tables"]["submission_items"]["Row"]>;
+        Relationships: [];
+      };
+      inventory_items: {
+        Row: {
+          id: string;
+          event_id: string;
+          name: string;
+          total_quantity: number;
+          notes: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["inventory_items"]["Row"]> & {
+          event_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["inventory_items"]["Row"]>;
         Relationships: [];
       };
       submission_field_values: {

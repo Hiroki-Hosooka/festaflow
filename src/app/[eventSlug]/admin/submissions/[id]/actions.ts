@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/session";
 import { decideSubmission } from "@/lib/data/submissions";
 import { addComment } from "@/lib/data/comments";
+import { setStockDecision } from "@/lib/data/inventory";
+import type { StockStatus } from "@/lib/database.types";
 
 export interface DecideFormState {
   error?: string;
@@ -41,6 +43,28 @@ export async function decideSubmissionAction(
     returned: "差し戻しました。",
   };
   return { success: labels[decision] };
+}
+
+export async function setStockDecisionAction(
+  eventSlug: string,
+  submissionId: string,
+  submissionItemId: string,
+  formData: FormData
+) {
+  await requireAdminSession(eventSlug);
+
+  const stockStatus = String(formData.get("stock_status") ?? "") as StockStatus;
+  if (stockStatus !== "pending" && stockStatus !== "secured" && stockStatus !== "denied") return;
+
+  const securedQuantity =
+    stockStatus === "secured"
+      ? Math.max(0, Math.floor(Number(formData.get("secured_quantity")) || 0))
+      : 0;
+
+  await setStockDecision(submissionItemId, { stockStatus, securedQuantity });
+
+  revalidatePath(`/${eventSlug}/admin/submissions/${submissionId}`);
+  revalidatePath(`/${eventSlug}/admin/inventory`);
 }
 
 export async function sendAdminCommentAction(

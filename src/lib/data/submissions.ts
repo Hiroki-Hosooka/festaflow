@@ -1,7 +1,7 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase";
 import { listUnreadSubmissionIds } from "@/lib/data/comments";
-import type { SubmissionStatus } from "@/lib/database.types";
+import type { ItemKind, SubmissionStatus } from "@/lib/database.types";
 
 export interface SubmissionListRow {
   groupId: string;
@@ -130,7 +130,13 @@ export async function getSubmissionDetail(submissionId: string) {
 
 export async function replaceSubmissionItems(
   submissionId: string,
-  items: { name: string; quantity: number; unitPrice: number }[]
+  items: {
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    kind: ItemKind;
+    inventoryItemId: string | null;
+  }[]
 ) {
   const db = supabaseAdmin();
   const { error: delErr } = await db
@@ -147,6 +153,8 @@ export async function replaceSubmissionItems(
       quantity: item.quantity,
       unit_price: item.unitPrice,
       sort_order: index,
+      kind: item.kind,
+      inventory_item_id: item.inventoryItemId,
     }))
   );
   if (insErr) throw insErr;

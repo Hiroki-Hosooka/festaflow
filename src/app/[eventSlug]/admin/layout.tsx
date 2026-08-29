@@ -32,6 +32,9 @@ export default async function AdminLayout({
               <Link href={`/${eventSlug}/admin/fields`} className="text-[var(--muted)]">
                 提出項目
               </Link>
+              <Link href={`/${eventSlug}/admin/inventory`} className="text-[var(--muted)]">
+                在庫管理
+              </Link>
             </nav>
           </div>
           <form action={boundLogout}>

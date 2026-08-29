@@ -1,5 +1,6 @@
 import { requireGroupSession } from "@/lib/session";
 import { getOrCreateSubmission, getSubmissionDetail } from "@/lib/data/submissions";
+import { listInventoryItems } from "@/lib/data/inventory";
 import { SubmissionForm } from "./SubmissionForm";
 
 export default async function GroupHomePage({
@@ -17,6 +18,8 @@ export default async function GroupHomePage({
     throw new Error("企画データの取得に失敗しました。");
   }
 
+  const inventoryItems = await listInventoryItems(auth.eventId);
+
   return (
     <SubmissionForm
       eventSlug={eventSlug}
@@ -26,6 +29,7 @@ export default async function GroupHomePage({
       fieldValues={detail.fieldValues}
       fields={detail.fields}
       budgetAllocated={detail.group.budget_allocated}
+      inventoryItems={inventoryItems}
     />
   );
 }

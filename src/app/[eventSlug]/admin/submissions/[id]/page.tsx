@@ -2,11 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdminSession } from "@/lib/session";
 import { getSubmissionDetail, sumItems } from "@/lib/data/submissions";
+import { getInventoryUsage } from "@/lib/data/inventory";
 import { listComments, markCommentsRead } from "@/lib/data/comments";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BudgetBar } from "@/components/BudgetBar";
 import { formatTime, yen } from "@/lib/format";
 import { DecisionForm } from "./DecisionForm";
+import { StockDecisionControl } from "./StockDecisionControl";
 import { sendAdminCommentAction } from "./actions";
 
 export default async function AdminSubmissionDetailPage({
@@ -22,6 +24,9 @@ export default async function AdminSubmissionDetailPage({
 
   const { submission, group, items, fieldValues, fields } = detail;
   const plannedTotal = sumItems(items);
+  const purchaseItems = items.filter((i) => i.kind === "purchase");
+  const borrowItems = items.filter((i) => i.kind === "borrow");
+  const inventoryUsage = await getInventoryUsage(submission.event_id);
 
   await markCommentsRead(submission.id, "admin");
   const comments = await listComments(submission.id);
@@ -56,11 +61,11 @@ export default async function AdminSubmissionDetailPage({
 
         <div>
           <div className="text-xs font-bold text-[var(--muted)] mb-1.5">購入物品</div>
-          {items.length === 0 ? (
+          {purchaseItems.length === 0 ? (
             <p className="text-[13px] text-[var(--muted-2)]">未入力</p>
           ) : (
             <div className="border border-[var(--border)] rounded-lg overflow-hidden">
-              {items.map((item) => (
+              {purchaseItems.map((item) => (
                 <div
                   key={item.id}
                   className="grid grid-cols-[1fr_70px_90px] px-3 py-2 text-[12px] border-b border-[var(--border)] last:border-b-0"
@@ -73,6 +78,47 @@ export default async function AdminSubmissionDetailPage({
             </div>
           )}
         </div>
+
+        {borrowItems.length > 0 && (
+          <div>
+            <div className="text-xs font-bold text-[var(--muted)] mb-1.5">借用物品</div>
+            <div className="border border-[var(--border)] rounded-lg overflow-hidden divide-y divide-[var(--border)]">
+              {borrowItems.map((item) => {
+                const usage = item.inventory_item_id
+                  ? inventoryUsage.get(item.inventory_item_id)
+                  : undefined;
+                return (
+                  <div key={item.id} className="px-3 py-2.5 space-y-1.5">
+                    <div className="flex items-center justify-between text-[12px]">
+                      <span className="font-semibold">
+                        {item.name} ×{item.quantity}
+                      </span>
+                      {usage && (
+                        <span className="text-[11px] text-[var(--muted)]">
+                          在庫 {usage.totalQuantity} / この物品への要求合計 {usage.requestedTotal}
+                          {usage.requestedTotal > usage.totalQuantity && (
+                            <span className="text-[var(--danger-text)] font-semibold">
+                              {" "}
+                              ・競合あり
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                    <StockDecisionControl
+                      eventSlug={eventSlug}
+                      submissionId={submission.id}
+                      submissionItemId={item.id}
+                      requestedQuantity={item.quantity}
+                      stockStatus={item.stock_status}
+                      securedQuantity={item.secured_quantity}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <BudgetBar allocated={group.budget_allocated} planned={plannedTotal} />
       </div>

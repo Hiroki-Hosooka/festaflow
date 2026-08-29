@@ -12,11 +12,14 @@ import {
   markSubmitted,
   sumItems,
 } from "@/lib/data/submissions";
+import type { ItemKind } from "@/lib/database.types";
 
 interface ItemInput {
   name: string;
   quantity: number;
   unitPrice: number;
+  kind: ItemKind;
+  inventoryItemId: string | null;
 }
 
 function parseItems(json: string): ItemInput[] {
@@ -28,6 +31,8 @@ function parseItems(json: string): ItemInput[] {
         name: String(i?.name ?? "").trim(),
         quantity: Math.max(0, Math.floor(Number(i?.quantity) || 0)),
         unitPrice: Math.max(0, Math.floor(Number(i?.unitPrice) || 0)),
+        kind: (i?.kind === "borrow" ? "borrow" : "purchase") as ItemKind,
+        inventoryItemId: i?.inventoryItemId ? String(i.inventoryItemId) : null,
       }))
       .filter((i) => i.name.length > 0);
   } catch {
@@ -92,6 +97,13 @@ export async function saveSubmissionAction(
     return {
       error: `「${missingRequired.map((f) => f.label).join("」「")}」を入力してください。`,
     };
+  }
+
+  const unselectedBorrowItem = items.find(
+    (i) => i.kind === "borrow" && !i.inventoryItemId
+  );
+  if (unselectedBorrowItem) {
+    return { error: `「${unselectedBorrowItem.name}」の借用元の物品を選択してください。` };
   }
 
   const group = await getGroup(auth.groupId);
