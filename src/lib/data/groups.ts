@@ -53,6 +53,15 @@ export async function updateGroupBudget(groupId: string, budgetAllocated: number
   if (error) throw error;
 }
 
+export async function updateGroupPassphrase(groupId: string, passphraseHash: string) {
+  const { error } = await supabaseAdmin()
+    .from("groups")
+    .update({ passphrase_hash: passphraseHash })
+    .eq("id", groupId);
+
+  if (error) throw error;
+}
+
 export async function deleteGroup(groupId: string) {
   const { error } = await supabaseAdmin().from("groups").delete().eq("id", groupId);
   if (error) throw error;

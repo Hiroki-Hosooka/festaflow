@@ -2,9 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/session";
-import { createGroup, updateGroupBudget } from "@/lib/data/groups";
+import { createGroup, updateGroupBudget, updateGroupPassphrase } from "@/lib/data/groups";
 import { hashPassword } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase";
 
 export interface GroupFormState {
   error?: string;
@@ -61,10 +60,6 @@ export async function resetPassphraseAction(
   const passphrase = String(formData.get("passphrase") ?? "").trim();
   if (!passphrase) return;
   const hash = await hashPassword(passphrase);
-  const { error } = await supabaseAdmin()
-    .from("groups")
-    .update({ passphrase_hash: hash })
-    .eq("id", groupId);
-  if (error) throw error;
+  await updateGroupPassphrase(groupId, hash);
   revalidatePath(`/${eventSlug}/admin/groups`);
 }

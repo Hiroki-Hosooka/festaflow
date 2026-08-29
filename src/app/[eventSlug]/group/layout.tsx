@@ -39,6 +39,9 @@ export default async function GroupLayout({
                   />
                 )}
               </Link>
+              <Link href={`/${eventSlug}/group/settings`} className="text-[var(--muted)]">
+                合言葉の変更
+              </Link>
             </nav>
           </div>
           <form action={boundLogout}>
