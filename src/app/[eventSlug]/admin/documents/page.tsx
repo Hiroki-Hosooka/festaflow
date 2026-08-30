@@ -4,6 +4,7 @@ import { createSignedUrl } from "@/lib/storage";
 import { formatDateTime } from "@/lib/format";
 import { NewDocumentForm } from "./NewDocumentForm";
 import { DeleteDocumentButton } from "./DeleteDocumentButton";
+import { EmptyState } from "@/components/EmptyState";
 
 export default async function AdminDocumentsPage({
   params,
@@ -33,7 +34,11 @@ export default async function AdminDocumentsPage({
 
       <div className="card overflow-hidden">
         {withUrls.length === 0 && (
-          <p className="px-4 py-6 text-sm text-[var(--muted)]">まだ資料はありません。</p>
+          <EmptyState
+            icon="document"
+            title="まだ資料はありません"
+            description="上のフォームから資料を追加すると、全団体のポータルに表示されます。"
+          />
         )}
         {withUrls.map((d) => (
           <div

@@ -63,10 +63,7 @@ export default async function AdminDashboardPage({
         <div className="h-2 rounded-full bg-[var(--border)] overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
-            style={{
-              width: `${progressPct}%`,
-              background: "linear-gradient(135deg, var(--accent-admin-from), var(--accent-admin-to))",
-            }}
+            style={{ width: `${progressPct}%`, background: "var(--accent-admin-solid)" }}
           />
         </div>
       </div>
@@ -106,17 +103,9 @@ function FilterChip({
       href={`/${eventSlug}/admin${value === "all" ? "" : `?filter=${value}`}`}
       className={`text-[11.5px] px-3 py-1.5 rounded-full ${
         active
-          ? "font-bold text-white"
+          ? "font-bold text-white bg-[var(--accent-admin-solid)]"
           : "text-[var(--muted)] bg-[var(--background)]"
       }`}
-      style={
-        active
-          ? {
-              background:
-                "linear-gradient(135deg, var(--accent-admin-from), var(--accent-admin-to))",
-            }
-          : undefined
-      }
     >
       {children}
     </Link>

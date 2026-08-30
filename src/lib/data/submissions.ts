@@ -14,6 +14,7 @@ export interface SubmissionListRow {
   hasUnreadFromGroup: boolean;
   affiliation: Affiliation | null;
   area: Area | null;
+  hasShiftConfig: boolean;
 }
 
 export async function listSubmissionsForAdmin(
@@ -56,6 +57,16 @@ export async function listSubmissionsForAdmin(
   const submissionsByGroup = new Map((submissions ?? []).map((s) => [s.group_id, s]));
   const unreadIds = await listUnreadSubmissionIds(submissionIds, "admin");
 
+  let shiftConfiguredIds = new Set<string>();
+  if (submissionIds.length > 0) {
+    const { data, error } = await db
+      .from("shift_configs")
+      .select("submission_id")
+      .in("submission_id", submissionIds);
+    if (error) throw error;
+    shiftConfiguredIds = new Set((data ?? []).map((c) => c.submission_id));
+  }
+
   return (groups ?? []).map((group) => {
     const submission = submissionsByGroup.get(group.id) ?? null;
     return {
@@ -69,6 +80,7 @@ export async function listSubmissionsForAdmin(
       hasUnreadFromGroup: submission ? unreadIds.has(submission.id) : false,
       affiliation: submission?.affiliation ?? null,
       area: submission?.area ?? null,
+      hasShiftConfig: submission ? shiftConfiguredIds.has(submission.id) : false,
     };
   });
 }

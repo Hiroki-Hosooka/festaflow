@@ -4,6 +4,7 @@ import { getInventoryUsage } from "@/lib/data/inventory";
 import { listInboxThreads } from "@/lib/data/comments";
 import { logoutAction } from "../login/actions";
 import { NavBar } from "@/components/NavBar";
+import { Icon } from "@/components/Icons";
 
 export default async function AdminLayout({
   children,
@@ -33,25 +34,25 @@ export default async function AdminLayout({
         badgeClass="bg-[var(--danger-text)]"
         logoutAction={boundLogout}
         links={[
-          { href: `/${eventSlug}/admin`, label: "企画一覧", icon: "🗂️" },
+          { href: `/${eventSlug}/admin`, label: "企画一覧", icon: <Icon name="clipboard" /> },
           {
             href: `/${eventSlug}/admin/inbox`,
             label: "受信箱",
-            icon: "📥",
+            icon: <Icon name="inbox" />,
             badge: hasUnreadInbox,
             badgeLabel: "未読の個別コメントがあります",
           },
-          { href: `/${eventSlug}/admin/broadcasts`, label: "連絡", icon: "📣" },
-          { href: `/${eventSlug}/admin/groups`, label: "団体・予算", icon: "👥" },
-          { href: `/${eventSlug}/admin/fields`, label: "提出項目", icon: "🧾" },
+          { href: `/${eventSlug}/admin/broadcasts`, label: "連絡", icon: <Icon name="megaphone" /> },
+          { href: `/${eventSlug}/admin/groups`, label: "団体・予算", icon: <Icon name="users" /> },
+          { href: `/${eventSlug}/admin/fields`, label: "提出項目", icon: <Icon name="receipt" /> },
           {
             href: `/${eventSlug}/admin/inventory`,
             label: "在庫管理",
-            icon: "📦",
+            icon: <Icon name="package" />,
             badge: hasInventoryConflict,
             badgeLabel: "在庫の希望が競合している物品があります",
           },
-          { href: `/${eventSlug}/admin/documents`, label: "配布資料", icon: "📄" },
+          { href: `/${eventSlug}/admin/documents`, label: "配布資料", icon: <Icon name="document" /> },
         ]}
       />
       <div className="max-w-4xl mx-auto px-5 py-8">{children}</div>

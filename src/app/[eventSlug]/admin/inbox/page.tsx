@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdminSession } from "@/lib/session";
 import { listInboxThreads } from "@/lib/data/comments";
 import { formatRelativeTime } from "@/lib/format";
+import { EmptyState } from "@/components/EmptyState";
 
 export default async function AdminInboxPage({
   params,
@@ -28,9 +29,11 @@ export default async function AdminInboxPage({
 
       <div className="card overflow-hidden divide-y divide-[var(--border)]">
         {threads.length === 0 && (
-          <p className="px-4 py-8 text-sm text-[var(--muted)] text-center">
-            まだやりとりはありません。団体からコメントが届くとここに表示されます。
-          </p>
+          <EmptyState
+            icon="inbox"
+            title="まだやりとりはありません"
+            description="団体からの個別コメントが届くと、ここに新着順で表示されます。"
+          />
         )}
         {threads.map((t) => (
           <Link

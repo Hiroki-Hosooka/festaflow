@@ -71,7 +71,7 @@ export default async function GroupMessagesPage({
                   委
                 </span>
                 <div>
-                  <div className="bg-[var(--background)] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed max-w-sm">
+                  <div className="bg-[var(--background)] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed max-w-sm">
                     {c.body}
                   </div>
                   <div className="text-[10.5px] text-[var(--muted-2)] mt-1">
@@ -82,7 +82,7 @@ export default async function GroupMessagesPage({
             ) : (
               <div key={c.id} className="flex justify-end">
                 <div className="text-right">
-                  <div className="inline-block bg-[var(--accent-group-soft-bg)] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed max-w-sm">
+                  <div className="inline-block bg-[var(--accent-group-soft-bg)] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed max-w-sm">
                     {c.body}
                   </div>
                   <div className="text-[10.5px] text-[var(--muted-2)] mt-1">

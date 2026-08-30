@@ -198,7 +198,7 @@ export function SubmissionForm({
             return (
               <div
                 key={s.id}
-                className={`rounded-2xl border px-4 py-3 text-[13px] font-medium ${style}`}
+                className={`rounded-xl border px-4 py-3 text-[13px] font-medium ${style}`}
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <span>{s.title}</span>
@@ -221,29 +221,29 @@ export function SubmissionForm({
       )}
 
       {submission.status === "returned" && submission.admin_comment && (
-        <div className="rounded-2xl border border-[var(--warn-border)] bg-[var(--status-returned-bg)]/40 px-4 py-3 text-[13px] text-[var(--warn-text)]">
+        <div className="rounded-xl border border-[var(--warn-border)] bg-[var(--status-returned-bg)]/40 px-4 py-3 text-[13px] text-[var(--warn-text)]">
           <strong>差し戻し：</strong>
           {submission.admin_comment}
         </div>
       )}
       {submission.status === "rejected" && (
-        <div className="rounded-2xl border border-[var(--danger-border)] bg-[var(--status-rejected-bg)]/40 px-4 py-3 text-[13px] text-[var(--danger-text)]">
+        <div className="rounded-xl border border-[var(--danger-border)] bg-[var(--status-rejected-bg)]/40 px-4 py-3 text-[13px] text-[var(--danger-text)]">
           <strong>却下：</strong>
           {submission.admin_comment || "この企画は却下されました。"}
         </div>
       )}
       {submission.status === "submitted" && (
-        <div className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-[13px] text-[var(--muted)]">
+        <div className="rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-[13px] text-[var(--muted)]">
           実行委員会の確認をお待ちください。
         </div>
       )}
       {submission.status === "approved" && (
-        <div className="rounded-2xl border border-[oklch(80%_0.1_150)] bg-[var(--status-approved-bg)]/40 px-4 py-3 text-[13px] text-[var(--status-approved-text)]">
+        <div className="rounded-xl border border-[oklch(80%_0.1_150)] bg-[var(--status-approved-bg)]/40 px-4 py-3 text-[13px] text-[var(--status-approved-text)]">
           承認されました。内容の変更が必要な場合は個別コメントで実行委員会にご連絡ください。
         </div>
       )}
       {isUntouchedFirstVisit && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--accent-group-soft-bg)]/60 px-4 py-3 text-[13px] text-[var(--foreground)] leading-relaxed">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--accent-group-soft-bg)]/60 px-4 py-3 text-[13px] text-[var(--foreground)] leading-relaxed">
           はじめまして。ここから企画を提出します。企画名・内容・物品（購入／借用）・場所を入力し、
           いつでも「下書き保存」で保存できます。準備ができたら「提出する」で実行委員会に送信してください。
         </div>

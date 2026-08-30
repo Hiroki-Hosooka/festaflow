@@ -41,8 +41,11 @@ export async function saveShiftConfigAction(
   const slotMinutes = Number(formData.get("slot_minutes"));
   const peoplePerSlot = Math.max(1, Math.floor(Number(formData.get("people_per_slot")) || 1));
 
-  if (!startTime || !endTime || startTime >= endTime) {
-    return { error: "活動開始時間・終了時間を正しく入力してください。" };
+  const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+  if (!timePattern.test(startTime) || !timePattern.test(endTime) || startTime >= endTime) {
+    return {
+      error: "開始時刻・終了時刻は「9:00」のように24時間表記の「時:分」で、開始<終了になるよう入力してください。",
+    };
   }
   if (![30, 60, 90, 120].includes(slotMinutes)) {
     return { error: "1シフトの時間単位を選択してください。" };

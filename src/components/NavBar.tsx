@@ -7,7 +7,7 @@ import { useState } from "react";
 export interface NavLinkItem {
   href: string;
   label: string;
-  icon?: string;
+  icon?: React.ReactNode;
   badge?: boolean;
   badgeLabel?: string;
 }
@@ -55,7 +55,7 @@ export function NavBar({
               }`}
             >
               {l.icon && (
-                <span aria-hidden="true" className="text-[14px] leading-none">
+                <span aria-hidden="true" className="inline-flex w-4 h-4 flex-none">
                   {l.icon}
                 </span>
               )}
@@ -85,7 +85,7 @@ export function NavBar({
               }`}
             >
               {l.icon && (
-                <span aria-hidden="true" className="text-[14px] leading-none">
+                <span aria-hidden="true" className="inline-flex w-4 h-4 flex-none">
                   {l.icon}
                 </span>
               )}

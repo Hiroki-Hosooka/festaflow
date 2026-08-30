@@ -32,10 +32,7 @@ export function LoginForm({
       <div className="flex items-center gap-2 mb-8 justify-center">
         <span
           className="w-5 h-5 rounded-md"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--accent-group-from), var(--accent-group-to))",
-          }}
+          style={{ background: "var(--accent-group-solid)" }}
         />
         <span className="text-sm font-bold">{eventName}</span>
       </div>

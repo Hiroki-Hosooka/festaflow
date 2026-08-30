@@ -2,6 +2,7 @@ import { requireGroupSession } from "@/lib/session";
 import { listEventDocuments } from "@/lib/data/documents";
 import { createSignedUrl } from "@/lib/storage";
 import { formatDateTime } from "@/lib/format";
+import { EmptyState } from "@/components/EmptyState";
 
 export default async function GroupDocumentsPage({
   params,
@@ -20,7 +21,11 @@ export default async function GroupDocumentsPage({
       <h1 className="text-lg font-bold">配布資料</h1>
       <div className="card overflow-hidden">
         {withUrls.length === 0 && (
-          <p className="px-4 py-6 text-sm text-[var(--muted)]">まだ資料はありません。</p>
+          <EmptyState
+            icon="document"
+            title="まだ資料はありません"
+            description="実行委員会が資料をアップロードすると、ここに表示されます。"
+          />
         )}
         {withUrls.map((d) => (
           <a

@@ -3,6 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
 import { StatusBadge, type DisplayStatus } from "@/components/StatusBadge";
+import { Icon } from "@/components/Icons";
 import { yen } from "@/lib/format";
 import type { SubmissionListRow } from "@/lib/data/submissions";
 import type { Affiliation, Area } from "@/lib/database.types";
@@ -84,6 +85,11 @@ export function SubmissionsList({
         </p>
       )}
 
+      <p className="text-[11px] text-[var(--muted-2)] inline-flex items-center gap-1">
+        <Icon name="calendar" className="w-3 h-3 text-[var(--accent-admin-text)]" />
+        当番シフト設定済みの団体には団体名の横にこのアイコンが表示されます
+      </p>
+
       <div className="card overflow-hidden hidden sm:block">
         <div className="grid grid-cols-[110px_1fr_130px_100px_130px] px-4 py-2.5 text-[10.5px] font-bold text-[var(--muted)] bg-[var(--background)] border-b border-[var(--border)]">
           <span>団体</span>
@@ -160,6 +166,14 @@ function TableRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRo
             aria-label="団体からの未読コメントがあります"
           />
         )}
+        {row.hasShiftConfig && (
+          <span
+            className="text-[var(--accent-admin-text)] flex-none"
+            title="当番シフト設定済み"
+          >
+            <Icon name="calendar" className="w-3 h-3" />
+          </span>
+        )}
       </span>
       <span className={row.name ? "" : "text-[var(--muted-2)]"}>
         {row.name || "—"}
@@ -203,6 +217,14 @@ function CardRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRow
                 className="w-1.5 h-1.5 rounded-full bg-[var(--accent-admin-text)] flex-none"
                 aria-label="団体からの未読コメントがあります"
               />
+            )}
+            {row.hasShiftConfig && (
+              <span
+                className="text-[var(--accent-admin-text)] flex-none"
+                title="当番シフト設定済み"
+              >
+                <Icon name="calendar" className="w-3 h-3" />
+              </span>
             )}
           </span>
           <StatusBadge status={status} />

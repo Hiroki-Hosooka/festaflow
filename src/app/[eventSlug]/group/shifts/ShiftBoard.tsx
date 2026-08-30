@@ -14,6 +14,7 @@ import {
   type AutoAssignState,
 } from "./actions";
 import type { Database } from "@/lib/database.types";
+import { EmptyState } from "@/components/EmptyState";
 
 type ShiftConfigRow = Database["public"]["Tables"]["shift_configs"]["Row"];
 type ShiftMemberRow = Database["public"]["Tables"]["shift_members"]["Row"];
@@ -59,7 +60,7 @@ export function ShiftBoard({
         slots={slots}
       />
 
-      {slots.length > 0 && (
+      {slots.length > 0 ? (
         <AssignmentGrid
           eventSlug={eventSlug}
           slots={slots}
@@ -69,6 +70,18 @@ export function ShiftBoard({
           assignments={assignments}
           canEdit={canEdit}
         />
+      ) : (
+        <div className="card">
+          <EmptyState
+            icon="calendar"
+            title="まだシフトが設定されていません"
+            description={
+              canEdit
+                ? "上の「シフト設定」で活動時間・コマ時間を入力して保存すると、コマ割りと当番表がここに生成されます。"
+                : "クラスリーダーがシフト設定を保存すると、当番表がここに表示されます。"
+            }
+          />
+        </div>
       )}
     </div>
   );
@@ -91,9 +104,13 @@ function ConfigForm({
         <div>
           <label className="block text-[11px] font-semibold mb-1">開始時刻</label>
           <input
-            type="time"
+            type="text"
+            inputMode="numeric"
             name="start_time"
             defaultValue={config?.start_time ?? "09:00"}
+            placeholder="09:00"
+            pattern="^([01]\d|2[0-3]):[0-5]\d$"
+            title="24時間表記で「時:分」の形式で入力してください（例: 09:00）"
             required
             className="h-9 w-full border border-[var(--border-strong)] rounded-md px-2 text-[12.5px]"
           />
@@ -101,9 +118,13 @@ function ConfigForm({
         <div>
           <label className="block text-[11px] font-semibold mb-1">終了時刻</label>
           <input
-            type="time"
+            type="text"
+            inputMode="numeric"
             name="end_time"
             defaultValue={config?.end_time ?? "16:00"}
+            placeholder="16:00"
+            pattern="^([01]\d|2[0-3]):[0-5]\d$"
+            title="24時間表記で「時:分」の形式で入力してください（例: 16:00）"
             required
             className="h-9 w-full border border-[var(--border-strong)] rounded-md px-2 text-[12.5px]"
           />
