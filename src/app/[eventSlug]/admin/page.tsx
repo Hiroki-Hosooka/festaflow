@@ -1,113 +1,148 @@
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/session";
+import { getEventBySlug } from "@/lib/data/events";
 import { listSubmissionsForAdmin } from "@/lib/data/submissions";
+import { listInboxThreads } from "@/lib/data/comments";
+import { getInventoryUsage } from "@/lib/data/inventory";
 import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
-import { ScheduleManager } from "./ScheduleManager";
-import { SubmissionsList } from "./SubmissionsList";
+import { daysUntil, formatDateTime } from "@/lib/format";
+import { HubTile } from "@/components/HubTile";
 
-type Filter = "all" | "unsubmitted" | "pending";
-
-export default async function AdminDashboardPage({
+export default async function AdminHubPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ eventSlug: string }>;
-  searchParams: Promise<{ filter?: string }>;
 }) {
   const { eventSlug } = await params;
-  const { filter: filterParam } = await searchParams;
   const auth = await requireAdminSession(eventSlug);
 
-  const [rows, schedules] = await Promise.all([
+  const [event, rows, inboxThreads, inventoryUsage, schedules] = await Promise.all([
+    getEventBySlug(eventSlug),
     listSubmissionsForAdmin(auth.eventId),
+    listInboxThreads(auth.eventId),
+    getInventoryUsage(auth.eventId),
     listSubmissionSchedules(auth.eventId),
   ]);
 
   const submittedCount = rows.filter((r) => r.status && r.status !== "draft").length;
   const pendingCount = rows.filter((r) => r.status === "submitted").length;
-  const progressPct = rows.length > 0 ? Math.round((submittedCount / rows.length) * 100) : 0;
+  const unreadCount = inboxThreads.filter((t) => t.hasUnreadFromGroup).length;
+  const hasInventoryConflict = Array.from(inventoryUsage.values()).some(
+    (u) => u.requestedTotal > u.totalQuantity
+  );
 
-  const filter: Filter =
-    filterParam === "unsubmitted" || filterParam === "pending" ? filterParam : "all";
-
-  const filtered = rows.filter((r) => {
-    if (filter === "unsubmitted") return !r.status || r.status === "draft";
-    if (filter === "pending") return r.status === "submitted";
-    return true;
-  });
+  const upcoming = [...schedules].sort(
+    (a, b) => daysUntil(a.deadline) - daysUntil(b.deadline)
+  )[0];
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-lg font-bold">企画一覧</h1>
-        <div className="flex gap-5 text-[13px] text-[var(--muted)]">
+      <div>
+        <h1 className="text-lg font-bold">{event?.name ?? "管理画面"}</h1>
+        <p className="text-[12.5px] text-[var(--muted)] mt-1">
+          実行委員会向けのホームです。ここから各機能にアクセスできます。
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile label="提出済み" value={`${submittedCount}/${rows.length}団体`} />
+        <StatTile
+          label="確認待ち"
+          value={`${pendingCount}件`}
+          tone={pendingCount > 0 ? "warn" : "neutral"}
+        />
+        <StatTile
+          label="未読コメント"
+          value={`${unreadCount}件`}
+          tone={unreadCount > 0 ? "danger" : "neutral"}
+        />
+        <StatTile
+          label="在庫"
+          value={hasInventoryConflict ? "競合あり" : "問題なし"}
+          tone={hasInventoryConflict ? "danger" : "neutral"}
+        />
+      </div>
+
+      {upcoming && (
+        <div className="card px-4 py-3.5 flex items-center justify-between gap-3 text-[13px] flex-wrap">
           <span>
-            提出済み{" "}
-            <strong className="text-[var(--foreground)]">
-              {submittedCount}/{rows.length}団体
-            </strong>
+            直近の締切: <strong>{upcoming.title}</strong>
+            <span className="text-[var(--muted)] ml-1.5">{formatDateTime(upcoming.deadline)}</span>
           </span>
-          <span>
-            確認待ち <strong className="text-[var(--foreground)]">{pendingCount}件</strong>
-          </span>
+          <Link
+            href={`/${eventSlug}/admin/submissions`}
+            className="text-[var(--accent-admin-text)] font-semibold text-[12px] whitespace-nowrap"
+          >
+            詳細を見る →
+          </Link>
         </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <HubTile
+          accent="admin"
+          href={`/${eventSlug}/admin/submissions`}
+          icon="clipboard"
+          label="企画一覧"
+          description="団体ごとの提出状況を確認・承認します"
+          badgeCount={pendingCount}
+        />
+        <HubTile
+          accent="admin"
+          href={`/${eventSlug}/admin/inbox`}
+          icon="inbox"
+          label="受信箱"
+          description="団体からの個別コメントを新着順に確認します"
+          badgeCount={unreadCount}
+          badgeTone="danger"
+        />
+        <HubTile
+          accent="admin"
+          href={`/${eventSlug}/admin/broadcasts`}
+          icon="megaphone"
+          label="連絡"
+          description="全体連絡・未提出団体へのリマインドを送ります"
+        />
+        <HubTile
+          accent="admin"
+          href={`/${eventSlug}/admin/inventory`}
+          icon="package"
+          label="在庫管理"
+          description="借用物品の在庫と希望の競合を管理します"
+          badgeCount={hasInventoryConflict ? 1 : 0}
+          badgeTone="danger"
+        />
+        <HubTile
+          accent="admin"
+          href={`/${eventSlug}/admin/settings`}
+          icon="settings"
+          label="設定"
+          description="団体・予算、提出項目、分類、配布資料を管理します"
+        />
       </div>
-
-      <div className="card px-4 py-3.5 space-y-2">
-        <div className="flex items-center justify-between text-[11.5px] text-[var(--muted)]">
-          <span>提出の進み具合</span>
-          <span className="font-semibold text-[var(--foreground)]">
-            {submittedCount}/{rows.length}団体（{progressPct}%）
-          </span>
-        </div>
-        <div className="h-2 rounded-full bg-[var(--border)] overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${progressPct}%`, background: "var(--accent-admin-solid)" }}
-          />
-        </div>
-      </div>
-
-      <ScheduleManager eventSlug={eventSlug} schedules={schedules} />
-
-      <div className="flex gap-2">
-        <FilterChip eventSlug={eventSlug} value="all" active={filter === "all"}>
-          すべて
-        </FilterChip>
-        <FilterChip eventSlug={eventSlug} value="unsubmitted" active={filter === "unsubmitted"}>
-          未提出
-        </FilterChip>
-        <FilterChip eventSlug={eventSlug} value="pending" active={filter === "pending"}>
-          要確認
-        </FilterChip>
-      </div>
-
-      <SubmissionsList eventSlug={eventSlug} rows={filtered} />
     </div>
   );
 }
 
-function FilterChip({
-  eventSlug,
+function StatTile({
+  label,
   value,
-  active,
-  children,
+  tone = "neutral",
 }: {
-  eventSlug: string;
-  value: Filter;
-  active: boolean;
-  children: React.ReactNode;
+  label: string;
+  value: string;
+  tone?: "neutral" | "warn" | "danger";
 }) {
+  const toneClass =
+    tone === "danger"
+      ? "text-[var(--danger-text)]"
+      : tone === "warn"
+      ? "text-[var(--warn-text)]"
+      : "text-[var(--foreground)]";
   return (
-    <Link
-      href={`/${eventSlug}/admin${value === "all" ? "" : `?filter=${value}`}`}
-      className={`text-[11.5px] px-3 py-1.5 rounded-full ${
-        active
-          ? "font-bold text-white bg-[var(--accent-admin-solid)]"
-          : "text-[var(--muted)] bg-[var(--background)]"
-      }`}
-    >
-      {children}
-    </Link>
+    <div className="card px-3.5 py-3">
+      <div className="text-[10.5px] text-[var(--muted)] font-semibold">{label}</div>
+      <div className={`text-[17px] font-bold mt-0.5 ${toneClass}`}>{value}</div>
+    </div>
   );
 }

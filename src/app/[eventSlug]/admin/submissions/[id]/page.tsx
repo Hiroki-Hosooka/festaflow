@@ -28,8 +28,10 @@ export default async function AdminSubmissionDetailPage({
   const plannedTotal = sumItems(items);
   const purchaseItems = items.filter((i) => i.kind === "purchase");
   const borrowItems = items.filter((i) => i.kind === "borrow");
-  const inventoryUsage = await getInventoryUsage(submission.event_id);
-  const attachments = await listAttachments(submission.id);
+  const [inventoryUsage, attachments] = await Promise.all([
+    getInventoryUsage(submission.event_id),
+    listAttachments(submission.id),
+  ]);
 
   await markCommentsRead(submission.id, "admin");
   const comments = await listComments(submission.id);
@@ -38,7 +40,7 @@ export default async function AdminSubmissionDetailPage({
 
   return (
     <div className="space-y-5 max-w-2xl">
-      <Link href={`/${eventSlug}/admin`} className="text-[11.5px] text-[var(--accent-admin-text)]">
+      <Link href={`/${eventSlug}/admin/submissions`} className="text-[11.5px] text-[var(--accent-admin-text)]">
         ← 一覧に戻る
       </Link>
 

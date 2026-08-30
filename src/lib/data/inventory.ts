@@ -76,11 +76,19 @@ export interface InventoryUsage {
 export async function getInventoryUsage(eventId: string): Promise<Map<string, InventoryUsage>> {
   const db = supabaseAdmin();
 
-  const { data: inventoryItems, error: invErr } = await db
-    .from("inventory_items")
-    .select("*")
-    .eq("event_id", eventId);
+  // 3クエリとも event_id のみに依存し互いに独立しているため並列実行する
+  const [
+    { data: inventoryItems, error: invErr },
+    { data: submissions, error: subErr },
+    { data: groups, error: grpErr },
+  ] = await Promise.all([
+    db.from("inventory_items").select("*").eq("event_id", eventId),
+    db.from("submissions").select("id, group_id").eq("event_id", eventId),
+    db.from("groups").select("id, name").eq("event_id", eventId),
+  ]);
   if (invErr) throw invErr;
+  if (subErr) throw subErr;
+  if (grpErr) throw grpErr;
 
   const usage = new Map<string, InventoryUsage>();
   for (const inv of inventoryItems ?? []) {
@@ -95,19 +103,9 @@ export async function getInventoryUsage(eventId: string): Promise<Map<string, In
   }
   if (usage.size === 0) return usage;
 
-  const { data: submissions, error: subErr } = await db
-    .from("submissions")
-    .select("id, group_id")
-    .eq("event_id", eventId);
-  if (subErr) throw subErr;
   const submissionIds = (submissions ?? []).map((s) => s.id);
   if (submissionIds.length === 0) return usage;
 
-  const { data: groups, error: grpErr } = await db
-    .from("groups")
-    .select("id, name")
-    .eq("event_id", eventId);
-  if (grpErr) throw grpErr;
   const groupNameBySubmission = new Map(
     (submissions ?? []).map((s) => [
       s.id,

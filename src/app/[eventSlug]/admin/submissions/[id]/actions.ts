@@ -46,7 +46,7 @@ export async function decideSubmissionAction(
   }
 
   revalidatePath(`/${eventSlug}/admin/submissions/${submissionId}`);
-  revalidatePath(`/${eventSlug}/admin`);
+  revalidatePath(`/${eventSlug}/admin/submissions`);
 
   const labels: Record<typeof decision, string> = {
     approved: "承認しました。",

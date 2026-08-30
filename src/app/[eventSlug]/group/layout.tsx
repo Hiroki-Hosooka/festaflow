@@ -22,7 +22,7 @@ export default async function GroupLayout({
   const hasUnread = unreadIds.has(submission.id);
 
   const links: NavLinkItem[] = [
-    { href: `/${eventSlug}/group`, label: "企画", icon: <Icon name="clipboard" /> },
+    { href: `/${eventSlug}/group/submission`, label: "企画", icon: <Icon name="clipboard" /> },
     {
       href: `/${eventSlug}/group/messages`,
       label: "連絡・コメント",
@@ -37,8 +37,8 @@ export default async function GroupLayout({
   if (auth.role === "leader") {
     links.push({
       href: `/${eventSlug}/group/settings`,
-      label: "合言葉の変更",
-      icon: <Icon name="key" />,
+      label: "設定",
+      icon: <Icon name="settings" />,
     });
   }
 
@@ -60,6 +60,7 @@ export default async function GroupLayout({
             </span>
           </span>
         }
+        homeHref={`/${eventSlug}/group`}
         accentTextClass="text-[var(--accent-group-text)]"
         badgeClass="bg-[var(--accent-group-text)]"
         logoutAction={boundLogout}

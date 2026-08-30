@@ -13,10 +13,8 @@ import {
   sumItems,
 } from "@/lib/data/submissions";
 import { addAttachment, deleteAttachment, getAttachment } from "@/lib/data/attachments";
-import type { Affiliation, Area, ItemKind } from "@/lib/database.types";
-
-const AFFILIATIONS: Affiliation[] = ["1年", "2年", "3年", "部活", "有志"];
-const AREAS: Area[] = ["校内", "校外"];
+import { listClassificationOptions } from "@/lib/data/classificationOptions";
+import type { ItemKind } from "@/lib/database.types";
 
 interface ItemInput {
   name: string;
@@ -79,10 +77,14 @@ export async function saveSubmissionAction(
   const location = String(formData.get("location") ?? "").trim();
   const affiliationRaw = String(formData.get("affiliation") ?? "");
   const areaRaw = String(formData.get("area") ?? "");
-  const affiliation = AFFILIATIONS.includes(affiliationRaw as Affiliation)
-    ? (affiliationRaw as Affiliation)
+  const [affiliationOptions, areaOptions] = await Promise.all([
+    listClassificationOptions(auth.eventId, "affiliation"),
+    listClassificationOptions(auth.eventId, "area"),
+  ]);
+  const affiliation = affiliationOptions.some((o) => o.value === affiliationRaw)
+    ? affiliationRaw
     : null;
-  const area = AREAS.includes(areaRaw as Area) ? (areaRaw as Area) : null;
+  const area = areaOptions.some((o) => o.value === areaRaw) ? areaRaw : null;
   const items = parseItems(String(formData.get("items_json") ?? "[]"));
   const fieldValues = parseFieldValues(String(formData.get("field_values_json") ?? "{}"));
 
@@ -92,7 +94,7 @@ export async function saveSubmissionAction(
   await replaceSubmissionItems(submission.id, items);
   await replaceFieldValues(submission.id, fieldValues);
 
-  revalidatePath(`/${eventSlug}/group`);
+  revalidatePath(`/${eventSlug}/group/submission`);
 
   if (intent === "draft") {
     return { success: "下書きを保存しました。" };
@@ -132,7 +134,7 @@ export async function saveSubmissionAction(
   }
 
   await markSubmitted(submission.id);
-  revalidatePath(`/${eventSlug}/group`);
+  revalidatePath(`/${eventSlug}/group/submission`);
   return { success: "提出しました。" };
 }
 
@@ -159,7 +161,7 @@ export async function uploadAttachmentAction(
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
   await addAttachment(submission.id, file);
 
-  revalidatePath(`/${eventSlug}/group`);
+  revalidatePath(`/${eventSlug}/group/submission`);
   return { success: `「${file.name}」をアップロードしました。` };
 }
 
@@ -171,5 +173,5 @@ export async function deleteAttachmentAction(eventSlug: string, attachmentId: st
   if (!attachment || attachment.review_status !== "pending") return;
 
   await deleteAttachment(attachmentId);
-  revalidatePath(`/${eventSlug}/group`);
+  revalidatePath(`/${eventSlug}/group/submission`);
 }

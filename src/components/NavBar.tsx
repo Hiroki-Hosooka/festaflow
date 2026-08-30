@@ -14,12 +14,14 @@ export interface NavLinkItem {
 
 export function NavBar({
   brand,
+  homeHref,
   links,
   logoutAction,
   accentTextClass,
   badgeClass,
 }: {
   brand: React.ReactNode;
+  homeHref: string;
   links: NavLinkItem[];
   logoutAction: (formData: FormData) => void | Promise<void>;
   accentTextClass: string;
@@ -42,9 +44,12 @@ export function NavBar({
         >
           <span className="text-base leading-none">{open ? "✕" : "☰"}</span>
         </button>
-        <span className="font-bold text-sm truncate flex-none max-w-[45%] lg:max-w-none">
+        <Link
+          href={homeHref}
+          className="font-bold text-sm truncate flex-none max-w-[45%] lg:max-w-none"
+        >
           {brand}
-        </span>
+        </Link>
         <nav className="hidden lg:flex gap-4 text-[13px] flex-1 min-w-0">
           {links.map((l) => (
             <Link

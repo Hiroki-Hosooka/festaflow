@@ -7,20 +7,21 @@ import { Icon } from "@/components/Icons";
 import { yen } from "@/lib/format";
 import type { SubmissionListRow } from "@/lib/data/submissions";
 import type { Affiliation, Area } from "@/lib/database.types";
-import { decideSubmissionAction, type DecideFormState } from "./submissions/[id]/actions";
+import { decideSubmissionAction, type DecideFormState } from "./[id]/actions";
 import { yen as formatYen } from "@/lib/format";
 
 const quickApproveInitialState: DecideFormState = {};
 
-const AFFILIATIONS: Affiliation[] = ["1年", "2年", "3年", "部活", "有志"];
-const AREAS: Area[] = ["校内", "校外"];
-
 export function SubmissionsList({
   eventSlug,
   rows,
+  affiliationOptions,
+  areaOptions,
 }: {
   eventSlug: string;
   rows: SubmissionListRow[];
+  affiliationOptions: Affiliation[];
+  areaOptions: Area[];
 }) {
   const [query, setQuery] = useState("");
   const [affiliationFilter, setAffiliationFilter] = useState<Affiliation | "all">("all");
@@ -55,7 +56,7 @@ export function SubmissionsList({
         <FilterChip active={affiliationFilter === "all"} onClick={() => setAffiliationFilter("all")}>
           すべて
         </FilterChip>
-        {AFFILIATIONS.map((a) => (
+        {affiliationOptions.map((a) => (
           <FilterChip
             key={a}
             active={affiliationFilter === a}
@@ -68,7 +69,7 @@ export function SubmissionsList({
         <FilterChip active={areaFilter === "all"} onClick={() => setAreaFilter("all")}>
           すべて
         </FilterChip>
-        {AREAS.map((a) => (
+        {areaOptions.map((a) => (
           <FilterChip
             key={a}
             active={areaFilter === a}

@@ -7,8 +7,10 @@ import { saveSubmissionAction, type SubmitFormState } from "./actions";
 import { yen, daysUntil, formatRelativeTime, formatDateTime } from "@/lib/format";
 import type { Affiliation, Area, Database, ItemKind, StockStatus } from "@/lib/database.types";
 
-const AFFILIATIONS: Affiliation[] = ["1年", "2年", "3年", "部活", "有志"];
-const AREAS: Area[] = ["校内", "校外"];
+function withCurrentValue(options: string[], current: string): string[] {
+  if (!current || options.includes(current)) return options;
+  return [...options, current];
+}
 
 type SubmissionRow = Database["public"]["Tables"]["submissions"]["Row"];
 type ScheduleRow = Database["public"]["Tables"]["submission_schedules"]["Row"];
@@ -52,6 +54,8 @@ export function SubmissionForm({
   inventoryItems,
   inventoryAvailability,
   schedules,
+  affiliationOptions,
+  areaOptions,
   role,
 }: {
   eventSlug: string;
@@ -64,6 +68,8 @@ export function SubmissionForm({
   inventoryItems: InventoryItemRow[];
   inventoryAvailability: Record<string, { available: number; requestedTotal: number }>;
   schedules: ScheduleRow[];
+  affiliationOptions: string[];
+  areaOptions: string[];
   role: "leader" | "member";
 }) {
   const boundAction = saveSubmissionAction.bind(null, eventSlug);
@@ -292,7 +298,7 @@ export function SubmissionForm({
               className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
             >
               <option value="">未選択</option>
-              {AFFILIATIONS.map((a) => (
+              {withCurrentValue(affiliationOptions, submission.affiliation ?? "").map((a) => (
                 <option key={a} value={a}>
                   {a}
                 </option>
@@ -309,7 +315,7 @@ export function SubmissionForm({
               className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
             >
               <option value="">未選択</option>
-              {AREAS.map((a) => (
+              {withCurrentValue(areaOptions, submission.area ?? "").map((a) => (
                 <option key={a} value={a}>
                   {a}
                 </option>

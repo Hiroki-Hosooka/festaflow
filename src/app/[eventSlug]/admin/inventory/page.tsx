@@ -12,8 +12,10 @@ export default async function AdminInventoryPage({
 }) {
   const { eventSlug } = await params;
   const auth = await requireAdminSession(eventSlug);
-  const items = await listInventoryItems(auth.eventId);
-  const usage = await getInventoryUsage(auth.eventId);
+  const [items, usage] = await Promise.all([
+    listInventoryItems(auth.eventId),
+    getInventoryUsage(auth.eventId),
+  ]);
 
   return (
     <div className="space-y-5 max-w-3xl">

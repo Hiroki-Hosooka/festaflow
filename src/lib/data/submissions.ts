@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { supabaseAdmin } from "@/lib/supabase";
 import { listUnreadSubmissionIds } from "@/lib/data/comments";
 import type { Affiliation, Area, ItemKind, SubmissionStatus } from "@/lib/database.types";
@@ -85,7 +86,8 @@ export async function listSubmissionsForAdmin(
   });
 }
 
-export async function getOrCreateSubmission(eventId: string, groupId: string) {
+// cache() で同一リクエスト内の重複呼び出し（layout + page など）を1回のクエリに統合する
+export const getOrCreateSubmission = cache(async (eventId: string, groupId: string) => {
   const db = supabaseAdmin();
   const { data: existing, error } = await db
     .from("submissions")
@@ -117,7 +119,7 @@ export async function getOrCreateSubmission(eventId: string, groupId: string) {
     throw insertError;
   }
   return created;
-}
+});
 
 export async function getSubmissionDetail(submissionId: string) {
   const db = supabaseAdmin();

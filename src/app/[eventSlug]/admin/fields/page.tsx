@@ -2,6 +2,7 @@ import { requireAdminSession } from "@/lib/session";
 import { listFormFields } from "@/lib/data/formFields";
 import { NewFieldForm } from "./NewFieldForm";
 import { DeleteFieldButton } from "./DeleteFieldButton";
+import { EditFieldForm } from "./EditFieldForm";
 
 const TYPE_LABELS: Record<string, string> = {
   text: "一行テキスト",
@@ -42,18 +43,28 @@ export default async function AdminFieldsPage({
           {fields.map((field) => (
             <div
               key={field.id}
-              className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] last:border-b-0 text-[13px]"
+              className="px-4 py-3 border-b border-[var(--border)] last:border-b-0 text-[13px] space-y-2"
             >
-              <div className="flex items-center gap-2.5">
-                <span className="font-semibold">{field.label}</span>
-                <span className="text-[11px] text-[var(--muted-2)]">
-                  {TYPE_LABELS[field.field_type] ?? field.field_type}
-                </span>
-                {field.required && (
-                  <span className="text-[11px] text-[var(--danger-text)]">必須</span>
-                )}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <span className="font-semibold">{field.label}</span>
+                  <span className="text-[11px] text-[var(--muted-2)]">
+                    {TYPE_LABELS[field.field_type] ?? field.field_type}
+                  </span>
+                  {field.required && (
+                    <span className="text-[11px] text-[var(--danger-text)]">必須</span>
+                  )}
+                </div>
+                <DeleteFieldButton eventSlug={eventSlug} fieldId={field.id} />
               </div>
-              <DeleteFieldButton eventSlug={eventSlug} fieldId={field.id} />
+              <details>
+                <summary className="cursor-pointer text-[11.5px] text-[var(--accent-admin-text)] font-semibold">
+                  名前・必須を編集
+                </summary>
+                <div className="mt-2">
+                  <EditFieldForm eventSlug={eventSlug} field={field} />
+                </div>
+              </details>
             </div>
           ))}
         </div>

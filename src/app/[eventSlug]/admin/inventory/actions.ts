@@ -35,7 +35,7 @@ export async function createInventoryItemAction(
   }
 
   revalidatePath(`/${eventSlug}/admin/inventory`);
-  revalidatePath(`/${eventSlug}/group`);
+  revalidatePath(`/${eventSlug}/group/submission`);
   return { success: `「${name}」を追加しました。` };
 }
 
@@ -55,5 +55,5 @@ export async function deleteInventoryItemAction(eventSlug: string, inventoryItem
   await requireAdminSession(eventSlug);
   await deleteInventoryItem(inventoryItemId);
   revalidatePath(`/${eventSlug}/admin/inventory`);
-  revalidatePath(`/${eventSlug}/group`);
+  revalidatePath(`/${eventSlug}/group/submission`);
 }

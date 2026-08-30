@@ -16,15 +16,16 @@ export default async function AdminLayout({
 }) {
   const { eventSlug } = await params;
   const auth = await requireAdminSession(eventSlug);
-  const event = await getEventBySlug(eventSlug);
   const boundLogout = logoutAction.bind(null, eventSlug);
 
-  const inventoryUsage = await getInventoryUsage(auth.eventId);
+  const [event, inventoryUsage, inboxThreads] = await Promise.all([
+    getEventBySlug(eventSlug),
+    getInventoryUsage(auth.eventId),
+    listInboxThreads(auth.eventId),
+  ]);
   const hasInventoryConflict = Array.from(inventoryUsage.values()).some(
     (u) => u.requestedTotal > u.totalQuantity
   );
-
-  const inboxThreads = await listInboxThreads(auth.eventId);
   const hasUnreadInbox = inboxThreads.some((t) => t.hasUnreadFromGroup);
 
   return (
@@ -36,11 +37,16 @@ export default async function AdminLayout({
             {event?.name ?? "管理画面"}
           </span>
         }
+        homeHref={`/${eventSlug}/admin`}
         accentTextClass="text-[var(--accent-admin-text)]"
         badgeClass="bg-[var(--danger-text)]"
         logoutAction={boundLogout}
         links={[
-          { href: `/${eventSlug}/admin`, label: "企画一覧", icon: <Icon name="clipboard" /> },
+          {
+            href: `/${eventSlug}/admin/submissions`,
+            label: "企画一覧",
+            icon: <Icon name="clipboard" />,
+          },
           {
             href: `/${eventSlug}/admin/inbox`,
             label: "受信箱",
@@ -49,8 +55,6 @@ export default async function AdminLayout({
             badgeLabel: "未読の個別コメントがあります",
           },
           { href: `/${eventSlug}/admin/broadcasts`, label: "連絡", icon: <Icon name="megaphone" /> },
-          { href: `/${eventSlug}/admin/groups`, label: "団体・予算", icon: <Icon name="users" /> },
-          { href: `/${eventSlug}/admin/fields`, label: "提出項目", icon: <Icon name="receipt" /> },
           {
             href: `/${eventSlug}/admin/inventory`,
             label: "在庫管理",
@@ -58,7 +62,7 @@ export default async function AdminLayout({
             badge: hasInventoryConflict,
             badgeLabel: "在庫の希望が競合している物品があります",
           },
-          { href: `/${eventSlug}/admin/documents`, label: "配布資料", icon: <Icon name="document" /> },
+          { href: `/${eventSlug}/admin/settings`, label: "設定", icon: <Icon name="settings" /> },
         ]}
       />
       <div className="max-w-4xl mx-auto px-5 py-8">{children}</div>

@@ -35,14 +35,14 @@ export async function createScheduleAction(
     hint,
   });
 
-  revalidatePath(`/${eventSlug}/admin`);
-  revalidatePath(`/${eventSlug}/group`);
+  revalidatePath(`/${eventSlug}/admin/submissions`);
+  revalidatePath(`/${eventSlug}/group/submission`);
   return { success: `「${title}」を登録しました。` };
 }
 
 export async function deleteScheduleAction(eventSlug: string, scheduleId: string) {
   await requireAdminSession(eventSlug);
   await deleteSubmissionSchedule(scheduleId);
-  revalidatePath(`/${eventSlug}/admin`);
-  revalidatePath(`/${eventSlug}/group`);
+  revalidatePath(`/${eventSlug}/admin/submissions`);
+  revalidatePath(`/${eventSlug}/group/submission`);
 }

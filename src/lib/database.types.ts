@@ -10,8 +10,10 @@ export type BroadcastTarget = "all" | "unsubmitted";
 export type CommentSender = "admin" | "group";
 export type ItemKind = "purchase" | "borrow";
 export type StockStatus = "pending" | "secured" | "denied";
-export type Affiliation = "1年" | "2年" | "3年" | "部活" | "有志";
-export type Area = "校内" | "校外";
+// 所属区分・エリアの選択肢は classification_options テーブルで管理者が自由に編集できる
+export type Affiliation = string;
+export type Area = string;
+export type ClassificationCategory = "affiliation" | "area";
 export type ReviewStatus = "pending" | "approved" | "needs_fix";
 export type TodoStatus = "not_started" | "in_progress" | "done";
 export type PreferenceKind = "ng" | "want";
@@ -90,6 +92,23 @@ export interface Database {
           deadline: string;
         };
         Update: Partial<Database["public"]["Tables"]["submission_schedules"]["Row"]>;
+        Relationships: [];
+      };
+      classification_options: {
+        Row: {
+          id: string;
+          event_id: string;
+          category: ClassificationCategory;
+          value: string;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["classification_options"]["Row"]> & {
+          event_id: string;
+          category: ClassificationCategory;
+          value: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["classification_options"]["Row"]>;
         Relationships: [];
       };
       submissions: {
