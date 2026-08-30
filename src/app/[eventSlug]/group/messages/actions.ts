@@ -7,6 +7,7 @@ import { addComment } from "@/lib/data/comments";
 
 export async function sendGroupCommentAction(eventSlug: string, formData: FormData) {
   const auth = await requireGroupSession(eventSlug);
+  if (auth.role !== "leader") return;
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
 

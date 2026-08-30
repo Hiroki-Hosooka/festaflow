@@ -2,7 +2,7 @@ import { requireGroupSession } from "@/lib/session";
 import { logoutAction } from "../login/actions";
 import { getOrCreateSubmission } from "@/lib/data/submissions";
 import { listUnreadSubmissionIds } from "@/lib/data/comments";
-import { NavBar } from "@/components/NavBar";
+import { NavBar, type NavLinkItem } from "@/components/NavBar";
 
 export default async function GroupLayout({
   children,
@@ -19,24 +19,44 @@ export default async function GroupLayout({
   const unreadIds = await listUnreadSubmissionIds([submission.id], "group");
   const hasUnread = unreadIds.has(submission.id);
 
+  const links: NavLinkItem[] = [
+    { href: `/${eventSlug}/group`, label: "企画", icon: "📋" },
+    {
+      href: `/${eventSlug}/group/messages`,
+      label: "連絡・コメント",
+      icon: "💬",
+      badge: hasUnread,
+      badgeLabel: "未読のコメントがあります",
+    },
+    { href: `/${eventSlug}/group/shifts`, label: "当番シフト", icon: "🗓️" },
+    { href: `/${eventSlug}/group/todos`, label: "ToDoリスト", icon: "✅" },
+    { href: `/${eventSlug}/group/documents`, label: "配布資料", icon: "📄" },
+  ];
+  if (auth.role === "leader") {
+    links.push({ href: `/${eventSlug}/group/settings`, label: "合言葉の変更", icon: "🔑" });
+  }
+
   return (
     <div className="min-h-screen">
       <NavBar
-        brand={auth.groupName}
+        brand={
+          <span className="inline-flex items-center gap-2">
+            {auth.groupName}
+            <span
+              className={`status-badge ${
+                auth.role === "leader"
+                  ? "bg-[var(--accent-group-soft-bg)] text-[var(--accent-group-text)]"
+                  : "bg-[var(--status-pending-bg)] text-[var(--status-pending-text)]"
+              }`}
+            >
+              {auth.role === "leader" ? "クラスリーダー" : "一般生徒"}
+            </span>
+          </span>
+        }
         accentTextClass="text-[var(--accent-group-text)]"
         badgeClass="bg-[var(--accent-group-text)]"
         logoutAction={boundLogout}
-        links={[
-          { href: `/${eventSlug}/group`, label: "企画", icon: "📋" },
-          {
-            href: `/${eventSlug}/group/messages`,
-            label: "連絡・コメント",
-            icon: "💬",
-            badge: hasUnread,
-            badgeLabel: "未読のコメントがあります",
-          },
-          { href: `/${eventSlug}/group/settings`, label: "合言葉の変更", icon: "🔑" },
-        ]}
+        links={links}
       />
       <div className="max-w-3xl mx-auto px-5 py-8">{children}</div>
     </div>

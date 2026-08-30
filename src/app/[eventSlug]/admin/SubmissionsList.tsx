@@ -5,9 +5,14 @@ import Link from "next/link";
 import { StatusBadge, type DisplayStatus } from "@/components/StatusBadge";
 import { yen } from "@/lib/format";
 import type { SubmissionListRow } from "@/lib/data/submissions";
+import type { Affiliation, Area } from "@/lib/database.types";
 import { decideSubmissionAction, type DecideFormState } from "./submissions/[id]/actions";
+import { yen as formatYen } from "@/lib/format";
 
 const quickApproveInitialState: DecideFormState = {};
+
+const AFFILIATIONS: Affiliation[] = ["1年", "2年", "3年", "部活", "有志"];
+const AREAS: Area[] = ["校内", "校外"];
 
 export function SubmissionsList({
   eventSlug,
@@ -17,12 +22,21 @@ export function SubmissionsList({
   rows: SubmissionListRow[];
 }) {
   const [query, setQuery] = useState("");
+  const [affiliationFilter, setAffiliationFilter] = useState<Affiliation | "all">("all");
+  const [areaFilter, setAreaFilter] = useState<Area | "all">("all");
 
   const filtered = useMemo(() => {
     const q = query.trim();
-    if (!q) return rows;
-    return rows.filter((r) => r.groupName.includes(q) || r.name.includes(q));
-  }, [rows, query]);
+    return rows.filter((r) => {
+      if (q && !r.groupName.includes(q) && !r.name.includes(q)) return false;
+      if (affiliationFilter !== "all" && r.affiliation !== affiliationFilter) return false;
+      if (areaFilter !== "all" && r.area !== areaFilter) return false;
+      return true;
+    });
+  }, [rows, query, affiliationFilter, areaFilter]);
+
+  const filteredBudgetTotal = filtered.reduce((sum, r) => sum + r.plannedTotal, 0);
+  const isFiltering = affiliationFilter !== "all" || areaFilter !== "all" || query.trim() !== "";
 
   return (
     <div className="space-y-3">
@@ -34,6 +48,41 @@ export function SubmissionsList({
         aria-label="団体名・企画名で検索"
         className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3.5 text-[13px] bg-white"
       />
+
+      <div className="flex flex-wrap gap-2 items-center text-[11.5px]">
+        <span className="text-[var(--muted)] font-semibold">所属:</span>
+        <FilterChip active={affiliationFilter === "all"} onClick={() => setAffiliationFilter("all")}>
+          すべて
+        </FilterChip>
+        {AFFILIATIONS.map((a) => (
+          <FilterChip
+            key={a}
+            active={affiliationFilter === a}
+            onClick={() => setAffiliationFilter(affiliationFilter === a ? "all" : a)}
+          >
+            {a}
+          </FilterChip>
+        ))}
+        <span className="text-[var(--muted)] font-semibold ml-2">エリア:</span>
+        <FilterChip active={areaFilter === "all"} onClick={() => setAreaFilter("all")}>
+          すべて
+        </FilterChip>
+        {AREAS.map((a) => (
+          <FilterChip
+            key={a}
+            active={areaFilter === a}
+            onClick={() => setAreaFilter(areaFilter === a ? "all" : a)}
+          >
+            {a}
+          </FilterChip>
+        ))}
+      </div>
+
+      {isFiltering && (
+        <p className="text-[11.5px] text-[var(--muted)]">
+          絞り込み中: {filtered.length}団体 ・ 使用予定合計 {formatYen(filteredBudgetTotal)}
+        </p>
+      )}
 
       <div className="card overflow-hidden hidden sm:block">
         <div className="grid grid-cols-[110px_1fr_130px_100px_130px] px-4 py-2.5 text-[10.5px] font-bold text-[var(--muted)] bg-[var(--background)] border-b border-[var(--border)]">
@@ -65,6 +114,34 @@ export function SubmissionsList({
   );
 }
 
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-2.5 py-1 rounded-full border ${
+        active
+          ? "bg-[var(--accent-admin-text)] border-[var(--accent-admin-text)] text-white font-semibold"
+          : "border-[var(--border)] text-[var(--muted)]"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function affiliationAreaLabel(row: SubmissionListRow) {
+  return [row.affiliation, row.area].filter(Boolean).join(" / ");
+}
+
 function actionHref(eventSlug: string, row: SubmissionListRow) {
   return row.submissionId
     ? `/${eventSlug}/admin/submissions/${row.submissionId}`
@@ -84,7 +161,14 @@ function TableRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRo
           />
         )}
       </span>
-      <span className={row.name ? "" : "text-[var(--muted-2)]"}>{row.name || "—"}</span>
+      <span className={row.name ? "" : "text-[var(--muted-2)]"}>
+        {row.name || "—"}
+        {affiliationAreaLabel(row) && (
+          <span className="block text-[10px] text-[var(--muted-2)]">
+            {affiliationAreaLabel(row)}
+          </span>
+        )}
+      </span>
       <span className="text-[11px]">
         {row.submissionId ? `${yen(row.plannedTotal)}/${yen(row.budgetAllocated)}` : "—"}
       </span>
@@ -125,6 +209,11 @@ function CardRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRow
         </div>
         <p className={`text-[12.5px] ${row.name ? "" : "text-[var(--muted-2)]"}`}>
           {row.name || "企画名未入力"}
+          {affiliationAreaLabel(row) && (
+            <span className="ml-1.5 text-[10.5px] text-[var(--muted-2)]">
+              {affiliationAreaLabel(row)}
+            </span>
+          )}
         </p>
         <div className="flex items-center justify-between text-[11px] text-[var(--muted)]">
           <span>

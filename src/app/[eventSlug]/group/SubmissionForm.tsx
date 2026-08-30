@@ -4,10 +4,14 @@ import { useActionState, useMemo, useState } from "react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BudgetBar } from "@/components/BudgetBar";
 import { saveSubmissionAction, type SubmitFormState } from "./actions";
-import { yen, daysUntil, formatRelativeTime } from "@/lib/format";
-import type { Database, ItemKind, StockStatus } from "@/lib/database.types";
+import { yen, daysUntil, formatRelativeTime, formatDateTime } from "@/lib/format";
+import type { Affiliation, Area, Database, ItemKind, StockStatus } from "@/lib/database.types";
+
+const AFFILIATIONS: Affiliation[] = ["1年", "2年", "3年", "部活", "有志"];
+const AREAS: Area[] = ["校内", "校外"];
 
 type SubmissionRow = Database["public"]["Tables"]["submissions"]["Row"];
+type ScheduleRow = Database["public"]["Tables"]["submission_schedules"]["Row"];
 type ItemRow = Database["public"]["Tables"]["submission_items"]["Row"];
 type FieldValueRow = Database["public"]["Tables"]["submission_field_values"]["Row"];
 type FormFieldRow = Database["public"]["Tables"]["form_fields"]["Row"];
@@ -47,7 +51,8 @@ export function SubmissionForm({
   budgetAllocated,
   inventoryItems,
   inventoryAvailability,
-  submissionDeadline,
+  schedules,
+  role,
 }: {
   eventSlug: string;
   groupName: string;
@@ -58,18 +63,25 @@ export function SubmissionForm({
   budgetAllocated: number;
   inventoryItems: InventoryItemRow[];
   inventoryAvailability: Record<string, { available: number; requestedTotal: number }>;
-  submissionDeadline: string | null;
+  schedules: ScheduleRow[];
+  role: "leader" | "member";
 }) {
   const boundAction = saveSubmissionAction.bind(null, eventSlug);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
-  const editable = submission.status === "draft" || submission.status === "returned";
+  const editable =
+    role === "leader" &&
+    (submission.status === "draft" || submission.status === "returned");
   const isUntouchedFirstVisit =
     submission.status === "draft" && !submission.name && items.length === 0;
 
   const [name, setName] = useState(submission.name);
   const [content, setContent] = useState(submission.content);
   const [location, setLocation] = useState(submission.location);
+  const [affiliation, setAffiliation] = useState<Affiliation | "">(
+    submission.affiliation ?? ""
+  );
+  const [area, setArea] = useState<Area | "">(submission.area ?? "");
   const [itemRows, setItemRows] = useState<EditableItem[]>(
     items.length > 0
       ? items.map((i) => ({
@@ -173,28 +185,40 @@ export function SubmissionForm({
         </div>
       </div>
 
-      {editable && submissionDeadline && (() => {
-        const days = daysUntil(submissionDeadline);
-        if (days < 0) {
-          return (
-            <div className="rounded-2xl border border-[var(--danger-border)] bg-[var(--status-rejected-bg)]/40 px-4 py-3 text-[13px] text-[var(--danger-text)] font-medium">
-              提出締切を過ぎています。できるだけ早く提出してください。心配な場合は個別コメントで実行委員会にご相談ください。
-            </div>
-          );
-        }
-        if (days <= 3) {
-          return (
-            <div className="rounded-2xl border border-[var(--warn-border)] bg-[var(--status-returned-bg)]/40 px-4 py-3 text-[13px] text-[var(--warn-text)] font-medium">
-              提出締切まであと{days === 0 ? "本日中" : `${days}日`}です。お忘れなく提出してください。
-            </div>
-          );
-        }
-        return (
-          <p className="text-[12px] text-[var(--muted)]">
-            提出締切まであと{days}日です。
-          </p>
-        );
-      })()}
+      {schedules.length > 0 && (
+        <div className="space-y-2">
+          {schedules.map((s) => {
+            const days = daysUntil(s.deadline);
+            const style =
+              days < 0
+                ? "border-[var(--danger-border)] bg-[var(--status-rejected-bg)]/40 text-[var(--danger-text)]"
+                : days <= 3
+                ? "border-[var(--warn-border)] bg-[var(--status-returned-bg)]/40 text-[var(--warn-text)]"
+                : "border-[var(--border)] bg-white text-[var(--foreground)]";
+            return (
+              <div
+                key={s.id}
+                className={`rounded-2xl border px-4 py-3 text-[13px] font-medium ${style}`}
+              >
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span>{s.title}</span>
+                  <span className="text-[11.5px] font-semibold">
+                    {days < 0
+                      ? "締切を過ぎています"
+                      : days === 0
+                      ? "本日締切"
+                      : `あと${days}日`}
+                  </span>
+                </div>
+                <p className="text-[11.5px] font-normal opacity-80 mt-0.5">
+                  {formatDateTime(s.deadline)}
+                  {s.hint && ` ・ ${s.hint}`}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {submission.status === "returned" && submission.admin_comment && (
         <div className="rounded-2xl border border-[var(--warn-border)] bg-[var(--status-returned-bg)]/40 px-4 py-3 text-[13px] text-[var(--warn-text)]">
@@ -255,6 +279,43 @@ export function SubmissionForm({
             rows={3}
             className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm leading-relaxed disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-semibold mb-1.5">所属区分</label>
+            <select
+              name="affiliation"
+              value={affiliation}
+              onChange={(e) => setAffiliation(e.target.value as Affiliation | "")}
+              disabled={!editable}
+              className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+            >
+              <option value="">未選択</option>
+              {AFFILIATIONS.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1.5">開催エリア</label>
+            <select
+              name="area"
+              value={area}
+              onChange={(e) => setArea(e.target.value as Area | "")}
+              disabled={!editable}
+              className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+            >
+              <option value="">未選択</option>
+              {AREAS.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>

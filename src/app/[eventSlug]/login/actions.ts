@@ -28,8 +28,12 @@ export async function groupLoginAction(
   const group = groups.find((g) => g.id === groupId);
   if (!group) return { error: "団体が見つかりません。" };
 
-  const ok = await verifyPassword(passphrase, group.passphrase_hash);
-  if (!ok) return { error: "合言葉が正しくありません。" };
+  const isLeader = await verifyPassword(passphrase, group.passphrase_hash);
+  const isMember =
+    !isLeader &&
+    !!group.member_passphrase_hash &&
+    (await verifyPassword(passphrase, group.member_passphrase_hash));
+  if (!isLeader && !isMember) return { error: "合言葉が正しくありません。" };
 
   const session = await getSession();
   session.auth = {
@@ -38,6 +42,7 @@ export async function groupLoginAction(
     eventSlug,
     groupId: group.id,
     groupName: group.name,
+    role: isLeader ? "leader" : "member",
   };
   await session.save();
   redirect(`/${eventSlug}/group`);

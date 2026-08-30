@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/session";
-import { createGroup, updateGroupBudget, updateGroupPassphrase } from "@/lib/data/groups";
+import {
+  createGroup,
+  updateGroupBudget,
+  updateGroupPassphrase,
+  updateGroupMemberPassphrase,
+} from "@/lib/data/groups";
 import { hashPassword } from "@/lib/auth";
 
 export interface GroupFormState {
@@ -61,5 +66,17 @@ export async function resetPassphraseAction(
   if (!passphrase) return;
   const hash = await hashPassword(passphrase);
   await updateGroupPassphrase(groupId, hash);
+  revalidatePath(`/${eventSlug}/admin/groups`);
+}
+
+export async function resetMemberPassphraseAction(
+  eventSlug: string,
+  groupId: string,
+  formData: FormData
+) {
+  await requireAdminSession(eventSlug);
+  const passphrase = String(formData.get("passphrase") ?? "").trim();
+  const hash = passphrase ? await hashPassword(passphrase) : null;
+  await updateGroupMemberPassphrase(groupId, hash);
   revalidatePath(`/${eventSlug}/admin/groups`);
 }

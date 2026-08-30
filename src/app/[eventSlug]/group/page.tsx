@@ -1,8 +1,10 @@
 import { requireGroupSession } from "@/lib/session";
 import { getOrCreateSubmission, getSubmissionDetail } from "@/lib/data/submissions";
 import { listInventoryItems, getInventoryUsage } from "@/lib/data/inventory";
-import { getEventBySlug } from "@/lib/data/events";
+import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
+import { listAttachments } from "@/lib/data/attachments";
 import { SubmissionForm } from "./SubmissionForm";
+import { AttachmentsCard } from "./AttachmentsCard";
 
 export default async function GroupHomePage({
   params,
@@ -21,7 +23,8 @@ export default async function GroupHomePage({
 
   const inventoryItems = await listInventoryItems(auth.eventId);
   const usage = await getInventoryUsage(auth.eventId);
-  const event = await getEventBySlug(eventSlug);
+  const schedules = await listSubmissionSchedules(auth.eventId);
+  const attachments = await listAttachments(submission.id);
   const inventoryAvailability = Object.fromEntries(
     Array.from(usage.entries()).map(([id, u]) => [
       id,
@@ -30,17 +33,25 @@ export default async function GroupHomePage({
   );
 
   return (
-    <SubmissionForm
-      eventSlug={eventSlug}
-      groupName={auth.groupName}
-      submission={detail.submission}
-      items={detail.items}
-      fieldValues={detail.fieldValues}
-      fields={detail.fields}
-      budgetAllocated={detail.group.budget_allocated}
-      inventoryItems={inventoryItems}
-      inventoryAvailability={inventoryAvailability}
-      submissionDeadline={event?.submission_deadline ?? null}
-    />
+    <div className="space-y-5">
+      <SubmissionForm
+        eventSlug={eventSlug}
+        groupName={auth.groupName}
+        submission={detail.submission}
+        items={detail.items}
+        fieldValues={detail.fieldValues}
+        fields={detail.fields}
+        budgetAllocated={detail.group.budget_allocated}
+        inventoryItems={inventoryItems}
+        inventoryAvailability={inventoryAvailability}
+        schedules={schedules}
+        role={auth.role}
+      />
+      <AttachmentsCard
+        eventSlug={eventSlug}
+        attachments={attachments}
+        canEdit={auth.role === "leader"}
+      />
+    </div>
   );
 }

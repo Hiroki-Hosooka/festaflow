@@ -5,7 +5,8 @@ import { requireAdminSession } from "@/lib/session";
 import { decideSubmission, listBorrowStockStatuses } from "@/lib/data/submissions";
 import { addComment } from "@/lib/data/comments";
 import { setStockDecision } from "@/lib/data/inventory";
-import type { StockStatus } from "@/lib/database.types";
+import { reviewAttachment } from "@/lib/data/attachments";
+import type { ReviewStatus, StockStatus } from "@/lib/database.types";
 
 export interface DecideFormState {
   error?: string;
@@ -75,6 +76,22 @@ export async function setStockDecisionAction(
 
   revalidatePath(`/${eventSlug}/admin/submissions/${submissionId}`);
   revalidatePath(`/${eventSlug}/admin/inventory`);
+}
+
+export async function reviewAttachmentAction(
+  eventSlug: string,
+  submissionId: string,
+  attachmentId: string,
+  formData: FormData
+) {
+  await requireAdminSession(eventSlug);
+
+  const reviewStatus = String(formData.get("review_status") ?? "") as ReviewStatus;
+  if (reviewStatus !== "approved" && reviewStatus !== "needs_fix") return;
+  const reviewComment = String(formData.get("review_comment") ?? "").trim();
+
+  await reviewAttachment(attachmentId, { reviewStatus, reviewComment });
+  revalidatePath(`/${eventSlug}/admin/submissions/${submissionId}`);
 }
 
 export async function sendAdminCommentAction(

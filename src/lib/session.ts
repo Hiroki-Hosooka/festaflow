@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { redirect } from "next/navigation";
 
+export type GroupRole = "leader" | "member";
+
 export type SessionAuth =
   | { kind: "admin"; eventId: string; eventSlug: string }
   | {
@@ -11,6 +13,7 @@ export type SessionAuth =
       eventSlug: string;
       groupId: string;
       groupName: string;
+      role: GroupRole;
     };
 
 interface SessionShape {

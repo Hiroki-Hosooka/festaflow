@@ -12,7 +12,11 @@ import {
   markSubmitted,
   sumItems,
 } from "@/lib/data/submissions";
-import type { ItemKind } from "@/lib/database.types";
+import { addAttachment, deleteAttachment, getAttachment } from "@/lib/data/attachments";
+import type { Affiliation, Area, ItemKind } from "@/lib/database.types";
+
+const AFFILIATIONS: Affiliation[] = ["1年", "2年", "3年", "部活", "有志"];
+const AREAS: Area[] = ["校内", "校外"];
 
 interface ItemInput {
   name: string;
@@ -65,17 +69,26 @@ export async function saveSubmissionAction(
   formData: FormData
 ): Promise<SubmitFormState> {
   const auth = await requireGroupSession(eventSlug);
+  if (auth.role !== "leader") {
+    return { error: "この操作はクラスリーダーのみ行えます。" };
+  }
   const intent = String(formData.get("intent") ?? "draft") === "submit" ? "submit" : "draft";
 
   const name = String(formData.get("name") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
   const location = String(formData.get("location") ?? "").trim();
+  const affiliationRaw = String(formData.get("affiliation") ?? "");
+  const areaRaw = String(formData.get("area") ?? "");
+  const affiliation = AFFILIATIONS.includes(affiliationRaw as Affiliation)
+    ? (affiliationRaw as Affiliation)
+    : null;
+  const area = AREAS.includes(areaRaw as Area) ? (areaRaw as Area) : null;
   const items = parseItems(String(formData.get("items_json") ?? "[]"));
   const fieldValues = parseFieldValues(String(formData.get("field_values_json") ?? "{}"));
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
 
-  await updateSubmissionCore(submission.id, { name, content, location });
+  await updateSubmissionCore(submission.id, { name, content, location, affiliation, area });
   await replaceSubmissionItems(submission.id, items);
   await replaceFieldValues(submission.id, fieldValues);
 
@@ -121,4 +134,42 @@ export async function saveSubmissionAction(
   await markSubmitted(submission.id);
   revalidatePath(`/${eventSlug}/group`);
   return { success: "提出しました。" };
+}
+
+export interface AttachmentFormState {
+  error?: string;
+  success?: string;
+}
+
+export async function uploadAttachmentAction(
+  eventSlug: string,
+  _prevState: AttachmentFormState,
+  formData: FormData
+): Promise<AttachmentFormState> {
+  const auth = await requireGroupSession(eventSlug);
+  if (auth.role !== "leader") {
+    return { error: "この操作はクラスリーダーのみ行えます。" };
+  }
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "ファイルを選択してください。" };
+  }
+
+  const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
+  await addAttachment(submission.id, file);
+
+  revalidatePath(`/${eventSlug}/group`);
+  return { success: `「${file.name}」をアップロードしました。` };
+}
+
+export async function deleteAttachmentAction(eventSlug: string, attachmentId: string) {
+  const auth = await requireGroupSession(eventSlug);
+  if (auth.role !== "leader") return;
+
+  const attachment = await getAttachment(attachmentId);
+  if (!attachment || attachment.review_status !== "pending") return;
+
+  await deleteAttachment(attachmentId);
+  revalidatePath(`/${eventSlug}/group`);
 }

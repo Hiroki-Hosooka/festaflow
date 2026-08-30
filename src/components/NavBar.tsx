@@ -31,7 +31,7 @@ export function NavBar({
   const isActive = (href: string) => pathname === href;
 
   return (
-    <header className="border-b border-[var(--border)] bg-[var(--surface)] sticky top-0 z-20">
+    <header className="border-b border-[var(--border)] bg-[var(--surface)] sticky top-0 z-20 print:hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-5 h-14 flex items-center gap-3">
         <button
           type="button"

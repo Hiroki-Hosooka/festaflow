@@ -1,7 +1,7 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase";
 import { listUnreadSubmissionIds } from "@/lib/data/comments";
-import type { ItemKind, SubmissionStatus } from "@/lib/database.types";
+import type { Affiliation, Area, ItemKind, SubmissionStatus } from "@/lib/database.types";
 
 export interface SubmissionListRow {
   groupId: string;
@@ -12,6 +12,8 @@ export interface SubmissionListRow {
   name: string;
   plannedTotal: number;
   hasUnreadFromGroup: boolean;
+  affiliation: Affiliation | null;
+  area: Area | null;
 }
 
 export async function listSubmissionsForAdmin(
@@ -65,6 +67,8 @@ export async function listSubmissionsForAdmin(
       name: submission?.name ?? "",
       plannedTotal: submission ? totalsBySubmission.get(submission.id) ?? 0 : 0,
       hasUnreadFromGroup: submission ? unreadIds.has(submission.id) : false,
+      affiliation: submission?.affiliation ?? null,
+      area: submission?.area ?? null,
     };
   });
 }
@@ -199,7 +203,13 @@ export async function replaceFieldValues(
 
 export async function updateSubmissionCore(
   submissionId: string,
-  core: { name: string; content: string; location: string }
+  core: {
+    name: string;
+    content: string;
+    location: string;
+    affiliation: Affiliation | null;
+    area: Area | null;
+  }
 ) {
   const { error } = await supabaseAdmin()
     .from("submissions")

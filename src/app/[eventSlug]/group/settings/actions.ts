@@ -1,7 +1,8 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { requireGroupSession } from "@/lib/session";
-import { getGroup, updateGroupPassphrase } from "@/lib/data/groups";
+import { getGroup, updateGroupPassphrase, updateGroupMemberPassphrase } from "@/lib/data/groups";
 import { hashPassword, verifyPassword } from "@/lib/auth";
 
 export interface ChangePassphraseState {
@@ -38,4 +39,36 @@ export async function changePassphraseAction(
 
   await updateGroupPassphrase(auth.groupId, await hashPassword(newPassphrase));
   return { success: "合言葉を変更しました。次回のログインから新しい合言葉を使用してください。" };
+}
+
+export interface MemberPassphraseState {
+  error?: string;
+  success?: string;
+}
+
+export async function setMemberPassphraseAction(
+  eventSlug: string,
+  _prevState: MemberPassphraseState,
+  formData: FormData
+): Promise<MemberPassphraseState> {
+  const auth = await requireGroupSession(eventSlug);
+  if (auth.role !== "leader") {
+    return { error: "この操作はクラスリーダーのみ行えます。" };
+  }
+
+  const passphrase = String(formData.get("passphrase") ?? "").trim();
+
+  if (!passphrase) {
+    await updateGroupMemberPassphrase(auth.groupId, null);
+    revalidatePath(`/${eventSlug}/admin/groups`);
+    return { success: "一般生徒用合言葉を解除しました。" };
+  }
+
+  if (passphrase.length < 4) {
+    return { error: "合言葉は4文字以上にしてください。" };
+  }
+
+  await updateGroupMemberPassphrase(auth.groupId, await hashPassword(passphrase));
+  revalidatePath(`/${eventSlug}/admin/groups`);
+  return { success: "一般生徒用合言葉を設定しました。" };
 }

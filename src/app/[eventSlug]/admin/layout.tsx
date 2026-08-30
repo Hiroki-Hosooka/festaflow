@@ -51,6 +51,7 @@ export default async function AdminLayout({
             badge: hasInventoryConflict,
             badgeLabel: "在庫の希望が競合している物品があります",
           },
+          { href: `/${eventSlug}/admin/documents`, label: "配布資料", icon: "📄" },
         ]}
       />
       <div className="max-w-4xl mx-auto px-5 py-8">{children}</div>

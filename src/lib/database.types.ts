@@ -10,6 +10,11 @@ export type BroadcastTarget = "all" | "unsubmitted";
 export type CommentSender = "admin" | "group";
 export type ItemKind = "purchase" | "borrow";
 export type StockStatus = "pending" | "secured" | "denied";
+export type Affiliation = "1年" | "2年" | "3年" | "部活" | "有志";
+export type Area = "校内" | "校外";
+export type ReviewStatus = "pending" | "approved" | "needs_fix";
+export type TodoStatus = "not_started" | "in_progress" | "done";
+export type PreferenceKind = "ng" | "want";
 
 export interface Database {
   public: {
@@ -21,7 +26,6 @@ export interface Database {
           name: string;
           admin_login_id: string;
           admin_password_hash: string;
-          submission_deadline: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & {
@@ -39,6 +43,7 @@ export interface Database {
           event_id: string;
           name: string;
           passphrase_hash: string;
+          member_passphrase_hash: string | null;
           budget_allocated: number;
           created_at: string;
         };
@@ -70,6 +75,23 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["form_fields"]["Row"]>;
         Relationships: [];
       };
+      submission_schedules: {
+        Row: {
+          id: string;
+          event_id: string;
+          title: string;
+          deadline: string;
+          hint: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["submission_schedules"]["Row"]> & {
+          event_id: string;
+          title: string;
+          deadline: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["submission_schedules"]["Row"]>;
+        Relationships: [];
+      };
       submissions: {
         Row: {
           id: string;
@@ -80,6 +102,8 @@ export interface Database {
           location: string;
           status: SubmissionStatus;
           admin_comment: string;
+          affiliation: Affiliation | null;
+          area: Area | null;
           submitted_at: string | null;
           decided_at: string | null;
           created_at: string;
@@ -174,6 +198,135 @@ export interface Database {
         Update: Partial<
           Database["public"]["Tables"]["submission_comments"]["Row"]
         >;
+        Relationships: [];
+      };
+      submission_attachments: {
+        Row: {
+          id: string;
+          submission_id: string;
+          file_name: string;
+          storage_path: string;
+          review_status: ReviewStatus;
+          review_comment: string;
+          uploaded_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["submission_attachments"]["Row"]> & {
+          submission_id: string;
+          file_name: string;
+          storage_path: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["submission_attachments"]["Row"]>;
+        Relationships: [];
+      };
+      event_documents: {
+        Row: {
+          id: string;
+          event_id: string;
+          file_name: string;
+          storage_path: string;
+          uploaded_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["event_documents"]["Row"]> & {
+          event_id: string;
+          file_name: string;
+          storage_path: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["event_documents"]["Row"]>;
+        Relationships: [];
+      };
+      todo_groups: {
+        Row: {
+          id: string;
+          submission_id: string;
+          name: string;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["todo_groups"]["Row"]> & {
+          submission_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["todo_groups"]["Row"]>;
+        Relationships: [];
+      };
+      todo_tasks: {
+        Row: {
+          id: string;
+          submission_id: string;
+          todo_group_id: string | null;
+          title: string;
+          status: TodoStatus;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["todo_tasks"]["Row"]> & {
+          submission_id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["todo_tasks"]["Row"]>;
+        Relationships: [];
+      };
+      shift_configs: {
+        Row: {
+          submission_id: string;
+          start_time: string;
+          end_time: string;
+          slot_minutes: number;
+          people_per_slot: number;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["shift_configs"]["Row"]> & {
+          submission_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["shift_configs"]["Row"]>;
+        Relationships: [];
+      };
+      shift_members: {
+        Row: {
+          id: string;
+          submission_id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["shift_members"]["Row"]> & {
+          submission_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["shift_members"]["Row"]>;
+        Relationships: [];
+      };
+      shift_preferences: {
+        Row: {
+          id: string;
+          submission_id: string;
+          member_id: string;
+          slot_label: string;
+          kind: PreferenceKind;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["shift_preferences"]["Row"]> & {
+          submission_id: string;
+          member_id: string;
+          slot_label: string;
+          kind: PreferenceKind;
+        };
+        Update: Partial<Database["public"]["Tables"]["shift_preferences"]["Row"]>;
+        Relationships: [];
+      };
+      shift_assignments: {
+        Row: {
+          id: string;
+          submission_id: string;
+          slot_label: string;
+          member_id: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["shift_assignments"]["Row"]> & {
+          submission_id: string;
+          slot_label: string;
+          member_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["shift_assignments"]["Row"]>;
         Relationships: [];
       };
     };

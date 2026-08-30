@@ -2,25 +2,47 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/session";
-import { updateEventDeadline } from "@/lib/data/events";
+import {
+  createSubmissionSchedule,
+  deleteSubmissionSchedule,
+} from "@/lib/data/submissionSchedules";
 import { parseJstDatetimeLocal } from "@/lib/format";
 
-export async function updateDeadlineAction(eventSlug: string, formData: FormData) {
+export interface ScheduleFormState {
+  error?: string;
+  success?: string;
+}
+
+export async function createScheduleAction(
+  eventSlug: string,
+  _prevState: ScheduleFormState,
+  formData: FormData
+): Promise<ScheduleFormState> {
   const auth = await requireAdminSession(eventSlug);
 
-  const raw = String(formData.get("deadline") ?? "").trim();
-  const deadline = raw ? parseJstDatetimeLocal(raw) : null;
+  const title = String(formData.get("title") ?? "").trim();
+  const deadlineRaw = String(formData.get("deadline") ?? "").trim();
+  const hint = String(formData.get("hint") ?? "").trim();
 
-  await updateEventDeadline(auth.eventId, deadline);
+  if (!title || !deadlineRaw) {
+    return { error: "提出物の名前と締切日時を入力してください。" };
+  }
+
+  await createSubmissionSchedule({
+    eventId: auth.eventId,
+    title,
+    deadline: parseJstDatetimeLocal(deadlineRaw),
+    hint,
+  });
 
   revalidatePath(`/${eventSlug}/admin`);
   revalidatePath(`/${eventSlug}/group`);
+  return { success: `「${title}」を登録しました。` };
 }
 
-export async function clearDeadlineAction(eventSlug: string) {
-  const auth = await requireAdminSession(eventSlug);
-  await updateEventDeadline(auth.eventId, null);
-
+export async function deleteScheduleAction(eventSlug: string, scheduleId: string) {
+  await requireAdminSession(eventSlug);
+  await deleteSubmissionSchedule(scheduleId);
   revalidatePath(`/${eventSlug}/admin`);
   revalidatePath(`/${eventSlug}/group`);
 }

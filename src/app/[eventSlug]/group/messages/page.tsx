@@ -16,7 +16,9 @@ export default async function GroupMessagesPage({
   const { eventSlug } = await params;
   const { tab: tabParam } = await searchParams;
   const auth = await requireGroupSession(eventSlug);
-  const tab = tabParam === "broadcast" ? "broadcast" : "comments";
+  const requestedTab = tabParam === "broadcast" ? "broadcast" : "comments";
+  // 一般生徒は個別コメント（質問相談チャット）を利用できないため、常に全体連絡のみ表示する
+  const tab = auth.role === "member" ? "broadcast" : requestedTab;
 
   const boundSend = sendGroupCommentAction.bind(null, eventSlug);
 
@@ -24,7 +26,7 @@ export default async function GroupMessagesPage({
     const broadcasts = await listBroadcasts(auth.eventId);
     return (
       <div className="space-y-5">
-        <Tabs eventSlug={eventSlug} active={tab} />
+        <Tabs eventSlug={eventSlug} active={tab} role={auth.role} />
         <div className="card divide-y divide-[var(--border)]">
           {broadcasts.length === 0 && (
             <p className="px-5 py-6 text-sm text-[var(--muted)]">
@@ -50,7 +52,7 @@ export default async function GroupMessagesPage({
 
   return (
     <div className="space-y-5">
-      <Tabs eventSlug={eventSlug} active={tab} />
+      <Tabs eventSlug={eventSlug} active={tab} role={auth.role} />
       <div className="card p-6 space-y-4">
         <p className="text-xs text-[var(--muted)]">
           企画「{submission.name || "（企画名未入力）"}」についてのやりとり
@@ -107,7 +109,15 @@ export default async function GroupMessagesPage({
   );
 }
 
-function Tabs({ eventSlug, active }: { eventSlug: string; active: "comments" | "broadcast" }) {
+function Tabs({
+  eventSlug,
+  active,
+  role,
+}: {
+  eventSlug: string;
+  active: "comments" | "broadcast";
+  role: "leader" | "member";
+}) {
   return (
     <div className="flex gap-5 border-b border-[var(--border)]">
       <Link
@@ -120,16 +130,18 @@ function Tabs({ eventSlug, active }: { eventSlug: string; active: "comments" | "
       >
         全体連絡
       </Link>
-      <Link
-        href={`/${eventSlug}/group/messages?tab=comments`}
-        className={`pb-2.5 text-[13px] ${
-          active === "comments"
-            ? "font-bold border-b-2 border-[var(--accent-group-text)]"
-            : "text-[var(--muted)]"
-        }`}
-      >
-        個別コメント
-      </Link>
+      {role === "leader" && (
+        <Link
+          href={`/${eventSlug}/group/messages?tab=comments`}
+          className={`pb-2.5 text-[13px] ${
+            active === "comments"
+              ? "font-bold border-b-2 border-[var(--accent-group-text)]"
+              : "text-[var(--muted)]"
+          }`}
+        >
+          個別コメント
+        </Link>
+      )}
     </div>
   );
 }

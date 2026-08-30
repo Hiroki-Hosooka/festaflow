@@ -4,11 +4,13 @@ import { requireAdminSession } from "@/lib/session";
 import { getSubmissionDetail, sumItems } from "@/lib/data/submissions";
 import { getInventoryUsage } from "@/lib/data/inventory";
 import { listComments, markCommentsRead } from "@/lib/data/comments";
+import { listAttachments } from "@/lib/data/attachments";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BudgetBar } from "@/components/BudgetBar";
-import { formatTime, yen } from "@/lib/format";
+import { formatDateTime, formatTime, yen } from "@/lib/format";
 import { DecisionForm } from "./DecisionForm";
 import { StockDecisionControl } from "./StockDecisionControl";
+import { AttachmentReviewControl } from "./AttachmentReviewControl";
 import { sendAdminCommentAction } from "./actions";
 
 export default async function AdminSubmissionDetailPage({
@@ -27,6 +29,7 @@ export default async function AdminSubmissionDetailPage({
   const purchaseItems = items.filter((i) => i.kind === "purchase");
   const borrowItems = items.filter((i) => i.kind === "borrow");
   const inventoryUsage = await getInventoryUsage(submission.event_id);
+  const attachments = await listAttachments(submission.id);
 
   await markCommentsRead(submission.id, "admin");
   const comments = await listComments(submission.id);
@@ -49,6 +52,8 @@ export default async function AdminSubmissionDetailPage({
 
       <div className="card p-6 space-y-4">
         <Field label="内容" value={submission.content || "—"} />
+        <Field label="所属区分" value={submission.affiliation || "—"} />
+        <Field label="開催エリア" value={submission.area || "—"} />
         <Field label="場所" value={submission.location || "—"} />
 
         {fields.map((field) => (
@@ -122,6 +127,29 @@ export default async function AdminSubmissionDetailPage({
 
         <BudgetBar allocated={group.budget_allocated} planned={plannedTotal} />
       </div>
+
+      {attachments.length > 0 && (
+        <div className="card p-6 space-y-3">
+          <div className="text-xs font-bold text-[var(--muted)]">添付資料</div>
+          {attachments.map((a) => (
+            <div key={a.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap text-[12.5px]">
+                <span className="font-semibold">{a.file_name}</span>
+                <span className="text-[10.5px] text-[var(--muted-2)]">
+                  {formatDateTime(a.uploaded_at)}
+                </span>
+              </div>
+              <AttachmentReviewControl
+                eventSlug={eventSlug}
+                submissionId={submission.id}
+                attachmentId={a.id}
+                reviewStatus={a.review_status}
+                reviewComment={a.review_comment}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {(submission.status === "submitted" ||
         submission.status === "approved" ||

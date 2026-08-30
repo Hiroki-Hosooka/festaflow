@@ -11,11 +11,3 @@ export async function getEventBySlug(slug: string) {
   if (error) throw error;
   return data;
 }
-
-export async function updateEventDeadline(eventId: string, deadline: string | null) {
-  const { error } = await supabaseAdmin()
-    .from("events")
-    .update({ submission_deadline: deadline })
-    .eq("id", eventId);
-  if (error) throw error;
-}
