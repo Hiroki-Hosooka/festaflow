@@ -32,20 +32,20 @@ export function NavBar({
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)] sticky top-0 z-20 print:hidden">
-      <div className="max-w-4xl mx-auto px-4 sm:px-5 h-14 flex items-center gap-3">
+      <div className="max-w-5xl mx-auto px-4 sm:px-5 h-14 flex items-center gap-3">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="md:hidden flex-none w-10 h-10 -ml-2 flex items-center justify-center rounded-lg text-[var(--foreground)] active:bg-[var(--background)]"
+          className="lg:hidden flex-none w-10 h-10 -ml-2 flex items-center justify-center rounded-lg text-[var(--foreground)] active:bg-[var(--background)]"
           aria-label={open ? "メニューを閉じる" : "メニューを開く"}
           aria-expanded={open}
         >
           <span className="text-base leading-none">{open ? "✕" : "☰"}</span>
         </button>
-        <span className="font-bold text-sm truncate flex-none max-w-[45%] md:max-w-none">
+        <span className="font-bold text-sm truncate flex-none max-w-[45%] lg:max-w-none">
           {brand}
         </span>
-        <nav className="hidden md:flex gap-4 text-[13px] flex-1 min-w-0">
+        <nav className="hidden lg:flex gap-4 text-[13px] flex-1 min-w-0">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -74,7 +74,7 @@ export function NavBar({
         </form>
       </div>
       {open && (
-        <nav className="md:hidden border-t border-[var(--border)] px-4 py-1.5 flex flex-col text-[13.5px]">
+        <nav className="lg:hidden border-t border-[var(--border)] px-4 py-1.5 flex flex-col text-[13.5px]">
           {links.map((l) => (
             <Link
               key={l.href}

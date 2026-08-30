@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { groupLoginAction, adminLoginAction, type LoginState } from "./actions";
+import { BrandMark } from "@/components/BrandMark";
 
 const initialState: LoginState = {};
 
@@ -30,14 +31,11 @@ export function LoginForm({
   return (
     <div className="card w-full max-w-sm p-9 sm:p-10">
       <div className="flex items-center gap-2 mb-8 justify-center">
-        <span
-          className="w-5 h-5 rounded-md"
-          style={{ background: "var(--accent-group-solid)" }}
-        />
+        <BrandMark />
         <span className="text-sm font-bold">{eventName}</span>
       </div>
 
-      <div className="flex rounded-lg bg-[oklch(94%_0.01_80)] p-1 mb-6">
+      <div className="flex rounded-lg bg-[oklch(94%_0.012_155)] p-1 mb-6">
         <button
           type="button"
           onClick={() => setTab("group")}

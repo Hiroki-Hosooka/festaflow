@@ -5,6 +5,7 @@ import { listInboxThreads } from "@/lib/data/comments";
 import { logoutAction } from "../login/actions";
 import { NavBar } from "@/components/NavBar";
 import { Icon } from "@/components/Icons";
+import { BrandMark } from "@/components/BrandMark";
 
 export default async function AdminLayout({
   children,
@@ -29,7 +30,12 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen">
       <NavBar
-        brand={event?.name ?? "管理画面"}
+        brand={
+          <span className="inline-flex items-center gap-2">
+            <BrandMark accent="var(--accent-admin-solid)" className="w-[18px] h-[18px]" />
+            {event?.name ?? "管理画面"}
+          </span>
+        }
         accentTextClass="text-[var(--accent-admin-text)]"
         badgeClass="bg-[var(--danger-text)]"
         logoutAction={boundLogout}

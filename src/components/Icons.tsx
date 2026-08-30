@@ -52,6 +52,7 @@ const PATHS: Record<string, string[]> = {
   chat: [
     "M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4v-4H5a1 1 0 0 1-1-1V5Z",
   ],
+  flag: ["M6 3v18", "M6 4.5h12l-3 4 3 4H6"],
 };
 
 export function Icon({

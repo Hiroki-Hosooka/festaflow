@@ -16,7 +16,7 @@ export function BudgetBar({ allocated, planned }: { allocated: number; planned: 
           className="h-full rounded-full transition-all"
           style={{
             width: `${pct}%`,
-            background: over ? "oklch(55% 0.18 25)" : "var(--accent-group-solid)",
+            background: over ? "oklch(55% 0.18 30)" : "var(--accent-group-solid)",
           }}
         />
       </div>

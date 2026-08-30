@@ -1,6 +1,7 @@
 import { requireAdminSession } from "@/lib/session";
 import { listGroups } from "@/lib/data/groups";
 import { NewGroupForm } from "./NewGroupForm";
+import { Icon } from "@/components/Icons";
 import {
   updateGroupBudgetAction,
   resetPassphraseAction,
@@ -75,7 +76,8 @@ function GroupRowCard({ eventSlug, group }: { eventSlug: string; group: GroupRow
 
       <div className="flex gap-6 flex-wrap text-[12px]">
         <details>
-          <summary className="cursor-pointer text-[var(--muted)]">
+          <summary className="cursor-pointer text-[var(--muted)] inline-flex items-center gap-1.5">
+            <Icon name="key" className="w-3.5 h-3.5 flex-none" />
             リーダー用合言葉を再設定
           </summary>
           <form action={boundReset} className="flex items-center gap-1.5 mt-2">
@@ -92,7 +94,8 @@ function GroupRowCard({ eventSlug, group }: { eventSlug: string; group: GroupRow
         </details>
 
         <details>
-          <summary className="cursor-pointer text-[var(--muted)]">
+          <summary className="cursor-pointer text-[var(--muted)] inline-flex items-center gap-1.5">
+            <Icon name="key" className="w-3.5 h-3.5 flex-none" />
             一般生徒用合言葉
             {group.member_passphrase_hash ? (
               <span className="ml-1.5 text-[var(--status-approved-text)] font-semibold">

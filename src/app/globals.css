@@ -1,45 +1,47 @@
 @import "tailwindcss";
 
 :root {
-  --background: oklch(97% 0.006 80);
-  --foreground: oklch(22% 0.012 80);
-  --muted: oklch(45% 0.012 80);
-  --muted-2: oklch(55% 0.012 80);
-  --surface: oklch(99% 0.004 80);
-  --border: oklch(90% 0.01 80);
-  --border-strong: oklch(85% 0.01 80);
+  /* ニュートラル（藍×若葉：寒色寄りのセージグレー） */
+  --background: oklch(97% 0.007 155);
+  --foreground: oklch(22% 0.02 155);
+  --muted: oklch(46% 0.02 155);
+  --muted-2: oklch(58% 0.018 155);
+  --surface: oklch(99% 0.004 150);
+  --border: oklch(90% 0.012 155);
+  --border-strong: oklch(84% 0.015 155);
 
-  /* 団体側アクセント（マゼンタ系、単色） */
-  --accent-group-solid: oklch(46% 0.17 325);
-  --accent-group-solid-hover: oklch(40% 0.17 325);
-  --accent-group-text: oklch(46% 0.15 325);
-  --accent-group-soft-bg: oklch(95% 0.045 325);
+  /* 団体側アクセント（若葉：ティールグリーン、単色） */
+  --accent-group-solid: oklch(46% 0.09 165);
+  --accent-group-solid-hover: oklch(40% 0.09 165);
+  --accent-group-text: oklch(44% 0.1 165);
+  --accent-group-soft-bg: oklch(94% 0.035 165);
 
-  /* 管理側アクセント（アンバー系、単色） */
-  --accent-admin-solid: oklch(45% 0.13 75);
-  --accent-admin-solid-hover: oklch(39% 0.13 75);
-  --accent-admin-text: oklch(45% 0.13 75);
+  /* 管理側アクセント（藍：インディゴ、単色） */
+  --accent-admin-solid: oklch(40% 0.09 255);
+  --accent-admin-solid-hover: oklch(34% 0.09 255);
+  --accent-admin-text: oklch(40% 0.09 255);
+  --accent-admin-soft-bg: oklch(94% 0.025 255);
 
-  /* 承認アクション（グリーン系、単色） */
-  --accent-approve-solid: oklch(38% 0.11 150);
-  --accent-approve-solid-hover: oklch(33% 0.11 150);
+  /* 承認アクション（若葉より黄寄りのグラスグリーン、単色） */
+  --accent-approve-solid: oklch(42% 0.11 140);
+  --accent-approve-solid-hover: oklch(36% 0.11 140);
 
   /* ステータス色 */
-  --status-approved-bg: oklch(91% 0.1 150);
-  --status-approved-text: oklch(34% 0.15 150);
-  --status-returned-bg: oklch(92% 0.09 75);
-  --status-returned-text: oklch(38% 0.13 75);
-  --status-rejected-bg: oklch(92% 0.09 25);
-  --status-rejected-text: oklch(42% 0.16 25);
-  --status-pending-bg: oklch(94% 0.01 80);
-  --status-pending-text: oklch(40% 0.012 80);
-  --status-unsubmitted-bg: oklch(94% 0.01 80);
-  --status-unsubmitted-text: oklch(55% 0.012 80);
+  --status-approved-bg: oklch(91% 0.06 150);
+  --status-approved-text: oklch(34% 0.12 150);
+  --status-returned-bg: oklch(92% 0.06 85);
+  --status-returned-text: oklch(38% 0.1 85);
+  --status-rejected-bg: oklch(92% 0.07 30);
+  --status-rejected-text: oklch(42% 0.15 30);
+  --status-pending-bg: oklch(93% 0.012 155);
+  --status-pending-text: oklch(40% 0.015 155);
+  --status-unsubmitted-bg: oklch(93% 0.012 155);
+  --status-unsubmitted-text: oklch(58% 0.015 155);
 
-  --danger-border: oklch(75% 0.15 25);
-  --danger-text: oklch(45% 0.16 25);
-  --warn-border: oklch(75% 0.12 80);
-  --warn-text: oklch(45% 0.12 80);
+  --danger-border: oklch(75% 0.13 30);
+  --danger-text: oklch(42% 0.15 30);
+  --warn-border: oklch(75% 0.1 85);
+  --warn-text: oklch(42% 0.1 85);
 }
 
 @theme inline {

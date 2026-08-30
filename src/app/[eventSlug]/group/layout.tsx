@@ -4,6 +4,7 @@ import { getOrCreateSubmission } from "@/lib/data/submissions";
 import { listUnreadSubmissionIds } from "@/lib/data/comments";
 import { NavBar, type NavLinkItem } from "@/components/NavBar";
 import { Icon } from "@/components/Icons";
+import { BrandMark } from "@/components/BrandMark";
 
 export default async function GroupLayout({
   children,
@@ -46,6 +47,7 @@ export default async function GroupLayout({
       <NavBar
         brand={
           <span className="inline-flex items-center gap-2">
+            <BrandMark className="w-[18px] h-[18px]" />
             {auth.groupName}
             <span
               className={`status-badge ${
