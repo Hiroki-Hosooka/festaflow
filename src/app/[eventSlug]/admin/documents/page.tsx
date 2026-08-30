@@ -1,6 +1,6 @@
 import { requireAdminSession } from "@/lib/session";
 import { listEventDocuments } from "@/lib/data/documents";
-import { createSignedUrl } from "@/lib/storage";
+import { createSignedUrls } from "@/lib/storage";
 import { formatDateTime } from "@/lib/format";
 import { NewDocumentForm } from "./NewDocumentForm";
 import { DeleteDocumentButton } from "./DeleteDocumentButton";
@@ -14,9 +14,8 @@ export default async function AdminDocumentsPage({
   const { eventSlug } = await params;
   const auth = await requireAdminSession(eventSlug);
   const documents = await listEventDocuments(auth.eventId);
-  const withUrls = await Promise.all(
-    documents.map(async (d) => ({ ...d, url: await createSignedUrl(d.storage_path) }))
-  );
+  const urlsByPath = await createSignedUrls(documents.map((d) => d.storage_path));
+  const withUrls = documents.map((d) => ({ ...d, url: urlsByPath.get(d.storage_path) ?? "" }));
 
   return (
     <div className="space-y-5 max-w-2xl">

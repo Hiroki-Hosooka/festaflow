@@ -1,6 +1,6 @@
 import { requireGroupSession } from "@/lib/session";
 import { listEventDocuments } from "@/lib/data/documents";
-import { createSignedUrl } from "@/lib/storage";
+import { createSignedUrls } from "@/lib/storage";
 import { formatDateTime } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
 
@@ -12,9 +12,8 @@ export default async function GroupDocumentsPage({
   const { eventSlug } = await params;
   const auth = await requireGroupSession(eventSlug);
   const documents = await listEventDocuments(auth.eventId);
-  const withUrls = await Promise.all(
-    documents.map(async (d) => ({ ...d, url: await createSignedUrl(d.storage_path) }))
-  );
+  const urlsByPath = await createSignedUrls(documents.map((d) => d.storage_path));
+  const withUrls = documents.map((d) => ({ ...d, url: urlsByPath.get(d.storage_path) ?? "" }));
 
   return (
     <div className="space-y-5">

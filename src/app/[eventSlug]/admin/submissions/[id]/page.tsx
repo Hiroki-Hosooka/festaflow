@@ -33,8 +33,10 @@ export default async function AdminSubmissionDetailPage({
     listAttachments(submission.id),
   ]);
 
-  await markCommentsRead(submission.id, "admin");
-  const comments = await listComments(submission.id);
+  const [, comments] = await Promise.all([
+    markCommentsRead(submission.id, "admin"),
+    listComments(submission.id),
+  ]);
 
   const boundSendComment = sendAdminCommentAction.bind(null, eventSlug, submission.id);
 

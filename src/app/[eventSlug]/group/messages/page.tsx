@@ -47,8 +47,10 @@ export default async function GroupMessagesPage({
   }
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
-  await markCommentsRead(submission.id, "group");
-  const comments = await listComments(submission.id);
+  const [, comments] = await Promise.all([
+    markCommentsRead(submission.id, "group"),
+    listComments(submission.id),
+  ]);
 
   return (
     <div className="space-y-5">
