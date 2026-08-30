@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { supabaseAdmin } from "@/lib/supabase";
 import type { CommentSender } from "@/lib/database.types";
 
@@ -14,7 +15,10 @@ export interface InboxThread {
 }
 
 // 全団体の個別コメントを横断的に新着順で並べる（実行委員会が直前の問い合わせを取りこぼさないための受信箱）
-export async function listInboxThreads(eventId: string): Promise<InboxThread[]> {
+// cache() で同一リクエスト内の重複呼び出し（layout + hub ページなど）を1回のクエリに統合する
+export const listInboxThreads = cache(async function listInboxThreads(
+  eventId: string
+): Promise<InboxThread[]> {
   const db = supabaseAdmin();
 
   const { data: submissions, error: subErr } = await db
@@ -66,7 +70,7 @@ export async function listInboxThreads(eventId: string): Promise<InboxThread[]> 
 
   threads.sort((a, b) => (a.lastMessageAt < b.lastMessageAt ? 1 : -1));
   return threads;
-}
+});
 
 export async function listComments(submissionId: string) {
   const { data, error } = await supabaseAdmin()
@@ -117,3 +121,13 @@ export async function listUnreadSubmissionIds(
   if (error) throw error;
   return new Set((data ?? []).map((row) => row.submission_id));
 }
+
+// 単一 submission の未読有無。cache() は配列引数だと参照が変わるたびキャッシュミスするため、
+// layout + hub ページなど同一リクエスト内で重複しやすいこの1件版を別途用意する。
+export const hasUnreadForSubmission = cache(async function hasUnreadForSubmission(
+  submissionId: string,
+  viewerType: CommentSender
+): Promise<boolean> {
+  const ids = await listUnreadSubmissionIds([submissionId], viewerType);
+  return ids.has(submissionId);
+});

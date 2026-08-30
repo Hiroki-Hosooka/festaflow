@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireGroupSession } from "@/lib/session";
 import { getOrCreateSubmission, getSubmissionDetail, sumItems } from "@/lib/data/submissions";
 import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
-import { listUnreadSubmissionIds } from "@/lib/data/comments";
+import { hasUnreadForSubmission } from "@/lib/data/comments";
 import { listAttachments } from "@/lib/data/attachments";
 import { daysUntil, formatDateTime, yen } from "@/lib/format";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -18,10 +18,10 @@ export default async function GroupHubPage({
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
 
-  const [detail, schedules, unreadIds, attachments] = await Promise.all([
+  const [detail, schedules, hasUnread, attachments] = await Promise.all([
     getSubmissionDetail(submission.id),
     listSubmissionSchedules(auth.eventId),
-    listUnreadSubmissionIds([submission.id], "group"),
+    hasUnreadForSubmission(submission.id, "group"),
     listAttachments(submission.id),
   ]);
   if (!detail || !detail.group) {
@@ -31,7 +31,6 @@ export default async function GroupHubPage({
   const plannedTotal = sumItems(
     detail.items.map((i) => ({ quantity: i.quantity, unit_price: i.unit_price }))
   );
-  const hasUnread = unreadIds.has(submission.id);
   const needsFixCount = attachments.filter((a) => a.review_status === "needs_fix").length;
   const upcoming = [...schedules].sort(
     (a, b) => daysUntil(a.deadline) - daysUntil(b.deadline)

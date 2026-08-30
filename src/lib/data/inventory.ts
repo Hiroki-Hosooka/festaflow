@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { supabaseAdmin } from "@/lib/supabase";
 import type { StockStatus } from "@/lib/database.types";
 
@@ -72,8 +73,11 @@ export interface InventoryUsage {
 /**
  * イベント内の全借用希望を在庫物品ごとに集計する。
  * バッティング（同一物品への複数団体からの希望競合）を管理側が見て裁定するための材料。
+ * cache() で同一リクエスト内の重複呼び出し（layout + hub ページなど）を1回のクエリに統合する。
  */
-export async function getInventoryUsage(eventId: string): Promise<Map<string, InventoryUsage>> {
+export const getInventoryUsage = cache(async function getInventoryUsage(
+  eventId: string
+): Promise<Map<string, InventoryUsage>> {
   const db = supabaseAdmin();
 
   // 3クエリとも event_id のみに依存し互いに独立しているため並列実行する
@@ -149,7 +153,7 @@ export async function getInventoryUsage(eventId: string): Promise<Map<string, In
   }
 
   return usage;
-}
+});
 
 export async function setStockDecision(
   submissionItemId: string,

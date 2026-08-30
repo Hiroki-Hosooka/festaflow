@@ -1,7 +1,7 @@
 import { requireGroupSession } from "@/lib/session";
 import { logoutAction } from "../login/actions";
 import { getOrCreateSubmission } from "@/lib/data/submissions";
-import { listUnreadSubmissionIds } from "@/lib/data/comments";
+import { hasUnreadForSubmission } from "@/lib/data/comments";
 import { NavBar, type NavLinkItem } from "@/components/NavBar";
 import { Icon } from "@/components/Icons";
 import { BrandMark } from "@/components/BrandMark";
@@ -18,8 +18,7 @@ export default async function GroupLayout({
   const boundLogout = logoutAction.bind(null, eventSlug);
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
-  const unreadIds = await listUnreadSubmissionIds([submission.id], "group");
-  const hasUnread = unreadIds.has(submission.id);
+  const hasUnread = await hasUnreadForSubmission(submission.id, "group");
 
   const links: NavLinkItem[] = [
     { href: `/${eventSlug}/group/submission`, label: "企画", icon: <Icon name="clipboard" /> },
