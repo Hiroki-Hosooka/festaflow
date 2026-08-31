@@ -71,6 +71,25 @@ export async function deleteShiftMember(memberId: string) {
   if (error) throw error;
 }
 
+export async function getOrCreateShiftMember(submissionId: string, name: string): Promise<string> {
+  const { data: existing, error: selErr } = await supabaseAdmin()
+    .from("shift_members")
+    .select("id")
+    .eq("submission_id", submissionId)
+    .eq("name", name)
+    .maybeSingle();
+  if (selErr) throw selErr;
+  if (existing) return existing.id;
+
+  const { data: created, error: insErr } = await supabaseAdmin()
+    .from("shift_members")
+    .insert({ submission_id: submissionId, name })
+    .select("id")
+    .single();
+  if (insErr) throw insErr;
+  return created.id;
+}
+
 export async function listShiftPreferences(submissionId: string) {
   const { data, error } = await supabaseAdmin()
     .from("shift_preferences")

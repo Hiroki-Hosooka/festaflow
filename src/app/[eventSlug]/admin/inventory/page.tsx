@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdminSession } from "@/lib/session";
 import { listInventoryItems, getInventoryUsage } from "@/lib/data/inventory";
 import { NewInventoryItemForm } from "./NewInventoryItemForm";
+import { ImportInventoryCsvForm } from "./ImportInventoryCsvForm";
 import { DeleteInventoryItemButton } from "./DeleteInventoryItemButton";
 import { updateInventoryItemAction } from "./actions";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -34,6 +35,22 @@ export default async function AdminInventoryPage({
       <div className="card p-6 space-y-3">
         <div className="card-heading">物品を追加</div>
         <NewInventoryItemForm eventSlug={eventSlug} />
+      </div>
+
+      <div className="card p-6 space-y-3">
+        <div className="card-heading">スプレッドシート連携（CSV）</div>
+        <p className="text-[11.5px] text-[var(--muted)] leading-relaxed">
+          在庫一覧をCSVでダウンロードしてGoogleスプレッドシート等に貼り付けて編集し、編集後のCSVをここからアップロードするとアプリ側の在庫数に反映されます。物品名が一致する行は更新、一致しない行は新規追加されます（既存の未掲載物品は削除されません）。
+        </p>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <a
+            href={`/${eventSlug}/admin/inventory/export`}
+            className="h-9 px-4 rounded-md text-[12.5px] font-semibold border border-[var(--border-strong)] inline-flex items-center"
+          >
+            CSVをダウンロード
+          </a>
+        </div>
+        <ImportInventoryCsvForm eventSlug={eventSlug} />
       </div>
 
       <div className="card overflow-hidden">

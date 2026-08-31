@@ -51,6 +51,28 @@ export async function deleteInventoryItem(inventoryItemId: string) {
   if (error) throw error;
 }
 
+export async function upsertInventoryItemByName(
+  eventId: string,
+  name: string,
+  totalQuantity: number,
+  notes: string
+): Promise<"created" | "updated"> {
+  const { data: existing, error: selErr } = await supabaseAdmin()
+    .from("inventory_items")
+    .select("id")
+    .eq("event_id", eventId)
+    .eq("name", name)
+    .maybeSingle();
+  if (selErr) throw selErr;
+
+  if (existing) {
+    await updateInventoryItem(existing.id, { totalQuantity, notes });
+    return "updated";
+  }
+  await createInventoryItem({ eventId, name, totalQuantity, notes });
+  return "created";
+}
+
 export interface BorrowRequestRow {
   submissionItemId: string;
   submissionId: string;

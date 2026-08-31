@@ -16,7 +16,9 @@ import {
   setAssignment,
   removeAssignment,
   generateSlots,
+  getOrCreateShiftMember,
 } from "@/lib/data/shifts";
+import { parseCsv } from "@/lib/csv";
 
 async function requireLeader(eventSlug: string) {
   const auth = await requireGroupSession(eventSlug);
@@ -214,4 +216,63 @@ export async function removeAssignmentAction(
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
   await removeAssignment(submission.id, slotLabel, memberId);
   revalidatePath(`/${eventSlug}/group/shifts`);
+}
+
+export interface ShiftCsvFormState {
+  error?: string;
+  success?: string;
+}
+
+export async function importShiftCsvAction(
+  eventSlug: string,
+  _prevState: ShiftCsvFormState,
+  formData: FormData
+): Promise<ShiftCsvFormState> {
+  const auth = await requireLeader(eventSlug);
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "CSVファイルを選択してください。" };
+  }
+
+  const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
+  const config = await getShiftConfig(submission.id);
+  if (!config) {
+    return { error: "先にシフト設定（活動時間・コマ時間）を保存してください。" };
+  }
+  const validSlots = new Set(generateSlots(config.start_time, config.end_time, config.slot_minutes));
+
+  const rows = parseCsv(await file.text());
+  if (rows.length === 0) {
+    return { error: "CSVにデータがありません。" };
+  }
+  const looksLikeHeader = /スロット|slot/i.test(rows[0][0] ?? "");
+  const records = looksLikeHeader ? rows.slice(1) : rows;
+
+  const assignments: { slotLabel: string; memberId: string }[] = [];
+  let invalidSlots = 0;
+  for (const r of records) {
+    const slotLabel = (r[0] ?? "").trim();
+    if (!slotLabel) continue;
+    if (!validSlots.has(slotLabel)) {
+      invalidSlots++;
+      continue;
+    }
+    const names = r
+      .slice(1)
+      .map((n) => n.trim())
+      .filter(Boolean);
+    for (const name of names) {
+      const memberId = await getOrCreateShiftMember(submission.id, name);
+      assignments.push({ slotLabel, memberId });
+    }
+  }
+
+  await replaceAssignments(submission.id, assignments);
+  revalidatePath(`/${eventSlug}/group/shifts`);
+  return {
+    success: `当番表をCSVから取り込みました（${assignments.length}件の割当）。${
+      invalidSlots > 0 ? `現在のシフト設定と一致しない${invalidSlots}行は無視しました。` : ""
+    }`,
+  };
 }

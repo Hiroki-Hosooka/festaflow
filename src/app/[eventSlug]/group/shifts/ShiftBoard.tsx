@@ -11,10 +11,12 @@ import {
   autoAssignAction,
   addAssignmentAction,
   removeAssignmentAction,
+  importShiftCsvAction,
   type ConfigFormState,
   type PreferenceFormState,
   type BindMemberFormState,
   type AutoAssignState,
+  type ShiftCsvFormState,
 } from "./actions";
 import type { Database } from "@/lib/database.types";
 import { EmptyState } from "@/components/EmptyState";
@@ -28,6 +30,7 @@ const configInitialState: ConfigFormState = {};
 const prefInitialState: PreferenceFormState = {};
 const bindInitialState: BindMemberFormState = {};
 const autoAssignInitialState: AutoAssignState = {};
+const csvInitialState: ShiftCsvFormState = {};
 
 export function ShiftBoard({
   eventSlug,
@@ -56,6 +59,7 @@ export function ShiftBoard({
         <>
           <ConfigForm eventSlug={eventSlug} config={config} />
           <MemberRoster eventSlug={eventSlug} members={members} />
+          {slots.length > 0 && <ShiftCsvControls eventSlug={eventSlug} />}
         </>
       )}
 
@@ -223,6 +227,43 @@ function MemberRoster({
           追加
         </button>
       </form>
+    </div>
+  );
+}
+
+function ShiftCsvControls({ eventSlug }: { eventSlug: string }) {
+  const bound = importShiftCsvAction.bind(null, eventSlug);
+  const [state, formAction, pending] = useActionState(bound, csvInitialState);
+
+  return (
+    <div className="card p-5 space-y-2.5 print:hidden">
+      <h2 className="card-heading">スプレッドシート連携（CSV）</h2>
+      <p className="text-[11.5px] text-[var(--muted)] leading-relaxed">
+        当番表をCSVでダウンロードしてGoogleスプレッドシート等で編集し、編集後のCSVをここからアップロードすると当番表に反映されます（名簿にない名前は自動で追加されます）。
+      </p>
+      <div className="flex flex-wrap items-center gap-2.5">
+        <a
+          href={`/${eventSlug}/group/shifts/export`}
+          className="h-9 px-4 rounded-md text-[12.5px] font-semibold border border-[var(--border-strong)] inline-flex items-center"
+        >
+          CSVをダウンロード
+        </a>
+      </div>
+      <form action={formAction} className="flex flex-wrap items-center gap-2.5">
+        <span className="file-input-wrapper">
+          <input type="file" name="file" accept=".csv,text/csv" required aria-label="当番表CSVファイルを選択" />
+        </span>
+        <button
+          disabled={pending}
+          className="h-9 px-4 rounded-md text-[12.5px] font-semibold btn-group disabled:opacity-60"
+        >
+          {pending ? "取り込み中..." : "CSVから取り込み"}
+        </button>
+      </form>
+      {state.error && <p className="text-[12.5px] text-[var(--danger-text)]">{state.error}</p>}
+      {state.success && (
+        <p className="text-[12.5px] text-[var(--status-approved-text)]">{state.success}</p>
+      )}
     </div>
   );
 }
