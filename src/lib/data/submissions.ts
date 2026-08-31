@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { supabaseAdmin } from "@/lib/supabase";
 import { listUnreadSubmissionIds } from "@/lib/data/comments";
-import type { Affiliation, Area, ItemKind, SubmissionStatus } from "@/lib/database.types";
+import type { Affiliation, Area, Genre, ItemKind, SubmissionStatus } from "@/lib/database.types";
 
 export interface SubmissionListRow {
   groupId: string;
@@ -15,6 +15,7 @@ export interface SubmissionListRow {
   hasUnreadFromGroup: boolean;
   affiliation: Affiliation | null;
   area: Area | null;
+  genre: Genre | null;
   hasShiftConfig: boolean;
 }
 
@@ -81,6 +82,7 @@ export async function listSubmissionsForAdmin(
       hasUnreadFromGroup: submission ? unreadIds.has(submission.id) : false,
       affiliation: submission?.affiliation ?? null,
       area: submission?.area ?? null,
+      genre: submission?.genre ?? null,
       hasShiftConfig: submission ? shiftConfiguredIds.has(submission.id) : false,
     };
   });
@@ -223,11 +225,14 @@ export async function updateSubmissionCore(
     location: string;
     affiliation: Affiliation | null;
     area: Area | null;
+    genre: Genre | null;
+    teacherCheck: boolean;
   }
 ) {
+  const { teacherCheck, ...rest } = core;
   const { error } = await supabaseAdmin()
     .from("submissions")
-    .update({ ...core, updated_at: new Date().toISOString() })
+    .update({ ...rest, teacher_check: teacherCheck, updated_at: new Date().toISOString() })
     .eq("id", submissionId);
   if (error) throw error;
 }

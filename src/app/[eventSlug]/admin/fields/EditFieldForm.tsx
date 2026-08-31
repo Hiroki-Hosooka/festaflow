@@ -11,12 +11,15 @@ const initialState: FieldFormState = {};
 export function EditFieldForm({
   eventSlug,
   field,
+  genreOptions,
 }: {
   eventSlug: string;
   field: FormFieldRow;
+  genreOptions: string[];
 }) {
   const boundAction = updateFieldAction.bind(null, eventSlug, field.id);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
+  const currentGenres = field.applicable_genres ?? [];
 
   return (
     <form action={formAction} className="flex flex-wrap items-center gap-2.5">
@@ -29,6 +32,24 @@ export function EditFieldForm({
       <label className="flex items-center gap-1.5 text-[12.5px] text-[var(--muted)] whitespace-nowrap">
         <input type="checkbox" name="required" defaultChecked={field.required} /> 必須
       </label>
+      {genreOptions.length > 0 && (
+        <div className="w-full flex flex-wrap gap-x-3 gap-y-1">
+          {genreOptions.map((g) => (
+            <label
+              key={g}
+              className="flex items-center gap-1.5 text-[12px] text-[var(--muted)] whitespace-nowrap"
+            >
+              <input
+                type="checkbox"
+                name="applicable_genres"
+                value={g}
+                defaultChecked={currentGenres.includes(g)}
+              />{" "}
+              {g}
+            </label>
+          ))}
+        </div>
+      )}
       <button
         disabled={pending}
         className="h-9 px-4 rounded-lg text-[12.5px] font-semibold btn-admin whitespace-nowrap disabled:opacity-60"

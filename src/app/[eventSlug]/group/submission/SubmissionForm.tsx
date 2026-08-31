@@ -5,11 +5,16 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { BudgetBar } from "@/components/BudgetBar";
 import { saveSubmissionAction, type SubmitFormState } from "./actions";
 import { yen, daysUntil, formatRelativeTime, formatDateTime } from "@/lib/format";
-import type { Affiliation, Area, Database, ItemKind, StockStatus } from "@/lib/database.types";
+import type { Affiliation, Area, Database, Genre, ItemKind, StockStatus } from "@/lib/database.types";
 
 function withCurrentValue(options: string[], current: string): string[] {
   if (!current || options.includes(current)) return options;
   return [...options, current];
+}
+
+function isFieldApplicable(field: { applicable_genres: string[] | null }, genre: string): boolean {
+  if (!field.applicable_genres || field.applicable_genres.length === 0) return true;
+  return !!genre && field.applicable_genres.includes(genre);
 }
 
 type SubmissionRow = Database["public"]["Tables"]["submissions"]["Row"];
@@ -56,6 +61,7 @@ export function SubmissionForm({
   schedules,
   affiliationOptions,
   areaOptions,
+  genreOptions,
   role,
   adminLabel,
 }: {
@@ -71,6 +77,7 @@ export function SubmissionForm({
   schedules: ScheduleRow[];
   affiliationOptions: string[];
   areaOptions: string[];
+  genreOptions: string[];
   role: "leader" | "member";
   adminLabel: string;
 }) {
@@ -90,6 +97,8 @@ export function SubmissionForm({
     submission.affiliation ?? ""
   );
   const [area, setArea] = useState<Area | "">(submission.area ?? "");
+  const [genre, setGenre] = useState<Genre | "">(submission.genre ?? "");
+  const [teacherCheck, setTeacherCheck] = useState(submission.teacher_check);
   const [itemRows, setItemRows] = useState<EditableItem[]>(
     items.length > 0
       ? items.map((i) => ({
@@ -289,6 +298,27 @@ export function SubmissionForm({
           />
         </div>
 
+        <div>
+          <label className="block text-xs font-semibold mb-1.5">企画ジャンル</label>
+          <select
+            name="genre"
+            value={genre}
+            onChange={(e) => setGenre(e.target.value as Genre | "")}
+            disabled={!editable}
+            className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+          >
+            <option value="">未選択</option>
+            {withCurrentValue(genreOptions, submission.genre ?? "").map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+          <p className="text-[11px] text-[var(--muted-2)] mt-1">
+            ジャンルによって、以下に表示される追加項目が変わることがあります。
+          </p>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold mb-1.5">所属区分</label>
@@ -471,7 +501,7 @@ export function SubmissionForm({
           )}
         </div>
 
-        {fields.map((field) => (
+        {fields.filter((field) => isFieldApplicable(field, genre)).map((field) => (
           <div key={field.id}>
             <label className="block text-xs font-semibold mb-1.5">
               {field.label}
@@ -511,6 +541,24 @@ export function SubmissionForm({
             className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
           />
         </div>
+
+        <label className="flex items-start gap-2 text-[12.5px] leading-relaxed">
+          <input
+            type="checkbox"
+            name="teacher_check"
+            checked={teacherCheck}
+            onChange={(e) => setTeacherCheck(e.target.checked)}
+            disabled={!editable}
+            className="mt-0.5"
+          />
+          <span>
+            担任・部活動顧問の確認を受けました
+            <span className="text-[var(--danger-text)]"> *</span>
+            <span className="block text-[11px] text-[var(--muted-2)]">
+              提出するにはチェックが必要です（下書き保存には不要です）。
+            </span>
+          </span>
+        </label>
 
         {state.error && (
           <p className="text-[13px] text-[var(--danger-text)] font-medium">{state.error}</p>

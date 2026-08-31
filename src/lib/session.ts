@@ -14,6 +14,7 @@ export type SessionAuth =
       groupId: string;
       groupName: string;
       role: GroupRole;
+      shiftMemberId?: string;
     };
 
 interface SessionShape {

@@ -6,7 +6,7 @@ import { StatusBadge, type DisplayStatus } from "@/components/StatusBadge";
 import { Icon } from "@/components/Icons";
 import { yen } from "@/lib/format";
 import type { SubmissionListRow } from "@/lib/data/submissions";
-import type { Affiliation, Area } from "@/lib/database.types";
+import type { Affiliation, Area, Genre } from "@/lib/database.types";
 import { decideSubmissionAction, type DecideFormState } from "./[id]/actions";
 import { yen as formatYen } from "@/lib/format";
 
@@ -17,15 +17,18 @@ export function SubmissionsList({
   rows,
   affiliationOptions,
   areaOptions,
+  genreOptions,
 }: {
   eventSlug: string;
   rows: SubmissionListRow[];
   affiliationOptions: Affiliation[];
   areaOptions: Area[];
+  genreOptions: Genre[];
 }) {
   const [query, setQuery] = useState("");
   const [affiliationFilter, setAffiliationFilter] = useState<Affiliation | "all">("all");
   const [areaFilter, setAreaFilter] = useState<Area | "all">("all");
+  const [genreFilter, setGenreFilter] = useState<Genre | "all">("all");
 
   const filtered = useMemo(() => {
     const q = query.trim();
@@ -33,12 +36,17 @@ export function SubmissionsList({
       if (q && !r.groupName.includes(q) && !r.name.includes(q)) return false;
       if (affiliationFilter !== "all" && r.affiliation !== affiliationFilter) return false;
       if (areaFilter !== "all" && r.area !== areaFilter) return false;
+      if (genreFilter !== "all" && r.genre !== genreFilter) return false;
       return true;
     });
-  }, [rows, query, affiliationFilter, areaFilter]);
+  }, [rows, query, affiliationFilter, areaFilter, genreFilter]);
 
   const filteredBudgetTotal = filtered.reduce((sum, r) => sum + r.plannedTotal, 0);
-  const isFiltering = affiliationFilter !== "all" || areaFilter !== "all" || query.trim() !== "";
+  const isFiltering =
+    affiliationFilter !== "all" ||
+    areaFilter !== "all" ||
+    genreFilter !== "all" ||
+    query.trim() !== "";
 
   return (
     <div className="space-y-3">
@@ -78,6 +86,23 @@ export function SubmissionsList({
             {a}
           </FilterChip>
         ))}
+        {genreOptions.length > 0 && (
+          <>
+            <span className="text-[var(--muted)] font-semibold ml-2">ジャンル:</span>
+            <FilterChip active={genreFilter === "all"} onClick={() => setGenreFilter("all")}>
+              すべて
+            </FilterChip>
+            {genreOptions.map((g) => (
+              <FilterChip
+                key={g}
+                active={genreFilter === g}
+                onClick={() => setGenreFilter(genreFilter === g ? "all" : g)}
+              >
+                {g}
+              </FilterChip>
+            ))}
+          </>
+        )}
       </div>
 
       {isFiltering && (
@@ -146,7 +171,7 @@ function FilterChip({
 }
 
 function affiliationAreaLabel(row: SubmissionListRow) {
-  return [row.affiliation, row.area].filter(Boolean).join(" / ");
+  return [row.affiliation, row.area, row.genre].filter(Boolean).join(" / ");
 }
 
 function actionHref(eventSlug: string, row: SubmissionListRow) {

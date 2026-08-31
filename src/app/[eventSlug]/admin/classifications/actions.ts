@@ -10,7 +10,7 @@ import {
 import type { ClassificationCategory } from "@/lib/database.types";
 
 function parseCategory(raw: FormDataEntryValue | null): ClassificationCategory | null {
-  return raw === "affiliation" || raw === "area" ? raw : null;
+  return raw === "affiliation" || raw === "area" || raw === "genre" ? raw : null;
 }
 
 function revalidateAll(eventSlug: string) {

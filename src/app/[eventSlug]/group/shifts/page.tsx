@@ -44,6 +44,7 @@ export default async function GroupShiftsPage({
         assignments={assignments}
         slots={slots}
         canEdit={auth.role === "leader"}
+        boundMemberId={auth.shiftMemberId ?? null}
       />
     </div>
   );

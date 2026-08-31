@@ -3,7 +3,7 @@ import { requireGroupSession } from "@/lib/session";
 import { getEventBySlug } from "@/lib/data/events";
 import { getOrCreateSubmission } from "@/lib/data/submissions";
 import { listComments, markCommentsRead } from "@/lib/data/comments";
-import { listBroadcasts } from "@/lib/data/broadcasts";
+import { listBroadcastsForGroup } from "@/lib/data/broadcasts";
 import { formatDateTime, formatTime } from "@/lib/format";
 import { sendGroupCommentAction } from "./actions";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -26,7 +26,9 @@ export default async function GroupMessagesPage({
   const boundSend = sendGroupCommentAction.bind(null, eventSlug);
 
   if (tab === "broadcast") {
-    const broadcasts = await listBroadcasts(auth.eventId);
+    const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
+    const isUnsubmitted = submission.status === "draft";
+    const broadcasts = await listBroadcastsForGroup(auth.eventId, auth.groupId, isUnsubmitted);
     return (
       <div className="space-y-5">
         <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/group` }, { label: "連絡" }]} />

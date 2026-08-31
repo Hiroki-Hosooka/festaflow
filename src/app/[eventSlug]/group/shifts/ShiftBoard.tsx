@@ -6,11 +6,14 @@ import {
   addShiftMemberAction,
   deleteShiftMemberAction,
   submitPreferencesAction,
+  bindShiftMemberAction,
+  unbindShiftMemberAction,
   autoAssignAction,
   addAssignmentAction,
   removeAssignmentAction,
   type ConfigFormState,
   type PreferenceFormState,
+  type BindMemberFormState,
   type AutoAssignState,
 } from "./actions";
 import type { Database } from "@/lib/database.types";
@@ -23,6 +26,7 @@ type ShiftAssignmentRow = Database["public"]["Tables"]["shift_assignments"]["Row
 
 const configInitialState: ConfigFormState = {};
 const prefInitialState: PreferenceFormState = {};
+const bindInitialState: BindMemberFormState = {};
 const autoAssignInitialState: AutoAssignState = {};
 
 export function ShiftBoard({
@@ -33,6 +37,7 @@ export function ShiftBoard({
   assignments,
   slots,
   canEdit,
+  boundMemberId,
 }: {
   eventSlug: string;
   config: ShiftConfigRow | null;
@@ -41,6 +46,7 @@ export function ShiftBoard({
   assignments: ShiftAssignmentRow[];
   slots: string[];
   canEdit: boolean;
+  boundMemberId: string | null;
 }) {
   const memberById = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
 
@@ -58,6 +64,7 @@ export function ShiftBoard({
         members={members}
         preferences={preferences}
         slots={slots}
+        boundMemberId={boundMemberId}
       />
 
       {slots.length > 0 ? (
@@ -225,35 +232,53 @@ function PreferenceForm({
   members,
   preferences,
   slots,
+  boundMemberId,
 }: {
   eventSlug: string;
   members: ShiftMemberRow[];
   preferences: ShiftPreferenceRow[];
   slots: string[];
+  boundMemberId: string | null;
 }) {
-  const bound = submitPreferencesAction.bind(null, eventSlug);
-  const [state, formAction, pending] = useActionState(bound, prefInitialState);
-  const [selectedMember, setSelectedMember] = useState("");
-
-  const existing = useMemo(
-    () => preferences.filter((p) => p.member_id === selectedMember),
-    [preferences, selectedMember]
-  );
-  const isNg = (slot: string) => existing.some((p) => p.slot_label === slot && p.kind === "ng");
-  const isWant = (slot: string) =>
-    existing.some((p) => p.slot_label === slot && p.kind === "want");
+  const boundMember =
+    boundMemberId != null ? members.find((m) => m.id === boundMemberId) ?? null : null;
 
   if (slots.length === 0) {
     return null;
   }
 
+  if (!boundMember) {
+    return <BindMemberForm eventSlug={eventSlug} members={members} />;
+  }
+
+  return (
+    <PreferenceChecklist
+      eventSlug={eventSlug}
+      member={boundMember}
+      preferences={preferences}
+      slots={slots}
+    />
+  );
+}
+
+function BindMemberForm({
+  eventSlug,
+  members,
+}: {
+  eventSlug: string;
+  members: ShiftMemberRow[];
+}) {
+  const bound = bindShiftMemberAction.bind(null, eventSlug);
+  const [state, formAction, pending] = useActionState(bound, bindInitialState);
+  const [selectedMember, setSelectedMember] = useState("");
+
   return (
     <div className="card p-5 space-y-3 print:hidden">
       <h2 className="text-sm font-bold">シフト希望の提出</h2>
       <p className="text-[11.5px] text-[var(--muted)]">
-        自分の名前を選び、都合の悪いコマ（NG）・特に活動したいコマ（希望）にチェックして送信してください。
+        まず名簿から自分の名前を選んでください。一度選ぶと、次回からこの端末では自動で「あなた」として希望を送信できます。
       </p>
-      <form action={formAction} className="space-y-3">
+      <form action={formAction} className="flex items-center gap-1.5">
         <select
           name="member_id"
           value={selectedMember}
@@ -268,7 +293,56 @@ function PreferenceForm({
             </option>
           ))}
         </select>
+        <button
+          disabled={pending || !selectedMember}
+          className="h-9 px-4 rounded-md text-[12.5px] font-semibold btn-group disabled:opacity-60"
+        >
+          {pending ? "設定中..." : "この名前で始める"}
+        </button>
+      </form>
+      {state.error && <p className="text-[12.5px] text-[var(--danger-text)]">{state.error}</p>}
+    </div>
+  );
+}
 
+function PreferenceChecklist({
+  eventSlug,
+  member,
+  preferences,
+  slots,
+}: {
+  eventSlug: string;
+  member: ShiftMemberRow;
+  preferences: ShiftPreferenceRow[];
+  slots: string[];
+}) {
+  const bound = submitPreferencesAction.bind(null, eventSlug);
+  const [state, formAction, pending] = useActionState(bound, prefInitialState);
+  const boundUnbind = unbindShiftMemberAction.bind(null, eventSlug);
+
+  const existing = useMemo(
+    () => preferences.filter((p) => p.member_id === member.id),
+    [preferences, member.id]
+  );
+  const isNg = (slot: string) => existing.some((p) => p.slot_label === slot && p.kind === "ng");
+  const isWant = (slot: string) =>
+    existing.some((p) => p.slot_label === slot && p.kind === "want");
+
+  return (
+    <div className="card p-5 space-y-3 print:hidden">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-sm font-bold">シフト希望の提出</h2>
+        <form action={boundUnbind}>
+          <button className="text-[11.5px] text-[var(--muted)] underline">
+            あなた: {member.name}（本人でない場合はこちら）
+          </button>
+        </form>
+      </div>
+      <p className="text-[11.5px] text-[var(--muted)]">
+        都合の悪いコマ（NG）・特に活動したいコマ（希望）にチェックして送信してください。
+      </p>
+      <form action={formAction} className="space-y-3">
+        <input type="hidden" name="member_id" value={member.id} />
         <div className="overflow-x-auto">
           <table className="text-[12px] border-collapse">
             <thead>
@@ -283,20 +357,10 @@ function PreferenceForm({
                 <tr key={slot} className="border-t border-[var(--border)]">
                   <td className="px-2 py-1.5 whitespace-nowrap">{slot}</td>
                   <td className="px-2 py-1.5 text-center">
-                    <input
-                      type="checkbox"
-                      name={`ng:${slot}`}
-                      defaultChecked={isNg(slot)}
-                      key={`ng-${selectedMember}-${slot}`}
-                    />
+                    <input type="checkbox" name={`ng:${slot}`} defaultChecked={isNg(slot)} />
                   </td>
                   <td className="px-2 py-1.5 text-center">
-                    <input
-                      type="checkbox"
-                      name={`want:${slot}`}
-                      defaultChecked={isWant(slot)}
-                      key={`want-${selectedMember}-${slot}`}
-                    />
+                    <input type="checkbox" name={`want:${slot}`} defaultChecked={isWant(slot)} />
                   </td>
                 </tr>
               ))}
@@ -305,7 +369,7 @@ function PreferenceForm({
         </div>
 
         <button
-          disabled={pending || !selectedMember}
+          disabled={pending}
           className="h-9 px-4 rounded-md text-[12.5px] font-semibold btn-group disabled:opacity-60"
         >
           {pending ? "送信中..." : "希望を送信"}

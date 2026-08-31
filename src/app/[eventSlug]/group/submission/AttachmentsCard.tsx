@@ -4,13 +4,16 @@ import { useActionState } from "react";
 import {
   uploadAttachmentAction,
   deleteAttachmentAction,
+  addGroupAttachmentCommentAction,
   type AttachmentFormState,
 } from "./actions";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatTime } from "@/lib/format";
 import type { Database } from "@/lib/database.types";
 import { EmptyState } from "@/components/EmptyState";
 
 type AttachmentRow = Database["public"]["Tables"]["submission_attachments"]["Row"];
+type AttachmentCommentRow =
+  Database["public"]["Tables"]["submission_attachment_comments"]["Row"];
 
 const REVIEW_LABELS: Record<AttachmentRow["review_status"], string> = {
   pending: "審査待ち",
@@ -29,11 +32,13 @@ const initialState: AttachmentFormState = {};
 export function AttachmentsCard({
   eventSlug,
   attachments,
+  commentsByAttachment,
   canEdit,
   adminLabel,
 }: {
   eventSlug: string;
   attachments: AttachmentRow[];
+  commentsByAttachment: Record<string, AttachmentCommentRow[]>;
   canEdit: boolean;
   adminLabel: string;
 }) {
@@ -72,11 +77,13 @@ export function AttachmentsCard({
             <p className="text-[10.5px] text-[var(--muted-2)]">
               {formatDateTime(a.uploaded_at)}
             </p>
-            {a.review_comment && (
-              <p className="text-[12px] text-[var(--foreground)] leading-relaxed">
-                {a.review_comment}
-              </p>
-            )}
+            <AttachmentThread
+              eventSlug={eventSlug}
+              attachmentId={a.id}
+              comments={commentsByAttachment[a.id] ?? []}
+              adminLabel={adminLabel}
+              canReply={canEdit}
+            />
           </div>
         ))}
       </div>
@@ -100,6 +107,61 @@ export function AttachmentsCard({
               {state.success}
             </p>
           )}
+        </form>
+      )}
+    </div>
+  );
+}
+
+function AttachmentThread({
+  eventSlug,
+  attachmentId,
+  comments,
+  adminLabel,
+  canReply,
+}: {
+  eventSlug: string;
+  attachmentId: string;
+  comments: AttachmentCommentRow[];
+  adminLabel: string;
+  canReply: boolean;
+}) {
+  const boundReply = addGroupAttachmentCommentAction.bind(null, eventSlug, attachmentId);
+
+  if (comments.length === 0 && !canReply) return null;
+
+  return (
+    <div className="space-y-1.5 pt-1 border-t border-[var(--border)]">
+      {comments.map((c) => (
+        <div
+          key={c.id}
+          className={`text-[12px] leading-relaxed ${c.sender_type === "group" ? "text-right" : ""}`}
+        >
+          <span
+            className={`inline-block rounded-lg px-2.5 py-1.5 max-w-[85%] ${
+              c.sender_type === "admin"
+                ? "bg-[var(--background)]"
+                : "bg-[var(--accent-group-soft-bg)]"
+            }`}
+          >
+            {c.body}
+          </span>
+          <span className="block text-[10px] text-[var(--muted-2)] mt-0.5">
+            {c.sender_type === "admin" ? adminLabel : "自分"} · {formatTime(c.created_at)}
+          </span>
+        </div>
+      ))}
+      {canReply && (
+        <form action={boundReply} className="flex items-center gap-1.5 pt-1">
+          <input
+            name="body"
+            required
+            placeholder="コメントを送る..."
+            className="h-8 flex-1 border border-[var(--border)] rounded-md px-2 text-[12px]"
+          />
+          <button className="h-8 px-3 rounded-md text-[11.5px] font-semibold btn-group">
+            送信
+          </button>
         </form>
       )}
     </div>

@@ -6,14 +6,15 @@ export type SubmissionStatus =
   | "returned";
 
 export type FormFieldType = "text" | "textarea" | "number";
-export type BroadcastTarget = "all" | "unsubmitted";
+export type BroadcastTarget = "all" | "unsubmitted" | "custom";
 export type CommentSender = "admin" | "group";
 export type ItemKind = "purchase" | "borrow";
 export type StockStatus = "pending" | "secured" | "denied";
 // 所属区分・エリアの選択肢は classification_options テーブルで管理者が自由に編集できる
 export type Affiliation = string;
 export type Area = string;
-export type ClassificationCategory = "affiliation" | "area";
+export type Genre = string;
+export type ClassificationCategory = "affiliation" | "area" | "genre";
 export type ReviewStatus = "pending" | "approved" | "needs_fix";
 export type TodoStatus = "not_started" | "in_progress" | "done";
 export type PreferenceKind = "ng" | "want";
@@ -67,6 +68,7 @@ export interface Database {
           field_type: FormFieldType;
           required: boolean;
           sort_order: number;
+          applicable_genres: string[] | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["form_fields"]["Row"]> & {
@@ -124,6 +126,8 @@ export interface Database {
           admin_comment: string;
           affiliation: Affiliation | null;
           area: Area | null;
+          genre: Genre | null;
+          teacher_check: boolean;
           submitted_at: string | null;
           decided_at: string | null;
           created_at: string;
@@ -192,6 +196,7 @@ export interface Database {
           id: string;
           event_id: string;
           target_type: BroadcastTarget;
+          target_group_ids: string[] | null;
           body: string;
           created_at: string;
         };
@@ -236,6 +241,22 @@ export interface Database {
           storage_path: string;
         };
         Update: Partial<Database["public"]["Tables"]["submission_attachments"]["Row"]>;
+        Relationships: [];
+      };
+      submission_attachment_comments: {
+        Row: {
+          id: string;
+          attachment_id: string;
+          sender_type: CommentSender;
+          body: string;
+          created_at: string;
+        };
+        Insert: Partial<
+          Database["public"]["Tables"]["submission_attachment_comments"]["Row"]
+        > & { attachment_id: string; sender_type: CommentSender; body: string };
+        Update: Partial<
+          Database["public"]["Tables"]["submission_attachment_comments"]["Row"]
+        >;
         Relationships: [];
       };
       event_documents: {

@@ -3,7 +3,7 @@ import { requireAdminSession } from "@/lib/session";
 import { getSubmissionDetail, sumItems } from "@/lib/data/submissions";
 import { getInventoryUsage } from "@/lib/data/inventory";
 import { listComments, markCommentsRead } from "@/lib/data/comments";
-import { listAttachments } from "@/lib/data/attachments";
+import { listAttachments, listAttachmentCommentsByIds } from "@/lib/data/attachments";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BudgetBar } from "@/components/BudgetBar";
 import { formatDateTime, formatTime, yen } from "@/lib/format";
@@ -33,6 +33,7 @@ export default async function AdminSubmissionDetailPage({
     getInventoryUsage(submission.event_id),
     listAttachments(submission.id),
   ]);
+  const attachmentComments = await listAttachmentCommentsByIds(attachments.map((a) => a.id));
 
   const [, comments] = await Promise.all([
     markCommentsRead(submission.id, "admin"),
@@ -61,9 +62,14 @@ export default async function AdminSubmissionDetailPage({
 
       <div className="card p-6 space-y-4">
         <Field label="内容" value={submission.content || "—"} />
+        <Field label="企画ジャンル" value={submission.genre || "—"} />
         <Field label="所属区分" value={submission.affiliation || "—"} />
         <Field label="開催エリア" value={submission.area || "—"} />
         <Field label="場所" value={submission.location || "—"} />
+        <Field
+          label="担任・部活動顧問の確認"
+          value={submission.teacher_check ? "確認済み" : "未確認"}
+        />
 
         {fields.map((field) => (
           <Field
@@ -153,7 +159,8 @@ export default async function AdminSubmissionDetailPage({
                 submissionId={submission.id}
                 attachmentId={a.id}
                 reviewStatus={a.review_status}
-                reviewComment={a.review_comment}
+                comments={attachmentComments.get(a.id) ?? []}
+                groupName={group.name}
               />
             </div>
           ))}

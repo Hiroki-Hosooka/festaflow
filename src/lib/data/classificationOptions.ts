@@ -35,7 +35,10 @@ export async function listAllClassificationOptions(eventId: string) {
   const area = (data ?? [])
     .filter((o) => o.category === "area")
     .map((o) => ({ id: o.id, value: o.value }));
-  return { affiliation, area };
+  const genre = (data ?? [])
+    .filter((o) => o.category === "genre")
+    .map((o) => ({ id: o.id, value: o.value }));
+  return { affiliation, area, genre };
 }
 
 export async function createClassificationOption(

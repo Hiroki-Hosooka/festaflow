@@ -91,6 +91,7 @@ export default async function AdminDashboardPage({
         rows={filtered}
         affiliationOptions={classificationOptions.affiliation.map((o) => o.value)}
         areaOptions={classificationOptions.area.map((o) => o.value)}
+        genreOptions={classificationOptions.genre.map((o) => o.value)}
       />
     </div>
   );

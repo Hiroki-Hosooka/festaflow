@@ -3,7 +3,7 @@ import { getEventBySlug } from "@/lib/data/events";
 import { getOrCreateSubmission, getSubmissionDetail } from "@/lib/data/submissions";
 import { listInventoryItems, getInventoryUsage } from "@/lib/data/inventory";
 import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
-import { listAttachments } from "@/lib/data/attachments";
+import { listAttachments, listAttachmentCommentsByIds } from "@/lib/data/attachments";
 import { listAllClassificationOptions } from "@/lib/data/classificationOptions";
 import { SubmissionForm } from "./SubmissionForm";
 import { AttachmentsCard } from "./AttachmentsCard";
@@ -29,8 +29,9 @@ export default async function GroupHomePage({
       listAttachments(submission.id),
       listAllClassificationOptions(auth.eventId),
     ]);
-  const { affiliation, area } = classificationOptions;
+  const { affiliation, area, genre } = classificationOptions;
   const adminLabel = event?.admin_label ?? "実行委員会";
+  const commentsByAttachment = await listAttachmentCommentsByIds(attachments.map((a) => a.id));
 
   if (!detail || !detail.group) {
     throw new Error("企画データの取得に失敗しました。");
@@ -58,12 +59,16 @@ export default async function GroupHomePage({
         schedules={schedules}
         affiliationOptions={affiliation.map((o) => o.value)}
         areaOptions={area.map((o) => o.value)}
+        genreOptions={genre.map((o) => o.value)}
         role={auth.role}
         adminLabel={adminLabel}
       />
       <AttachmentsCard
         eventSlug={eventSlug}
         attachments={attachments}
+        commentsByAttachment={Object.fromEntries(
+          Array.from(commentsByAttachment.entries())
+        )}
         canEdit={auth.role === "leader"}
         adminLabel={adminLabel}
       />

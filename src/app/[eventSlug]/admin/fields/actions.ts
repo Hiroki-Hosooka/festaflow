@@ -15,6 +15,11 @@ export interface FieldFormState {
   success?: string;
 }
 
+function parseApplicableGenres(formData: FormData): string[] | null {
+  const values = formData.getAll("applicable_genres").map(String).filter(Boolean);
+  return values.length > 0 ? values : null;
+}
+
 export async function createFieldAction(
   eventSlug: string,
   _prevState: FieldFormState,
@@ -39,6 +44,7 @@ export async function createFieldAction(
     fieldType,
     required,
     sortOrder: existing.length,
+    applicableGenres: parseApplicableGenres(formData),
   });
 
   revalidatePath(`/${eventSlug}/admin/fields`);
@@ -66,7 +72,11 @@ export async function updateFieldAction(
   const required = formData.get("required") === "on";
   if (!label) return { error: "項目名を入力してください。" };
 
-  await updateFormField(fieldId, { label, required });
+  await updateFormField(fieldId, {
+    label,
+    required,
+    applicableGenres: parseApplicableGenres(formData),
+  });
   revalidatePath(`/${eventSlug}/admin/fields`);
   revalidatePath(`/${eventSlug}/group/submission`);
   return { success: `「${label}」に変更しました。` };

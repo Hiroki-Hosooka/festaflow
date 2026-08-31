@@ -78,7 +78,15 @@ export function FieldsPreview({
         </PreviewField>
 
         {fields.map((field) => (
-          <PreviewField key={field.id} label={field.label} required={field.required}>
+          <PreviewField
+            key={field.id}
+            label={
+              field.applicable_genres && field.applicable_genres.length > 0
+                ? `${field.label}（${field.applicable_genres.join("・")}のみ）`
+                : field.label
+            }
+            required={field.required}
+          >
             {field.field_type === "textarea" ? (
               <textarea
                 disabled

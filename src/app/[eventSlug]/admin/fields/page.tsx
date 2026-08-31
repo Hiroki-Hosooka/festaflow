@@ -25,6 +25,7 @@ export default async function AdminFieldsPage({
     listFormFields(auth.eventId),
     listAllClassificationOptions(auth.eventId),
   ]);
+  const genreOptions = classificationOptions.genre.map((o) => o.value);
 
   return (
     <div className="space-y-5">
@@ -40,7 +41,7 @@ export default async function AdminFieldsPage({
         <div className="space-y-5">
           <div className="card p-6 space-y-3">
             <div className="card-heading">項目を追加</div>
-            <NewFieldForm eventSlug={eventSlug} />
+            <NewFieldForm eventSlug={eventSlug} genreOptions={genreOptions} />
           </div>
 
           <div className="card overflow-hidden">
@@ -61,15 +62,20 @@ export default async function AdminFieldsPage({
                     {field.required && (
                       <span className="text-[11px] text-[var(--danger-text)]">必須</span>
                     )}
+                    {field.applicable_genres && field.applicable_genres.length > 0 && (
+                      <span className="text-[11px] text-[var(--muted-2)]">
+                        対象: {field.applicable_genres.join("・")}
+                      </span>
+                    )}
                   </div>
                   <DeleteFieldButton eventSlug={eventSlug} fieldId={field.id} />
                 </div>
                 <details>
                   <summary className="cursor-pointer text-[11.5px] text-[var(--accent-admin-text)] font-semibold">
-                    名前・必須を編集
+                    名前・必須・対象ジャンルを編集
                   </summary>
                   <div className="mt-2">
-                    <EditFieldForm eventSlug={eventSlug} field={field} />
+                    <EditFieldForm eventSlug={eventSlug} field={field} genreOptions={genreOptions} />
                   </div>
                 </details>
               </div>

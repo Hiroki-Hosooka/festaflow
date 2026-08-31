@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireGroupSession } from "@/lib/session";
+import { requireGroupSession, getSession } from "@/lib/session";
 import { getOrCreateSubmission } from "@/lib/data/submissions";
 import {
   upsertShiftConfig,
@@ -74,6 +74,45 @@ export async function deleteShiftMemberAction(eventSlug: string, memberId: strin
   revalidatePath(`/${eventSlug}/group/shifts`);
 }
 
+export interface BindMemberFormState {
+  error?: string;
+}
+
+export async function bindShiftMemberAction(
+  eventSlug: string,
+  _prevState: BindMemberFormState,
+  formData: FormData
+): Promise<BindMemberFormState> {
+  const auth = await requireGroupSession(eventSlug);
+  const memberId = String(formData.get("member_id") ?? "");
+  if (!memberId) return { error: "自分の名前を選択してください。" };
+
+  const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
+  const members = await listShiftMembers(submission.id);
+  if (!members.some((m) => m.id === memberId)) {
+    return { error: "名簿に登録されていません。リーダーに追加を依頼してください。" };
+  }
+
+  const session = await getSession();
+  if (session.auth?.kind === "group") {
+    session.auth = { ...session.auth, shiftMemberId: memberId };
+    await session.save();
+  }
+  revalidatePath(`/${eventSlug}/group/shifts`);
+  return {};
+}
+
+export async function unbindShiftMemberAction(eventSlug: string) {
+  const session = await getSession();
+  if (session.auth?.kind === "group") {
+    const nextAuth = { ...session.auth };
+    delete nextAuth.shiftMemberId;
+    session.auth = nextAuth;
+    await session.save();
+  }
+  revalidatePath(`/${eventSlug}/group/shifts`);
+}
+
 export interface PreferenceFormState {
   error?: string;
   success?: string;
@@ -86,7 +125,7 @@ export async function submitPreferencesAction(
 ): Promise<PreferenceFormState> {
   const auth = await requireGroupSession(eventSlug);
 
-  const memberId = String(formData.get("member_id") ?? "");
+  const memberId = auth.shiftMemberId || String(formData.get("member_id") ?? "");
   if (!memberId) {
     return { error: "自分の名前を選択してください。" };
   }

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireGroupSession } from "@/lib/session";
 import { getGroup } from "@/lib/data/groups";
-import { listFormFields } from "@/lib/data/formFields";
+import { listFormFields, isFieldApplicable } from "@/lib/data/formFields";
 import {
   getOrCreateSubmission,
   updateSubmissionCore,
@@ -12,7 +12,12 @@ import {
   markSubmitted,
   sumItems,
 } from "@/lib/data/submissions";
-import { addAttachment, deleteAttachment, getAttachment } from "@/lib/data/attachments";
+import {
+  addAttachment,
+  deleteAttachment,
+  getAttachment,
+  addAttachmentComment,
+} from "@/lib/data/attachments";
 import { listClassificationOptions } from "@/lib/data/classificationOptions";
 import type { ItemKind } from "@/lib/database.types";
 
@@ -77,20 +82,32 @@ export async function saveSubmissionAction(
   const location = String(formData.get("location") ?? "").trim();
   const affiliationRaw = String(formData.get("affiliation") ?? "");
   const areaRaw = String(formData.get("area") ?? "");
-  const [affiliationOptions, areaOptions] = await Promise.all([
+  const genreRaw = String(formData.get("genre") ?? "");
+  const teacherCheck = formData.get("teacher_check") === "on";
+  const [affiliationOptions, areaOptions, genreOptions] = await Promise.all([
     listClassificationOptions(auth.eventId, "affiliation"),
     listClassificationOptions(auth.eventId, "area"),
+    listClassificationOptions(auth.eventId, "genre"),
   ]);
   const affiliation = affiliationOptions.some((o) => o.value === affiliationRaw)
     ? affiliationRaw
     : null;
   const area = areaOptions.some((o) => o.value === areaRaw) ? areaRaw : null;
+  const genre = genreOptions.some((o) => o.value === genreRaw) ? genreRaw : null;
   const items = parseItems(String(formData.get("items_json") ?? "[]"));
   const fieldValues = parseFieldValues(String(formData.get("field_values_json") ?? "{}"));
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
 
-  await updateSubmissionCore(submission.id, { name, content, location, affiliation, area });
+  await updateSubmissionCore(submission.id, {
+    name,
+    content,
+    location,
+    affiliation,
+    area,
+    genre,
+    teacherCheck,
+  });
   await replaceSubmissionItems(submission.id, items);
   await replaceFieldValues(submission.id, fieldValues);
 
@@ -106,12 +123,16 @@ export async function saveSubmissionAction(
 
   const fields = await listFormFields(auth.eventId);
   const missingRequired = fields.filter(
-    (f) => f.required && !(fieldValues[f.id] ?? "").trim()
+    (f) => f.required && isFieldApplicable(f, genre) && !(fieldValues[f.id] ?? "").trim()
   );
   if (missingRequired.length > 0) {
     return {
       error: `「${missingRequired.map((f) => f.label).join("」「")}」を入力してください。`,
     };
+  }
+
+  if (!teacherCheck) {
+    return { error: "「担任・部活動顧問の確認を受けました」にチェックしてください。" };
   }
 
   const unselectedBorrowItem = items.find(
@@ -173,5 +194,24 @@ export async function deleteAttachmentAction(eventSlug: string, attachmentId: st
   if (!attachment || attachment.review_status !== "pending") return;
 
   await deleteAttachment(attachmentId);
+  revalidatePath(`/${eventSlug}/group/submission`);
+}
+
+export async function addGroupAttachmentCommentAction(
+  eventSlug: string,
+  attachmentId: string,
+  formData: FormData
+) {
+  const auth = await requireGroupSession(eventSlug);
+  if (auth.role !== "leader") return;
+
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return;
+
+  const attachment = await getAttachment(attachmentId);
+  const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
+  if (!attachment || attachment.submission_id !== submission.id) return;
+
+  await addAttachmentComment(attachmentId, "group", body);
   revalidatePath(`/${eventSlug}/group/submission`);
 }

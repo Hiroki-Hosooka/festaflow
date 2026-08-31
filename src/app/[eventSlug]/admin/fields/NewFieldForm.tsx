@@ -5,7 +5,13 @@ import { createFieldAction, type FieldFormState } from "./actions";
 
 const initialState: FieldFormState = {};
 
-export function NewFieldForm({ eventSlug }: { eventSlug: string }) {
+export function NewFieldForm({
+  eventSlug,
+  genreOptions,
+}: {
+  eventSlug: string;
+  genreOptions: string[];
+}) {
   const boundAction = createFieldAction.bind(null, eventSlug);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
@@ -37,6 +43,23 @@ export function NewFieldForm({ eventSlug }: { eventSlug: string }) {
           項目を追加
         </button>
       </div>
+      {genreOptions.length > 0 && (
+        <div>
+          <p className="text-[11px] text-[var(--muted)] mb-1">
+            対象ジャンル（未選択の場合は全ジャンル共通の項目になります）
+          </p>
+          <div className="flex flex-wrap gap-x-3 gap-y-1">
+            {genreOptions.map((g) => (
+              <label
+                key={g}
+                className="flex items-center gap-1.5 text-[12px] text-[var(--muted)] whitespace-nowrap"
+              >
+                <input type="checkbox" name="applicable_genres" value={g} /> {g}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
       {state.error && <p className="text-[13px] text-[var(--danger-text)]">{state.error}</p>}
       {state.success && (
         <p className="text-[13px] text-[var(--status-approved-text)]">{state.success}</p>

@@ -8,9 +8,15 @@ import type { BroadcastTarget } from "@/lib/database.types";
 export async function sendBroadcastAction(eventSlug: string, formData: FormData) {
   const auth = await requireAdminSession(eventSlug);
   const body = String(formData.get("body") ?? "").trim();
-  const targetType = String(formData.get("target_type") ?? "all") as BroadcastTarget;
+  const targetTypeRaw = String(formData.get("target_type") ?? "all") as BroadcastTarget;
+  const targetType: BroadcastTarget =
+    targetTypeRaw === "unsubmitted" || targetTypeRaw === "custom" ? targetTypeRaw : "all";
   if (!body) return;
 
-  await createBroadcast(auth.eventId, targetType === "unsubmitted" ? "unsubmitted" : "all", body);
+  const groupIds =
+    targetType === "custom" ? formData.getAll("group_ids").map(String).filter(Boolean) : null;
+  if (targetType === "custom" && (!groupIds || groupIds.length === 0)) return;
+
+  await createBroadcast(auth.eventId, targetType, body, groupIds);
   revalidatePath(`/${eventSlug}/admin/messages`);
 }

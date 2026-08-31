@@ -3,6 +3,7 @@ import { requireAdminSession } from "@/lib/session";
 import { listInboxThreads } from "@/lib/data/comments";
 import { listBroadcasts } from "@/lib/data/broadcasts";
 import { listSubmissionsForAdmin } from "@/lib/data/submissions";
+import { listGroups } from "@/lib/data/groups";
 import { formatRelativeTime, formatDateTime } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -21,11 +22,14 @@ export default async function AdminMessagesPage({
   const tab = tabParam === "broadcast" ? "broadcast" : "inbox";
 
   if (tab === "broadcast") {
-    const target = targetParam === "unsubmitted" ? "unsubmitted" : "all";
-    const [broadcasts, rows] = await Promise.all([
+    const target =
+      targetParam === "unsubmitted" || targetParam === "custom" ? targetParam : "all";
+    const [broadcasts, rows, groups] = await Promise.all([
       listBroadcasts(auth.eventId),
       listSubmissionsForAdmin(auth.eventId),
+      listGroups(auth.eventId),
     ]);
+    const groupNameById = new Map((groups ?? []).map((g) => [g.id, g.name]));
     const unsubmittedCount = rows.filter((r) => !r.status || r.status === "draft").length;
     const boundSend = sendBroadcastAction.bind(null, eventSlug);
 
@@ -37,7 +41,7 @@ export default async function AdminMessagesPage({
 
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5 items-start">
           <div className="card p-6 space-y-4">
-            <div className="flex gap-5 border-b border-[var(--border)]">
+            <div className="flex gap-5 border-b border-[var(--border)] flex-wrap">
               <Link
                 href={`/${eventSlug}/admin/messages?tab=broadcast&target=all`}
                 className={`pb-2.5 text-[13px] ${
@@ -58,18 +62,48 @@ export default async function AdminMessagesPage({
               >
         未提出団体へのリマインド
               </Link>
+              <Link
+                href={`/${eventSlug}/admin/messages?tab=broadcast&target=custom`}
+                className={`pb-2.5 text-[13px] ${
+                  target === "custom"
+                    ? "font-bold border-b-2 border-[var(--accent-admin-text)]"
+                    : "text-[var(--muted)]"
+                }`}
+              >
+                団体を選んで送信
+              </Link>
             </div>
 
             <form action={boundSend} className="space-y-3.5">
               <input type="hidden" name="target_type" value={target} />
-              <div>
-                <label className="block text-xs font-semibold mb-1.5">宛先</label>
-                <div className="h-10 border border-[var(--border)] rounded-lg flex items-center px-3.5 text-[13px] bg-[var(--accent-admin-soft-bg)] text-[var(--accent-admin-text)] font-semibold">
-                  {target === "all"
-                    ? `すべての団体（${rows.length}団体）`
-                    : `未提出の団体（${unsubmittedCount}団体）`}
+              {target === "custom" ? (
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5">宛先（複数選択可）</label>
+                  <div className="border border-[var(--border-strong)] rounded-lg divide-y divide-[var(--border)] max-h-56 overflow-y-auto">
+                    {(groups ?? []).length === 0 && (
+                      <p className="px-3.5 py-3 text-[12.5px] text-[var(--muted)]">団体がありません。</p>
+                    )}
+                    {(groups ?? []).map((g) => (
+                      <label
+                        key={g.id}
+                        className="flex items-center gap-2 px-3.5 py-2 text-[13px] cursor-pointer"
+                      >
+                        <input type="checkbox" name="group_ids" value={g.id} />
+                        {g.name}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5">宛先</label>
+                  <div className="h-10 border border-[var(--border)] rounded-lg flex items-center px-3.5 text-[13px] bg-[var(--accent-admin-soft-bg)] text-[var(--accent-admin-text)] font-semibold">
+                    {target === "all"
+                      ? `すべての団体（${rows.length}団体）`
+                      : `未提出の団体（${unsubmittedCount}団体）`}
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-semibold mb-1.5">本文</label>
                 <textarea
@@ -98,7 +132,14 @@ export default async function AdminMessagesPage({
                 >
                   <span>{b.body}</span>
                   <span className="text-[10.5px] text-[var(--muted-2)]">
-                    {b.target_type === "all" ? "全体" : "未提出団体"} ・{" "}
+                    {b.target_type === "all"
+                      ? "全体"
+                      : b.target_type === "unsubmitted"
+                      ? "未提出団体"
+                      : `${(b.target_group_ids ?? [])
+                          .map((id) => groupNameById.get(id) ?? "?")
+                          .join("・")}`}
+                    {" ・ "}
                     {formatDateTime(b.created_at)}
                   </span>
                 </div>

@@ -5,7 +5,7 @@ import { requireAdminSession } from "@/lib/session";
 import { decideSubmission, listBorrowStockStatuses } from "@/lib/data/submissions";
 import { addComment } from "@/lib/data/comments";
 import { setStockDecision } from "@/lib/data/inventory";
-import { reviewAttachment } from "@/lib/data/attachments";
+import { reviewAttachment, addAttachmentComment } from "@/lib/data/attachments";
 import type { ReviewStatus, StockStatus } from "@/lib/database.types";
 
 export interface DecideFormState {
@@ -88,9 +88,22 @@ export async function reviewAttachmentAction(
 
   const reviewStatus = String(formData.get("review_status") ?? "") as ReviewStatus;
   if (reviewStatus !== "approved" && reviewStatus !== "needs_fix") return;
-  const reviewComment = String(formData.get("review_comment") ?? "").trim();
 
-  await reviewAttachment(attachmentId, { reviewStatus, reviewComment });
+  await reviewAttachment(attachmentId, { reviewStatus });
+  revalidatePath(`/${eventSlug}/admin/submissions/${submissionId}`);
+}
+
+export async function addAttachmentCommentAction(
+  eventSlug: string,
+  submissionId: string,
+  attachmentId: string,
+  formData: FormData
+) {
+  await requireAdminSession(eventSlug);
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return;
+
+  await addAttachmentComment(attachmentId, "admin", body);
   revalidatePath(`/${eventSlug}/admin/submissions/${submissionId}`);
 }
 
