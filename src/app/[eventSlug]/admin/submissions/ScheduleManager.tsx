@@ -12,9 +12,11 @@ const initialState: ScheduleFormState = {};
 export function ScheduleManager({
   eventSlug,
   schedules,
+  groups,
 }: {
   eventSlug: string;
   schedules: ScheduleRow[];
+  groups: { id: string; name: string }[];
 }) {
   const boundCreate = createScheduleAction.bind(null, eventSlug);
   const [state, formAction, pending] = useActionState(boundCreate, initialState);
@@ -28,7 +30,7 @@ export function ScheduleManager({
       ) : (
         <div className="space-y-2">
           {schedules.map((s) => (
-            <ScheduleRowItem key={s.id} eventSlug={eventSlug} schedule={s} />
+            <ScheduleRowItem key={s.id} eventSlug={eventSlug} schedule={s} groups={groups} />
           ))}
         </div>
       )}
@@ -62,6 +64,23 @@ export function ScheduleManager({
           >
             追加登録
           </button>
+          {groups.length > 0 && (
+            <div className="col-span-full">
+              <p className="text-[11px] text-[var(--muted)] mb-1">
+                対象団体（未選択の場合は全団体宛て）
+              </p>
+              <div className="flex flex-wrap gap-x-3 gap-y-1">
+                {groups.map((g) => (
+                  <label
+                    key={g.id}
+                    className="flex items-center gap-1.5 text-[12px] text-[var(--muted)] whitespace-nowrap"
+                  >
+                    <input type="checkbox" name="target_group_ids" value={g.id} /> {g.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
           {state.error && (
             <p className="col-span-full text-[12.5px] text-[var(--danger-text)]">{state.error}</p>
           )}
@@ -79,12 +98,17 @@ export function ScheduleManager({
 function ScheduleRowItem({
   eventSlug,
   schedule,
+  groups,
 }: {
   eventSlug: string;
   schedule: ScheduleRow;
+  groups: { id: string; name: string }[];
 }) {
   const boundDelete = deleteScheduleAction.bind(null, eventSlug, schedule.id);
   const daysLeft = daysUntil(schedule.deadline);
+  const targetNames = schedule.target_group_ids
+    ?.map((id) => groups.find((g) => g.id === id)?.name)
+    .filter((n): n is string => !!n);
 
   return (
     <div className="flex items-center justify-between gap-3 text-[12.5px] border border-[var(--border)] rounded-lg px-3 py-2">
@@ -101,6 +125,9 @@ function ScheduleRowItem({
         {schedule.hint && (
           <span className="block text-[11px] text-[var(--muted-2)]">{schedule.hint}</span>
         )}
+        <span className="block text-[11px] text-[var(--muted-2)]">
+          対象: {targetNames && targetNames.length > 0 ? targetNames.join("・") : "全団体"}
+        </span>
       </div>
       <form action={boundDelete}>
         <button className="btn-row btn-row-danger flex-none">削除</button>

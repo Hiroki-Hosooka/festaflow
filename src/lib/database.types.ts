@@ -16,6 +16,7 @@ export type Area = string;
 export type Genre = string;
 export type ClassificationCategory = "affiliation" | "area" | "genre";
 export type PushSubscriptionKind = "admin" | "group";
+export type CalendarOwnerKind = "admin" | "group";
 export type ReviewStatus = "pending" | "approved" | "needs_fix";
 export type TodoStatus = "not_started" | "in_progress" | "done";
 export type PreferenceKind = "ng" | "want";
@@ -88,6 +89,7 @@ export interface Database {
           title: string;
           deadline: string;
           hint: string;
+          target_group_ids: string[] | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["submission_schedules"]["Row"]> & {
@@ -96,6 +98,26 @@ export interface Database {
           deadline: string;
         };
         Update: Partial<Database["public"]["Tables"]["submission_schedules"]["Row"]>;
+        Relationships: [];
+      };
+      calendar_events: {
+        Row: {
+          id: string;
+          event_id: string;
+          owner_kind: CalendarOwnerKind;
+          owner_group_id: string | null;
+          title: string;
+          event_date: string;
+          color: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["calendar_events"]["Row"]> & {
+          event_id: string;
+          owner_kind: CalendarOwnerKind;
+          title: string;
+          event_date: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["calendar_events"]["Row"]>;
         Relationships: [];
       };
       push_subscriptions: {

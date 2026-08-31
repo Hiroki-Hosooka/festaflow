@@ -29,12 +29,14 @@ export default async function GroupLayout({
       badge: hasUnread,
       badgeLabel: "未読のコメントがあります",
     },
+  ];
+  const secondaryLinks: NavLinkItem[] = [
     { href: `/${eventSlug}/group/shifts`, label: "当番シフト", icon: <Icon name="calendar" /> },
     { href: `/${eventSlug}/group/todos`, label: "ToDoリスト", icon: <Icon name="checkSquare" /> },
     { href: `/${eventSlug}/group/documents`, label: "配布資料", icon: <Icon name="document" /> },
   ];
   if (auth.role === "leader") {
-    links.push({
+    secondaryLinks.push({
       href: `/${eventSlug}/group/settings`,
       label: "設定",
       icon: <Icon name="settings" />,
@@ -64,6 +66,7 @@ export default async function GroupLayout({
         badgeClass="bg-[var(--accent-group-text)]"
         logoutAction={boundLogout}
         links={links}
+        secondaryLinks={secondaryLinks}
       />
       <div className="max-w-5xl mx-auto px-5 py-8">{children}</div>
     </div>

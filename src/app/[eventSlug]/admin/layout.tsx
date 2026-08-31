@@ -64,6 +64,17 @@ export default async function AdminLayout({
             badge: hasInventoryConflict,
             badgeLabel: "在庫の希望が競合している物品があります",
           },
+          { href: `/${eventSlug}/admin/groups`, label: "団体・予算", icon: <Icon name="users" /> },
+          {
+            href: `/${eventSlug}/admin/form-settings`,
+            label: "フォーム設定",
+            icon: <Icon name="receipt" />,
+          },
+          {
+            href: `/${eventSlug}/admin/documents`,
+            label: "配布資料",
+            icon: <Icon name="document" />,
+          },
           { href: `/${eventSlug}/admin/settings`, label: "設定", icon: <Icon name="settings" /> },
         ]}
       />

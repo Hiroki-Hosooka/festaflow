@@ -15,6 +15,7 @@ function parseCategory(raw: FormDataEntryValue | null): ClassificationCategory |
 
 function revalidateAll(eventSlug: string) {
   revalidatePath(`/${eventSlug}/admin/classifications`);
+  revalidatePath(`/${eventSlug}/admin/form-settings`);
   revalidatePath(`/${eventSlug}/admin/submissions`);
   revalidatePath(`/${eventSlug}/group/submission`);
 }

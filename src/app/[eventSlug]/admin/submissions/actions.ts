@@ -23,6 +23,7 @@ export async function createScheduleAction(
   const title = String(formData.get("title") ?? "").trim();
   const deadlineRaw = String(formData.get("deadline") ?? "").trim();
   const hint = String(formData.get("hint") ?? "").trim();
+  const targetGroupIds = formData.getAll("target_group_ids").map(String).filter(Boolean);
 
   if (!title || !deadlineRaw) {
     return { error: "提出物の名前と締切日時を入力してください。" };
@@ -33,10 +34,13 @@ export async function createScheduleAction(
     title,
     deadline: parseJstDatetimeLocal(deadlineRaw),
     hint,
+    targetGroupIds: targetGroupIds.length > 0 ? targetGroupIds : null,
   });
 
   revalidatePath(`/${eventSlug}/admin/submissions`);
+  revalidatePath(`/${eventSlug}/admin`);
   revalidatePath(`/${eventSlug}/group/submission`);
+  revalidatePath(`/${eventSlug}/group`);
   return { success: `「${title}」を登録しました。` };
 }
 

@@ -3,6 +3,7 @@ import { requireAdminSession } from "@/lib/session";
 import { listSubmissionsForAdmin } from "@/lib/data/submissions";
 import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
 import { listAllClassificationOptions } from "@/lib/data/classificationOptions";
+import { listGroups } from "@/lib/data/groups";
 import { ScheduleManager } from "./ScheduleManager";
 import { SubmissionsList } from "./SubmissionsList";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -20,10 +21,11 @@ export default async function AdminDashboardPage({
   const { filter: filterParam } = await searchParams;
   const auth = await requireAdminSession(eventSlug);
 
-  const [rows, schedules, classificationOptions] = await Promise.all([
+  const [rows, schedules, classificationOptions, groups] = await Promise.all([
     listSubmissionsForAdmin(auth.eventId),
     listSubmissionSchedules(auth.eventId),
     listAllClassificationOptions(auth.eventId),
+    listGroups(auth.eventId),
   ]);
 
   const submittedCount = rows.filter((r) => r.status && r.status !== "draft").length;
@@ -72,7 +74,11 @@ export default async function AdminDashboardPage({
         </div>
       </div>
 
-      <ScheduleManager eventSlug={eventSlug} schedules={schedules} />
+      <ScheduleManager
+        eventSlug={eventSlug}
+        schedules={schedules}
+        groups={(groups ?? []).map((g) => ({ id: g.id, name: g.name }))}
+      />
 
       <div className="flex gap-2">
         <FilterChip eventSlug={eventSlug} value="all" active={filter === "all"}>

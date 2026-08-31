@@ -3,9 +3,9 @@
 :root {
   /* ニュートラル（藍×若葉：寒色寄りのセージグレー） */
   --background: oklch(97% 0.007 155);
-  --foreground: oklch(22% 0.02 155);
-  --muted: oklch(46% 0.02 155);
-  --muted-2: oklch(58% 0.018 155);
+  --foreground: oklch(18% 0.02 155);
+  --muted: oklch(38% 0.02 155);
+  --muted-2: oklch(48% 0.018 155);
   --surface: oklch(99% 0.004 150);
   --border: oklch(90% 0.012 155);
   --border-strong: oklch(84% 0.015 155);
@@ -26,24 +26,24 @@
   --accent-approve-solid: oklch(42% 0.11 140);
   --accent-approve-solid-hover: oklch(36% 0.11 140);
 
-  /* ステータス色 */
-  --status-approved-bg: oklch(91% 0.06 150);
-  --status-approved-text: oklch(34% 0.12 150);
-  --status-returned-bg: oklch(92% 0.06 85);
-  --status-returned-text: oklch(38% 0.1 85);
-  --status-rejected-bg: oklch(92% 0.07 30);
-  --status-rejected-text: oklch(42% 0.15 30);
+  /* ステータス色（背景は控えめに、文字色は濃くしてコントラストを確保） */
+  --status-approved-bg: oklch(94% 0.045 150);
+  --status-approved-text: oklch(30% 0.12 150);
+  --status-returned-bg: oklch(94% 0.045 85);
+  --status-returned-text: oklch(34% 0.1 85);
+  --status-rejected-bg: oklch(94% 0.05 30);
+  --status-rejected-text: oklch(38% 0.15 30);
   --status-pending-bg: oklch(93% 0.012 155);
-  --status-pending-text: oklch(40% 0.015 155);
-  --status-review-bg: oklch(92% 0.03 255);
-  --status-review-text: oklch(40% 0.09 255);
-  --status-unsubmitted-bg: oklch(90% 0.09 55);
-  --status-unsubmitted-text: oklch(40% 0.12 55);
+  --status-pending-text: oklch(36% 0.015 155);
+  --status-review-bg: oklch(94% 0.025 255);
+  --status-review-text: oklch(36% 0.09 255);
+  --status-unsubmitted-bg: oklch(93% 0.06 55);
+  --status-unsubmitted-text: oklch(36% 0.12 55);
 
   --danger-border: oklch(75% 0.13 30);
-  --danger-text: oklch(42% 0.15 30);
+  --danger-text: oklch(38% 0.15 30);
   --warn-border: oklch(75% 0.1 85);
-  --warn-text: oklch(42% 0.1 85);
+  --warn-text: oklch(38% 0.1 85);
 }
 
 @theme inline {

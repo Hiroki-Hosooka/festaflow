@@ -1,18 +1,4 @@
-import { requireAdminSession } from "@/lib/session";
-import { listFormFields } from "@/lib/data/formFields";
-import { listAllClassificationOptions } from "@/lib/data/classificationOptions";
-import { NewFieldForm } from "./NewFieldForm";
-import { DeleteFieldButton } from "./DeleteFieldButton";
-import { EditFieldForm } from "./EditFieldForm";
-import { FieldsPreview } from "./FieldsPreview";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { EmptyState } from "@/components/EmptyState";
-
-const TYPE_LABELS: Record<string, string> = {
-  text: "一行テキスト",
-  textarea: "複数行テキスト",
-  number: "数値",
-};
+import { redirect } from "next/navigation";
 
 export default async function AdminFieldsPage({
   params,
@@ -20,75 +6,5 @@ export default async function AdminFieldsPage({
   params: Promise<{ eventSlug: string }>;
 }) {
   const { eventSlug } = await params;
-  const auth = await requireAdminSession(eventSlug);
-  const [fields, classificationOptions] = await Promise.all([
-    listFormFields(auth.eventId),
-    listAllClassificationOptions(auth.eventId),
-  ]);
-  const genreOptions = classificationOptions.genre.map((o) => o.value);
-
-  return (
-    <div className="space-y-5">
-      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/admin` }, { label: "提出項目" }]} />
-      <div>
-        <h1 className="page-title">提出項目</h1>
-        <p className="text-[12.5px] text-[var(--muted)] mt-1 leading-relaxed">
-          企画名・内容・購入物品・場所は初期項目として常に表示されます。ここで追加した項目は、既存の提出物では「未入力」のまま残り、これ以降の新規提出・編集から反映されます。
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
-        <div className="space-y-5">
-          <div className="card p-6 space-y-3">
-            <div className="card-heading">項目を追加</div>
-            <NewFieldForm eventSlug={eventSlug} genreOptions={genreOptions} />
-          </div>
-
-          <div className="card overflow-hidden">
-            {fields.length === 0 && (
-              <EmptyState icon="receipt" title="追加項目はまだありません" />
-            )}
-            {fields.map((field) => (
-              <div
-                key={field.id}
-                className="px-4 py-3 border-b border-[var(--border)] last:border-b-0 text-[13px] space-y-2"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <span className="font-semibold">{field.label}</span>
-                    <span className="text-[11px] text-[var(--muted-2)]">
-                      {TYPE_LABELS[field.field_type] ?? field.field_type}
-                    </span>
-                    {field.required && (
-                      <span className="text-[11px] text-[var(--danger-text)]">必須</span>
-                    )}
-                    {field.applicable_genres && field.applicable_genres.length > 0 && (
-                      <span className="text-[11px] text-[var(--muted-2)]">
-                        対象: {field.applicable_genres.join("・")}
-                      </span>
-                    )}
-                  </div>
-                  <DeleteFieldButton eventSlug={eventSlug} fieldId={field.id} />
-                </div>
-                <details>
-                  <summary className="cursor-pointer text-[11.5px] text-[var(--accent-admin-text)] font-semibold">
-                    名前・必須・対象ジャンルを編集
-                  </summary>
-                  <div className="mt-2">
-                    <EditFieldForm eventSlug={eventSlug} field={field} genreOptions={genreOptions} />
-                  </div>
-                </details>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <FieldsPreview
-          fields={fields}
-          affiliationOptions={classificationOptions.affiliation.map((o) => o.value)}
-          areaOptions={classificationOptions.area.map((o) => o.value)}
-        />
-      </div>
-    </div>
-  );
+  redirect(`/${eventSlug}/admin/form-settings`);
 }

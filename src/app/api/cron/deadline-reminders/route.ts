@@ -40,6 +40,7 @@ export async function GET(request: Request) {
         const rows = await listSubmissionsForAdmin(event.id);
         const unsubmittedGroupIds = rows
           .filter((r) => !r.status || r.status === "draft")
+          .filter((r) => !schedule.target_group_ids || schedule.target_group_ids.includes(r.groupId))
           .map((r) => r.groupId);
 
         const [adminSubs, groupSubs] = await Promise.all([

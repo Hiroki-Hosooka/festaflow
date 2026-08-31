@@ -5,10 +5,12 @@ import { listSubmissionsForAdmin } from "@/lib/data/submissions";
 import { listInboxThreads } from "@/lib/data/comments";
 import { getInventoryUsage } from "@/lib/data/inventory";
 import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
-import { formatRelativeTime } from "@/lib/format";
+import { listAdminCalendarEvents } from "@/lib/data/calendarEvents";
+import { formatRelativeTime, daysUntil } from "@/lib/format";
 import { HubTile } from "@/components/HubTile";
 import { Icon } from "@/components/Icons";
-import { DeadlineCalendar } from "./DeadlineCalendar";
+import { MonthCalendar, type CalendarDeadlineItem } from "@/components/MonthCalendar";
+import { createAdminCalendarEventAction, deleteAdminCalendarEventAction } from "./calendarActions";
 
 export default async function AdminHubPage({
   params,
@@ -18,12 +20,13 @@ export default async function AdminHubPage({
   const { eventSlug } = await params;
   const auth = await requireAdminSession(eventSlug);
 
-  const [event, rows, inboxThreads, inventoryUsage, schedules] = await Promise.all([
+  const [event, rows, inboxThreads, inventoryUsage, schedules, calendarEvents] = await Promise.all([
     getEventBySlug(eventSlug),
     listSubmissionsForAdmin(auth.eventId),
     listInboxThreads(auth.eventId),
     getInventoryUsage(auth.eventId),
     listSubmissionSchedules(auth.eventId),
+    listAdminCalendarEvents(auth.eventId),
   ]);
 
   const submittedCount = rows.filter((r) => r.status && r.status !== "draft").length;
@@ -34,6 +37,28 @@ export default async function AdminHubPage({
   );
 
   const latestThreads = inboxThreads.slice(0, 3);
+
+  const deadlineItems: CalendarDeadlineItem[] = schedules.map((s) => {
+    const remaining = daysUntil(s.deadline);
+    return {
+      id: s.id,
+      title: s.title,
+      date: s.deadline,
+      hint: s.hint,
+      daysLeftLabel: remaining < 0 ? "超過" : remaining === 0 ? "本日" : `あと${remaining}日`,
+      overdue: remaining < 0,
+      dueToday: remaining === 0,
+    };
+  });
+  const personalItems = calendarEvents.map((e) => ({
+    id: e.id,
+    title: e.title,
+    date: e.event_date,
+    color: e.color,
+  }));
+
+  const boundAddEvent = createAdminCalendarEventAction.bind(null, eventSlug);
+  const boundDeleteEvent = deleteAdminCalendarEventAction.bind(null, eventSlug);
 
   return (
     <div className="space-y-5">
@@ -118,43 +143,73 @@ export default async function AdminHubPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <HubTile
-          accent="admin"
-          href={`/${eventSlug}/admin/submissions`}
-          icon="clipboard"
-          label="企画一覧"
-          description="団体ごとの提出状況を確認・承認します"
-          badgeCount={pendingCount}
-        />
-        <HubTile
-          accent="admin"
-          href={`/${eventSlug}/admin/messages`}
-          icon="inbox"
-          label="連絡"
-          description="個別コメントの確認・全体連絡の送信を行います"
-          badgeCount={unreadCount}
-          badgeTone="danger"
-        />
-        <HubTile
-          accent="admin"
-          href={`/${eventSlug}/admin/inventory`}
-          icon="package"
-          label="在庫管理"
-          description="借用物品の在庫と希望の競合を管理します"
-          badgeCount={hasInventoryConflict ? 1 : 0}
-          badgeTone="danger"
-        />
-        <HubTile
-          accent="admin"
-          href={`/${eventSlug}/admin/settings`}
-          icon="settings"
-          label="設定"
-          description="団体・予算、提出項目、分類、配布資料を管理します"
-        />
+      <div>
+        <div className="section-caption mb-2">各機能へ</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <HubTile
+            accent="admin"
+            href={`/${eventSlug}/admin/submissions`}
+            icon="clipboard"
+            label="企画一覧"
+            description="団体ごとの提出状況を確認・承認します"
+            badgeCount={pendingCount}
+          />
+          <HubTile
+            accent="admin"
+            href={`/${eventSlug}/admin/messages`}
+            icon="inbox"
+            label="連絡"
+            description="個別コメントの確認・全体連絡の送信を行います"
+            badgeCount={unreadCount}
+            badgeTone="danger"
+          />
+          <HubTile
+            accent="admin"
+            href={`/${eventSlug}/admin/inventory`}
+            icon="package"
+            label="在庫管理"
+            description="借用物品の在庫と希望の競合を管理します"
+            badgeCount={hasInventoryConflict ? 1 : 0}
+            badgeTone="danger"
+          />
+          <HubTile
+            accent="admin"
+            href={`/${eventSlug}/admin/groups`}
+            icon="users"
+            label="団体・予算"
+            description="団体一覧・予算配分・ログイン合言葉を管理します"
+          />
+          <HubTile
+            accent="admin"
+            href={`/${eventSlug}/admin/form-settings`}
+            icon="receipt"
+            label="フォーム設定"
+            description="提出項目・分類（所属区分/エリア）を編集します"
+          />
+          <HubTile
+            accent="admin"
+            href={`/${eventSlug}/admin/documents`}
+            icon="document"
+            label="配布資料"
+            description="団体に配布する資料をアップロードします"
+          />
+          <HubTile
+            accent="admin"
+            href={`/${eventSlug}/admin/settings`}
+            icon="settings"
+            label="設定"
+            description="イベント基本情報・通知設定を管理します"
+          />
+        </div>
       </div>
 
-      <DeadlineCalendar schedules={schedules} />
+      <MonthCalendar
+        accent="admin"
+        deadlines={deadlineItems}
+        personalEvents={personalItems}
+        addEventAction={boundAddEvent}
+        deleteEventAction={boundDeleteEvent}
+      />
     </div>
   );
 }

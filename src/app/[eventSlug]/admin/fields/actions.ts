@@ -48,6 +48,7 @@ export async function createFieldAction(
   });
 
   revalidatePath(`/${eventSlug}/admin/fields`);
+  revalidatePath(`/${eventSlug}/admin/form-settings`);
   revalidatePath(`/${eventSlug}/group/submission`);
   return {
     success: `「${label}」を追加しました。既存の提出物ではこの項目は未入力のままになります。`,
@@ -58,6 +59,7 @@ export async function deleteFieldAction(eventSlug: string, fieldId: string) {
   await requireAdminSession(eventSlug);
   await deleteFormField(fieldId);
   revalidatePath(`/${eventSlug}/admin/fields`);
+  revalidatePath(`/${eventSlug}/admin/form-settings`);
   revalidatePath(`/${eventSlug}/group/submission`);
 }
 
@@ -78,6 +80,7 @@ export async function updateFieldAction(
     applicableGenres: parseApplicableGenres(formData),
   });
   revalidatePath(`/${eventSlug}/admin/fields`);
+  revalidatePath(`/${eventSlug}/admin/form-settings`);
   revalidatePath(`/${eventSlug}/group/submission`);
   return { success: `「${label}」に変更しました。` };
 }
