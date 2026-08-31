@@ -4,6 +4,8 @@ import { listInventoryItems, getInventoryUsage } from "@/lib/data/inventory";
 import { NewInventoryItemForm } from "./NewInventoryItemForm";
 import { DeleteInventoryItemButton } from "./DeleteInventoryItemButton";
 import { updateInventoryItemAction } from "./actions";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { EmptyState } from "@/components/EmptyState";
 
 export default async function AdminInventoryPage({
   params,
@@ -18,10 +20,11 @@ export default async function AdminInventoryPage({
   ]);
 
   return (
-    <div className="space-y-5 max-w-3xl">
+    <div className="space-y-5">
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/admin` }, { label: "在庫管理（借用物品）" }]} />
       <div>
-        <h1 className="text-lg font-bold">在庫管理（借用物品）</h1>
-        <p className="text-[12.5px] text-[var(--muted)] mt-1 leading-relaxed">
+        <h1 className="page-title">在庫管理（借用物品）</h1>
+        <p className="text-[12.5px] text-[var(--muted)] mt-1 leading-relaxed bg-[var(--accent-admin-soft-bg)] rounded-lg px-3.5 py-2.5">
           ここで登録した物品が、団体側の企画提出フォームで「借用」として選べるようになります。
           在庫は学校全体で共有する1つのプールとして扱い、団体ごとの割当はありません。
           複数団体の希望が競合した場合の割り振り（在庫確保）は、各企画の詳細画面で行います。
@@ -29,7 +32,7 @@ export default async function AdminInventoryPage({
       </div>
 
       <div className="card p-6 space-y-3">
-        <div className="text-xs font-bold text-[var(--muted)]">物品を追加</div>
+        <div className="card-heading">物品を追加</div>
         <NewInventoryItemForm eventSlug={eventSlug} />
       </div>
 
@@ -43,9 +46,11 @@ export default async function AdminInventoryPage({
           <span />
         </div>
         {items.length === 0 && (
-          <p className="px-4 py-6 text-sm text-[var(--muted)]">
-            まだ在庫物品が登録されていません。
-          </p>
+          <EmptyState
+            icon="package"
+            title="まだ在庫物品が登録されていません"
+            description="上のフォームから物品を追加すると、団体側の「借用」選択肢に反映されます。"
+          />
         )}
         {items.map((item) => {
           const stats = usage.get(item.id);
@@ -66,9 +71,7 @@ export default async function AdminInventoryPage({
                   aria-label={`${item.name}の在庫総数`}
                   className="h-8 w-16 border border-[var(--border-strong)] rounded-md px-2 text-[12.5px]"
                 />
-                <button className="text-[11px] text-[var(--accent-admin-text)] font-semibold">
-                  保存
-                </button>
+                <button className="btn-row btn-row-admin">保存</button>
               </form>
               <span className="text-[12.5px] text-[var(--muted)]">
                 {stats?.securedTotal ?? 0}
@@ -93,7 +96,7 @@ export default async function AdminInventoryPage({
 
       {Array.from(usage.values()).some((u) => u.requests.length > 0) && (
         <div className="card p-6 space-y-4">
-          <div className="text-xs font-bold text-[var(--muted)]">物品ごとの借用希望</div>
+          <div className="card-heading">物品ごとの借用希望</div>
           {Array.from(usage.values())
             .filter((u) => u.requests.length > 0)
             .map((u) => {

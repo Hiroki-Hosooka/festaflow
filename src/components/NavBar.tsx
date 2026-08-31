@@ -56,6 +56,7 @@ export function NavBar({
   logoutAction,
   accentTextClass,
   badgeClass,
+  maxWidthClassName = "max-w-5xl",
 }: {
   brand: React.ReactNode;
   homeHref: string;
@@ -64,6 +65,7 @@ export function NavBar({
   logoutAction: (formData: FormData) => void | Promise<void>;
   accentTextClass: string;
   badgeClass: string;
+  maxWidthClassName?: string;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -74,7 +76,7 @@ export function NavBar({
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)] sticky top-0 z-20 print:hidden">
-      <div className="max-w-5xl mx-auto px-4 sm:px-5 h-14 flex items-center gap-3">
+      <div className={`${maxWidthClassName} mx-auto px-4 sm:px-5 h-14 flex items-center gap-3`}>
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}

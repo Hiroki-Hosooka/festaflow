@@ -7,6 +7,7 @@ import { listAttachments } from "@/lib/data/attachments";
 import { listAllClassificationOptions } from "@/lib/data/classificationOptions";
 import { SubmissionForm } from "./SubmissionForm";
 import { AttachmentsCard } from "./AttachmentsCard";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 export default async function GroupHomePage({
   params,
@@ -43,6 +44,7 @@ export default async function GroupHomePage({
 
   return (
     <div className="space-y-5">
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/group` }, { label: "企画" }]} />
       <SubmissionForm
         eventSlug={eventSlug}
         groupName={auth.groupName}

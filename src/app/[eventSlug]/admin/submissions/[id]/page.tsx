@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdminSession } from "@/lib/session";
 import { getSubmissionDetail, sumItems } from "@/lib/data/submissions";
@@ -12,6 +11,8 @@ import { DecisionForm } from "./DecisionForm";
 import { StockDecisionControl } from "./StockDecisionControl";
 import { AttachmentReviewControl } from "./AttachmentReviewControl";
 import { sendAdminCommentAction } from "./actions";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { EmptyState } from "@/components/EmptyState";
 
 export default async function AdminSubmissionDetailPage({
   params,
@@ -41,14 +42,18 @@ export default async function AdminSubmissionDetailPage({
   const boundSendComment = sendAdminCommentAction.bind(null, eventSlug, submission.id);
 
   return (
-    <div className="space-y-5 max-w-2xl">
-      <Link href={`/${eventSlug}/admin/submissions`} className="text-[11.5px] text-[var(--accent-admin-text)]">
-        ← 一覧に戻る
-      </Link>
+    <div className="space-y-5 max-w-3xl">
+      <Breadcrumbs
+        items={[
+          { label: "ホーム", href: `/${eventSlug}/admin` },
+          { label: "企画一覧", href: `/${eventSlug}/admin/submissions` },
+          { label: group.name },
+        ]}
+      />
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold">{submission.name || "（企画名未入力）"}</h1>
+          <h1 className="page-title">{submission.name || "（企画名未入力）"}</h1>
           <p className="text-[11.5px] text-[var(--muted)]">{group.name}</p>
         </div>
         <StatusBadge status={submission.status} />
@@ -69,7 +74,7 @@ export default async function AdminSubmissionDetailPage({
         ))}
 
         <div>
-          <div className="text-xs font-bold text-[var(--muted)] mb-1.5">購入物品</div>
+          <div className="card-heading mb-1.5">購入物品</div>
           {purchaseItems.length === 0 ? (
             <p className="text-[13px] text-[var(--muted-2)]">未入力</p>
           ) : (
@@ -90,7 +95,7 @@ export default async function AdminSubmissionDetailPage({
 
         {borrowItems.length > 0 && (
           <div>
-            <div className="text-xs font-bold text-[var(--muted)] mb-1.5">借用物品</div>
+            <div className="card-heading mb-1.5">借用物品</div>
             <div className="border border-[var(--border)] rounded-lg overflow-hidden divide-y divide-[var(--border)]">
               {borrowItems.map((item) => {
                 const usage = item.inventory_item_id
@@ -134,7 +139,7 @@ export default async function AdminSubmissionDetailPage({
 
       {attachments.length > 0 && (
         <div className="card p-6 space-y-3">
-          <div className="text-xs font-bold text-[var(--muted)]">添付資料</div>
+          <div className="card-heading">添付資料</div>
           {attachments.map((a) => (
             <div key={a.id} className="border border-[var(--border)] rounded-lg p-3 space-y-2">
               <div className="flex items-center justify-between gap-2 flex-wrap text-[12.5px]">
@@ -172,10 +177,10 @@ export default async function AdminSubmissionDetailPage({
       )}
 
       <div className="card p-6 space-y-4">
-        <div className="text-xs font-bold text-[var(--muted)]">個別コメント</div>
+        <div className="card-heading">個別コメント</div>
         <div className="space-y-3">
           {comments.length === 0 && (
-            <p className="text-[13px] text-[var(--muted)]">まだやりとりはありません。</p>
+            <EmptyState icon="chat" title="まだやりとりはありません" />
           )}
           {comments.map((c) =>
             c.sender_type === "group" ? (

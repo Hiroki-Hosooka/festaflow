@@ -5,6 +5,7 @@ import { formatDateTime } from "@/lib/format";
 import { NewDocumentForm } from "./NewDocumentForm";
 import { DeleteDocumentButton } from "./DeleteDocumentButton";
 import { EmptyState } from "@/components/EmptyState";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 export default async function AdminDocumentsPage({
   params,
@@ -18,16 +19,17 @@ export default async function AdminDocumentsPage({
   const withUrls = documents.map((d) => ({ ...d, url: urlsByPath.get(d.storage_path) ?? "" }));
 
   return (
-    <div className="space-y-5 max-w-2xl">
+    <div className="space-y-5">
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/admin` }, { label: "配布資料" }]} />
       <div>
-        <h1 className="text-lg font-bold">配布資料</h1>
+        <h1 className="page-title">配布資料</h1>
         <p className="text-[12.5px] text-[var(--muted)] mt-1 leading-relaxed">
           ここでアップロードした資料は、全団体のポータルに一覧表示されます。
         </p>
       </div>
 
       <div className="card p-6 space-y-3">
-        <div className="text-xs font-bold text-[var(--muted)]">資料を追加</div>
+        <div className="card-heading">資料を追加</div>
         <NewDocumentForm eventSlug={eventSlug} />
       </div>
 

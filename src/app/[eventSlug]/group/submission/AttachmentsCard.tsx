@@ -8,6 +8,7 @@ import {
 } from "./actions";
 import { formatDateTime } from "@/lib/format";
 import type { Database } from "@/lib/database.types";
+import { EmptyState } from "@/components/EmptyState";
 
 type AttachmentRow = Database["public"]["Tables"]["submission_attachments"]["Row"];
 
@@ -42,7 +43,7 @@ export function AttachmentsCard({
   return (
     <div className="card p-6 sm:p-7 space-y-4">
       <div>
-        <h2 className="text-sm font-bold">添付資料</h2>
+        <h2 className="card-heading">添付資料</h2>
         <p className="text-[11.5px] text-[var(--muted)] mt-0.5">
           設計図など、{adminLabel}に確認してほしい資料をアップロードできます。ファイルごとに承認・要修正の判定が届きます。
         </p>
@@ -50,7 +51,7 @@ export function AttachmentsCard({
 
       <div className="space-y-2">
         {attachments.length === 0 && (
-          <p className="text-[12.5px] text-[var(--muted-2)]">まだ資料はアップロードされていません。</p>
+          <EmptyState icon="document" title="まだ資料はアップロードされていません" />
         )}
         {attachments.map((a) => (
           <div
@@ -82,13 +83,9 @@ export function AttachmentsCard({
 
       {canEdit && (
         <form action={formAction} className="flex items-center gap-2 flex-wrap">
-          <input
-            type="file"
-            name="file"
-            required
-            aria-label="添付ファイルを選択"
-            className="text-[12.5px]"
-          />
+          <span className="file-input-wrapper">
+            <input type="file" name="file" required aria-label="添付ファイルを選択" />
+          </span>
           <button
             disabled={pending}
             className="h-9 px-4 rounded-md text-[12.5px] font-semibold btn-group disabled:opacity-60"
@@ -124,7 +121,7 @@ function DeleteAttachmentButton({
         if (!confirm("この資料を削除しますか？")) e.preventDefault();
       }}
     >
-      <button className="text-[11px] text-[var(--danger-text)] font-semibold">削除</button>
+      <button className="btn-row btn-row-danger">削除</button>
     </form>
   );
 }

@@ -24,7 +24,7 @@ export function HubTile({
   return (
     <Link
       href={href}
-      className="card p-4 flex items-start gap-3 hover:border-[var(--border-strong)] transition-colors"
+      className="card p-4 flex items-start gap-3 hover:border-[var(--border-strong)] hover:shadow-sm transition-[border-color,box-shadow]"
     >
       <span
         className="w-9 h-9 rounded-lg flex items-center justify-center flex-none"
@@ -53,6 +53,9 @@ export function HubTile({
             {description}
           </span>
         )}
+      </span>
+      <span className="text-[var(--muted-2)] flex-none self-center" aria-hidden="true">
+        <Icon name="chevronRight" className="w-4 h-4" />
       </span>
     </Link>
   );

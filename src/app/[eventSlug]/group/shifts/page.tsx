@@ -8,6 +8,7 @@ import {
   generateSlots,
 } from "@/lib/data/shifts";
 import { ShiftBoard } from "./ShiftBoard";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 export default async function GroupShiftsPage({
   params,
@@ -31,7 +32,10 @@ export default async function GroupShiftsPage({
 
   return (
     <div className="space-y-5">
-      <h1 className="text-lg font-bold print:hidden">当番シフト配置</h1>
+      <div className="print:hidden space-y-2">
+        <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/group` }, { label: "当番シフト配置" }]} />
+        <h1 className="page-title">当番シフト配置</h1>
+      </div>
       <ShiftBoard
         eventSlug={eventSlug}
         config={config}

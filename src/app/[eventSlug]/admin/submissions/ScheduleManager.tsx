@@ -21,7 +21,7 @@ export function ScheduleManager({
 
   return (
     <div className="card p-4 space-y-3">
-      <div className="text-xs font-bold text-[var(--muted)]">提出締切</div>
+      <div className="card-heading">提出締切</div>
 
       {schedules.length === 0 ? (
         <p className="text-[12.5px] text-[var(--muted-2)]">まだ登録されていません。</p>
@@ -103,9 +103,7 @@ function ScheduleRowItem({
         )}
       </div>
       <form action={boundDelete}>
-        <button className="text-[11.5px] text-[var(--danger-text)] font-semibold flex-none">
-          削除
-        </button>
+        <button className="btn-row btn-row-danger flex-none">削除</button>
       </form>
     </div>
   );

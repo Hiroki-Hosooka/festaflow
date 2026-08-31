@@ -17,7 +17,7 @@ export function DeleteDocumentButton({
         if (!confirm("この資料を削除しますか？")) e.preventDefault();
       }}
     >
-      <button className="text-[11.5px] text-[var(--danger-text)] font-semibold">削除</button>
+      <button className="btn-row btn-row-danger">削除</button>
     </form>
   );
 }

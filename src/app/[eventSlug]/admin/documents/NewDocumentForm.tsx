@@ -11,7 +11,9 @@ export function NewDocumentForm({ eventSlug }: { eventSlug: string }) {
 
   return (
     <form action={formAction} key={state.success} className="flex items-center gap-2 flex-wrap">
-      <input type="file" name="file" required aria-label="配布資料を選択" className="text-[12.5px]" />
+      <span className="file-input-wrapper">
+        <input type="file" name="file" required aria-label="配布資料を選択" />
+      </span>
       <button
         disabled={pending}
         className="h-9 px-4 rounded-md text-[12.5px] font-semibold btn-admin disabled:opacity-60"

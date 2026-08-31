@@ -5,6 +5,7 @@ import { listBroadcasts } from "@/lib/data/broadcasts";
 import { listSubmissionsForAdmin } from "@/lib/data/submissions";
 import { formatRelativeTime, formatDateTime } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { sendBroadcastAction } from "./actions";
 
 export default async function AdminMessagesPage({
@@ -29,8 +30,9 @@ export default async function AdminMessagesPage({
     const boundSend = sendBroadcastAction.bind(null, eventSlug);
 
     return (
-      <div className="space-y-5 max-w-5xl">
-        <h1 className="text-lg font-bold">連絡</h1>
+      <div className="space-y-5">
+        <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/admin` }, { label: "連絡" }]} />
+        <h1 className="page-title">連絡</h1>
         <Tabs eventSlug={eventSlug} active={tab} />
 
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5 items-start">
@@ -54,7 +56,7 @@ export default async function AdminMessagesPage({
                     : "text-[var(--muted)]"
                 }`}
               >
-                未提出団体へのリマインド
+        未提出団体へのリマインド
               </Link>
             </div>
 
@@ -62,7 +64,7 @@ export default async function AdminMessagesPage({
               <input type="hidden" name="target_type" value={target} />
               <div>
                 <label className="block text-xs font-semibold mb-1.5">宛先</label>
-                <div className="h-10 border border-[var(--border-strong)] rounded-lg flex items-center px-3.5 text-[13px] bg-[var(--background)]">
+                <div className="h-10 border border-[var(--border)] rounded-lg flex items-center px-3.5 text-[13px] bg-[var(--accent-admin-soft-bg)] text-[var(--accent-admin-text)] font-semibold">
                   {target === "all"
                     ? `すべての団体（${rows.length}団体）`
                     : `未提出の団体（${unsubmittedCount}団体）`}
@@ -84,10 +86,10 @@ export default async function AdminMessagesPage({
           </div>
 
           <div className="card p-6">
-            <div className="text-xs font-bold text-[var(--muted)] mb-3">送信履歴</div>
+            <div className="card-heading mb-3">送信履歴</div>
             <div className="border-t border-[var(--border)]">
               {broadcasts.length === 0 && (
-                <p className="py-4 text-sm text-[var(--muted)]">まだ送信履歴はありません。</p>
+                <EmptyState icon="megaphone" title="まだ送信履歴はありません" />
               )}
               {broadcasts.map((b) => (
                 <div
@@ -112,9 +114,10 @@ export default async function AdminMessagesPage({
   const unreadCount = threads.filter((t) => t.hasUnreadFromGroup).length;
 
   return (
-    <div className="space-y-5 max-w-2xl">
+    <div className="space-y-5 max-w-3xl">
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/admin` }, { label: "連絡" }]} />
       <div>
-        <h1 className="text-lg font-bold">連絡</h1>
+        <h1 className="page-title">連絡</h1>
       </div>
       <Tabs eventSlug={eventSlug} active={tab} />
 
@@ -192,7 +195,7 @@ function Tabs({ eventSlug, active }: { eventSlug: string; active: "inbox" | "bro
             : "text-[var(--muted)]"
         }`}
       >
-        連絡・お知らせ
+        全体連絡
       </Link>
     </div>
   );

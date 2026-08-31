@@ -2,6 +2,7 @@ import { requireGroupSession } from "@/lib/session";
 import { getOrCreateSubmission } from "@/lib/data/submissions";
 import { listTodoGroups, listTodoTasks } from "@/lib/data/todos";
 import { TodoBoard } from "./TodoBoard";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 export default async function GroupTodosPage({
   params,
@@ -19,7 +20,8 @@ export default async function GroupTodosPage({
 
   return (
     <div className="space-y-5">
-      <h1 className="text-lg font-bold">クラスToDoリスト</h1>
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/group` }, { label: "ToDoリスト" }]} />
+      <h1 className="page-title">クラスToDoリスト</h1>
       <TodoBoard
         eventSlug={eventSlug}
         groups={groups}

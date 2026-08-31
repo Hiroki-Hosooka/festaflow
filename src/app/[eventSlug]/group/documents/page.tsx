@@ -4,6 +4,7 @@ import { listEventDocuments } from "@/lib/data/documents";
 import { createSignedUrls } from "@/lib/storage";
 import { formatDateTime } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 export default async function GroupDocumentsPage({
   params,
@@ -22,7 +23,8 @@ export default async function GroupDocumentsPage({
 
   return (
     <div className="space-y-5">
-      <h1 className="text-lg font-bold">配布資料</h1>
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/group` }, { label: "配布資料" }]} />
+      <h1 className="page-title">配布資料</h1>
       <div className="card overflow-hidden">
         {withUrls.length === 0 && (
           <EmptyState

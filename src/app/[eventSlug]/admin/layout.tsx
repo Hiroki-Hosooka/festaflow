@@ -40,6 +40,7 @@ export default async function AdminLayout({
         homeHref={`/${eventSlug}/admin`}
         accentTextClass="text-[var(--accent-admin-text)]"
         badgeClass="bg-[var(--danger-text)]"
+        maxWidthClassName="max-w-6xl"
         logoutAction={boundLogout}
         links={[
           {
@@ -66,7 +67,7 @@ export default async function AdminLayout({
           { href: `/${eventSlug}/admin/settings`, label: "設定", icon: <Icon name="settings" /> },
         ]}
       />
-      <div className="max-w-4xl mx-auto px-5 py-8">{children}</div>
+      <div className="max-w-6xl mx-auto px-5 py-8">{children}</div>
     </div>
   );
 }

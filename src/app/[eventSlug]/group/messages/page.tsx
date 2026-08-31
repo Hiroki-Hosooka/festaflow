@@ -6,6 +6,8 @@ import { listComments, markCommentsRead } from "@/lib/data/comments";
 import { listBroadcasts } from "@/lib/data/broadcasts";
 import { formatDateTime, formatTime } from "@/lib/format";
 import { sendGroupCommentAction } from "./actions";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { EmptyState } from "@/components/EmptyState";
 
 export default async function GroupMessagesPage({
   params,
@@ -27,12 +29,12 @@ export default async function GroupMessagesPage({
     const broadcasts = await listBroadcasts(auth.eventId);
     return (
       <div className="space-y-5">
+        <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/group` }, { label: "連絡" }]} />
+        <h1 className="page-title">連絡</h1>
         <Tabs eventSlug={eventSlug} active={tab} role={auth.role} />
         <div className="card divide-y divide-[var(--border)]">
           {broadcasts.length === 0 && (
-            <p className="px-5 py-6 text-sm text-[var(--muted)]">
-              まだお知らせはありません。
-            </p>
+            <EmptyState icon="megaphone" title="まだお知らせはありません" />
           )}
           {broadcasts.map((b) => (
             <div key={b.id} className="px-5 py-4 flex justify-between gap-4 text-[13px]">
@@ -57,17 +59,21 @@ export default async function GroupMessagesPage({
 
   return (
     <div className="space-y-5">
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/group` }, { label: "連絡" }]} />
+      <h1 className="page-title">連絡</h1>
       <Tabs eventSlug={eventSlug} active={tab} role={auth.role} />
       <div className="card p-6 space-y-4">
         <p className="text-xs text-[var(--muted)]">
-          企画「{submission.name || "（企画名未入力）"}」についてのやりとり
+          {submission.name ? `企画「${submission.name}」についてのやりとり` : `${adminLabel}への個別の質問・相談です`}
         </p>
 
         <div className="space-y-4 min-h-[80px]">
           {comments.length === 0 && (
-            <p className="text-sm text-[var(--muted)]">
-              まだやりとりはありません。気になる点があれば下からメッセージを送れます。
-            </p>
+            <EmptyState
+              icon="chat"
+              title="まだやりとりはありません"
+              description="気になる点があれば下のフォームからメッセージを送れます。"
+            />
           )}
           {comments.map((c) =>
             c.sender_type === "admin" ? (

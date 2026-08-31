@@ -47,7 +47,7 @@ export default async function GroupLayout({
         brand={
           <span className="inline-flex items-center gap-2">
             <BrandMark className="w-[18px] h-[18px]" />
-            {auth.groupName}
+            <span className="font-bold">{auth.groupName}</span>
             <span
               className={`status-badge ${
                 auth.role === "leader"
@@ -65,7 +65,7 @@ export default async function GroupLayout({
         logoutAction={boundLogout}
         links={links}
       />
-      <div className="max-w-3xl mx-auto px-5 py-8">{children}</div>
+      <div className="max-w-5xl mx-auto px-5 py-8">{children}</div>
     </div>
   );
 }

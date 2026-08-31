@@ -191,11 +191,8 @@ function TableRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRo
         <StatusBadge status={status} />
       </span>
       <div className="flex flex-col items-end gap-1">
-        <Link
-          href={actionHref(eventSlug, row)}
-          className="text-[var(--accent-admin-text)] font-semibold text-[11.5px]"
-        >
-          {row.submissionId ? "確認" : "催促"}
+        <Link href={actionHref(eventSlug, row)} className="btn-row btn-row-admin">
+          {row.submissionId ? "確認する" : "催促する"}
         </Link>
         {row.status === "submitted" && row.submissionId && (
           <QuickApproveButton eventSlug={eventSlug} submissionId={row.submissionId} />

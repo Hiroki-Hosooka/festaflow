@@ -178,10 +178,12 @@ function MemberRoster({
 
   return (
     <div className="card p-5 space-y-3 print:hidden">
-      <h2 className="text-sm font-bold">名簿</h2>
+      <h2 className="card-heading">名簿</h2>
       <div className="flex flex-wrap gap-2">
         {members.length === 0 && (
-          <p className="text-[12.5px] text-[var(--muted-2)]">まだ名簿がありません。</p>
+          <p className="text-[12.5px] text-[var(--muted-2)]">
+            まだ名簿がありません
+          </p>
         )}
         {members.map((m) => {
           const boundDelete = deleteShiftMemberAction.bind(null, eventSlug, m.id);

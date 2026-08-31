@@ -38,7 +38,7 @@ export default async function AdminHubPage({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-lg font-bold">{event?.name ?? "管理画面"}</h1>
+        <h1 className="page-title">{event?.name ?? "管理画面"}</h1>
         <p className="text-[12.5px] text-[var(--muted)] mt-1">
           {event?.admin_label ?? "実行委員会"}向けのホームです。ここから各機能にアクセスできます。
         </p>
@@ -65,7 +65,7 @@ export default async function AdminHubPage({
 
       <div className="card p-6 space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <div className="text-xs font-bold text-[var(--muted)]">連絡</div>
+          <div className="card-heading">連絡</div>
           <Link
             href={`/${eventSlug}/admin/messages`}
             className="text-[12px] font-semibold text-[var(--accent-admin-text)]"
@@ -75,7 +75,10 @@ export default async function AdminHubPage({
         </div>
 
         {latestThreads.length === 0 ? (
-          <p className="text-[12.5px] text-[var(--muted-2)]">まだやりとりはありません。</p>
+          <p className="text-[12.5px] text-[var(--muted-2)] inline-flex items-center gap-1.5">
+            <Icon name="inbox" className="w-3.5 h-3.5 text-[var(--muted-2)]" />
+            まだやりとりはありません
+          </p>
         ) : (
           <div className="space-y-1">
             {latestThreads.map((t) => (

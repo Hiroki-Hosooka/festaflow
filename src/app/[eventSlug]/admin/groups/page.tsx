@@ -2,6 +2,8 @@ import { requireAdminSession } from "@/lib/session";
 import { listGroups } from "@/lib/data/groups";
 import { NewGroupForm } from "./NewGroupForm";
 import { Icon } from "@/components/Icons";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { EmptyState } from "@/components/EmptyState";
 import {
   updateGroupBudgetAction,
   resetPassphraseAction,
@@ -21,25 +23,30 @@ export default async function AdminGroupsPage({
   const groups = await listGroups(auth.eventId);
 
   return (
-    <div className="space-y-5 max-w-3xl">
-      <h1 className="text-lg font-bold">団体・予算配分</h1>
+    <div className="space-y-5">
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/admin` }, { label: "団体・予算配分" }]} />
+      <h1 className="page-title">団体・予算配分</h1>
 
       <div className="card p-6 space-y-3">
-        <div className="text-xs font-bold text-[var(--muted)]">団体を追加</div>
+        <div className="card-heading">団体を追加</div>
         <NewGroupForm eventSlug={eventSlug} />
       </div>
 
-      <p className="text-[12px] text-[var(--muted)] leading-relaxed">
+      <p className="text-[12px] text-[var(--muted)] leading-relaxed bg-[var(--accent-admin-soft-bg)] rounded-lg px-3.5 py-2.5">
         「一般生徒用合言葉」を設定すると、その合言葉でログインした生徒は閲覧とシフト希望の提出のみ行える「一般生徒」として扱われます。未設定の間は一般生徒としてのログインはできません（団体のリーダーは
         <span className="font-semibold">/group/settings</span>
         からも設定できます）。
       </p>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {groups.length === 0 && (
-          <p className="card px-4 py-6 text-sm text-[var(--muted)]">
-            まだ団体が登録されていません。
-          </p>
+          <div className="lg:col-span-2 card">
+            <EmptyState
+              icon="users"
+              title="まだ団体が登録されていません"
+              description="上のフォームから団体を追加すると、ここに一覧表示されます。"
+            />
+          </div>
         )}
         {groups.map((group) => (
           <GroupRowCard key={group.id} eventSlug={eventSlug} group={group} />
@@ -68,9 +75,7 @@ function GroupRowCard({ eventSlug, group }: { eventSlug: string; group: GroupRow
             className="h-8 w-24 border border-[var(--border-strong)] rounded-md px-2 text-[12.5px]"
           />
           <span className="text-[11.5px] text-[var(--muted)]">円</span>
-          <button className="text-[11.5px] text-[var(--accent-admin-text)] font-semibold">
-            保存
-          </button>
+          <button className="btn-row btn-row-admin">保存</button>
         </form>
       </div>
 
@@ -87,9 +92,7 @@ function GroupRowCard({ eventSlug, group }: { eventSlug: string; group: GroupRow
               placeholder="新しい合言葉"
               className="h-8 border border-[var(--border-strong)] rounded-md px-2 text-[12px] w-32"
             />
-            <button className="text-[11.5px] text-[var(--accent-admin-text)] font-semibold">
-              変更
-            </button>
+            <button className="btn-row btn-row-admin">変更</button>
           </form>
         </details>
 
@@ -111,9 +114,7 @@ function GroupRowCard({ eventSlug, group }: { eventSlug: string; group: GroupRow
               placeholder="新しい合言葉（空欄で解除）"
               className="h-8 border border-[var(--border-strong)] rounded-md px-2 text-[12px] w-44"
             />
-            <button className="text-[11.5px] text-[var(--accent-admin-text)] font-semibold">
-              保存
-            </button>
+            <button className="btn-row btn-row-admin">保存</button>
           </form>
         </details>
       </div>

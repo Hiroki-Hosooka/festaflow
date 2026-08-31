@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { createOptionAction, renameOptionAction, deleteOptionAction, type OptionFormState } from "./actions";
 import type { ClassificationCategory } from "@/lib/database.types";
 import type { ClassificationOption } from "@/lib/data/classificationOptions";
+import { EmptyState } from "@/components/EmptyState";
 
 const initialState: OptionFormState = {};
 
@@ -23,10 +24,10 @@ export function OptionColumn({
 
   return (
     <div className="card p-5 space-y-3">
-      <h2 className="text-sm font-bold">{title}</h2>
+      <h2 className="card-heading">{title}</h2>
       <div className="space-y-2">
         {options.length === 0 && (
-          <p className="text-[12.5px] text-[var(--muted-2)]">まだ選択肢がありません。</p>
+          <EmptyState icon="tag" title="まだ選択肢がありません" />
         )}
         {options.map((o) => (
           <OptionRow key={o.id} eventSlug={eventSlug} option={o} />
@@ -75,9 +76,7 @@ function OptionRow({
           aria-label="選択肢の名前"
           className="h-9 flex-1 border border-[var(--border)] rounded-md px-2.5 text-[12.5px]"
         />
-        <button className="text-[11.5px] text-[var(--accent-admin-text)] font-semibold flex-none">
-          保存
-        </button>
+        <button className="btn-row btn-row-admin flex-none">保存</button>
       </form>
       <form
         action={boundDelete}
@@ -85,9 +84,7 @@ function OptionRow({
           if (!confirm(`「${option.value}」を削除しますか？`)) e.preventDefault();
         }}
       >
-        <button className="text-[11px] text-[var(--danger-text)] font-semibold flex-none">
-          削除
-        </button>
+        <button className="btn-row btn-row-danger flex-none">削除</button>
       </form>
     </div>
   );

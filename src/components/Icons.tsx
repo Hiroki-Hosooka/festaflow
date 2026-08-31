@@ -65,6 +65,7 @@ const PATHS: Record<string, string[]> = {
     "M12 2h7a1 1 0 0 1 1 1v7l-9 9a1 1 0 0 1-1.4 0l-6.6-6.6a1 1 0 0 1 0-1.4l9-9Z",
     "M17 7m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0",
   ],
+  chevronRight: ["m9 5 7 7-7 7"],
 };
 
 export function Icon({

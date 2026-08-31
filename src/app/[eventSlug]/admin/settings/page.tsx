@@ -1,6 +1,7 @@
 import { requireAdminSession } from "@/lib/session";
 import { getEventBySlug } from "@/lib/data/events";
 import { HubTile } from "@/components/HubTile";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { EventSettingsForm } from "./EventSettingsForm";
 
 export default async function AdminSettingsPage({
@@ -14,15 +15,16 @@ export default async function AdminSettingsPage({
 
   return (
     <div className="space-y-5">
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/admin` }, { label: "設定" }]} />
       <div>
-        <h1 className="text-lg font-bold">設定</h1>
+        <h1 className="page-title">設定</h1>
         <p className="text-[12.5px] text-[var(--muted)] mt-1">
           団体・予算配分、企画の提出項目、分類の選択肢、配布資料をここから管理できます。
         </p>
       </div>
 
       <div className="card p-6 space-y-3">
-        <div className="text-xs font-bold text-[var(--muted)]">基本設定</div>
+        <div className="card-heading">基本設定</div>
         {event && (
           <EventSettingsForm
             eventSlug={eventSlug}

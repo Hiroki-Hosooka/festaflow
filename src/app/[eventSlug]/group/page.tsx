@@ -42,13 +42,16 @@ export default async function GroupHubPage({
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-lg font-bold">{auth.groupName} のホーム</h1>
+        <h1 className="page-title">{auth.groupName} のホーム</h1>
         <StatusBadge status={detail.submission.status} />
       </div>
 
       <div className="card px-4 py-3.5 flex items-center justify-between gap-3 flex-wrap text-[13px]">
         <span>
-          使用予定 {yen(plannedTotal)} / 配分予算 {yen(detail.group.budget_allocated)}
+          使用予定{" "}
+          <strong className="text-[15px] text-[var(--foreground)]">{yen(plannedTotal)}</strong>
+          {" / 配分予算 "}
+          {yen(detail.group.budget_allocated)}
         </span>
         <Link
           href={`/${eventSlug}/group/submission`}

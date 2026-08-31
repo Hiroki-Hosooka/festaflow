@@ -19,7 +19,11 @@ export function MemberPassphraseForm({
     <form action={formAction} key={state.success} className="space-y-4">
       <p className="text-[12.5px] text-[var(--muted)] leading-relaxed">
         ここで設定した合言葉でログインした人は「一般生徒」として扱われ、閲覧とシフト希望の提出のみ行えます（企画の編集・提出はできません）。現在
-        <span className="font-semibold">
+        <span
+          className={`font-bold ${
+            hasMemberPassphrase ? "text-[var(--status-approved-text)]" : "text-[var(--warn-text)]"
+          }`}
+        >
           {hasMemberPassphrase ? "設定されています" : "未設定です"}
         </span>
         。

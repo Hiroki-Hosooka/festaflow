@@ -182,7 +182,7 @@ export function SubmissionForm({
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">{groupName} の企画</h1>
+        <h1 className="page-title">{groupName} の企画</h1>
         <div className="flex items-center gap-2">
           {editable && !isUntouchedFirstVisit && (
             <span className="text-[10.5px] text-[var(--muted-2)]">

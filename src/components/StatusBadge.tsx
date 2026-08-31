@@ -13,7 +13,7 @@ const LABELS: Record<DisplayStatus, string> = {
 
 const STYLES: Record<DisplayStatus, string> = {
   draft: "bg-[var(--status-pending-bg)] text-[var(--status-pending-text)]",
-  submitted: "bg-[var(--status-pending-bg)] text-[var(--status-pending-text)]",
+  submitted: "bg-[var(--status-review-bg)] text-[var(--status-review-text)]",
   approved: "bg-[var(--status-approved-bg)] text-[var(--status-approved-text)]",
   rejected: "bg-[var(--status-rejected-bg)] text-[var(--status-rejected-text)]",
   returned: "bg-[var(--status-returned-bg)] text-[var(--status-returned-text)]",

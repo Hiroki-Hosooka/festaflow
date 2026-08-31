@@ -1,4 +1,5 @@
 import { daysUntil, formatDateTime, toJstDateKey } from "@/lib/format";
+import { Icon } from "@/components/Icons";
 
 interface ScheduleLite {
   id: string;
@@ -40,7 +41,7 @@ export function DeadlineCalendar({ schedules }: { schedules: ScheduleLite[] }) {
   return (
     <div className="card p-6 space-y-4">
       <div>
-        <div className="text-xs font-bold text-[var(--muted)]">締切カレンダー</div>
+        <div className="card-heading">締切カレンダー</div>
         <p className="text-[11.5px] text-[var(--muted-2)] mt-0.5">
           {year}年{month}月。締切のある日には件数が表示されます。
         </p>
@@ -81,7 +82,10 @@ export function DeadlineCalendar({ schedules }: { schedules: ScheduleLite[] }) {
       </div>
 
       {sorted.length === 0 ? (
-        <p className="text-[12.5px] text-[var(--muted-2)]">まだ締切は登録されていません。</p>
+        <p className="text-[12.5px] text-[var(--muted-2)] inline-flex items-center gap-1.5">
+          <Icon name="calendar" className="w-3.5 h-3.5 text-[var(--muted-2)]" />
+          まだ締切は登録されていません
+        </p>
       ) : (
         <div className="space-y-1.5 pt-1 border-t border-[var(--border)]">
           {sorted.map((s) => {

@@ -5,6 +5,7 @@ import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
 import { listAllClassificationOptions } from "@/lib/data/classificationOptions";
 import { ScheduleManager } from "./ScheduleManager";
 import { SubmissionsList } from "./SubmissionsList";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 type Filter = "all" | "unsubmitted" | "pending";
 
@@ -40,8 +41,9 @@ export default async function AdminDashboardPage({
 
   return (
     <div className="space-y-5">
+      <Breadcrumbs items={[{ label: "ホーム", href: `/${eventSlug}/admin` }, { label: "企画一覧" }]} />
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-lg font-bold">企画一覧</h1>
+        <h1 className="page-title">企画一覧</h1>
         <div className="flex gap-5 text-[13px] text-[var(--muted)]">
           <span>
             提出済み{" "}

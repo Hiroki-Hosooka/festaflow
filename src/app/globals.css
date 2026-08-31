@@ -35,8 +35,10 @@
   --status-rejected-text: oklch(42% 0.15 30);
   --status-pending-bg: oklch(93% 0.012 155);
   --status-pending-text: oklch(40% 0.015 155);
-  --status-unsubmitted-bg: oklch(93% 0.012 155);
-  --status-unsubmitted-text: oklch(58% 0.015 155);
+  --status-review-bg: oklch(92% 0.03 255);
+  --status-review-text: oklch(40% 0.09 255);
+  --status-unsubmitted-bg: oklch(90% 0.09 55);
+  --status-unsubmitted-text: oklch(40% 0.12 55);
 
   --danger-border: oklch(75% 0.13 30);
   --danger-text: oklch(42% 0.15 30);
@@ -128,4 +130,93 @@ body {
   font-weight: 700;
   width: fit-content;
   white-space: nowrap;
+}
+
+/* タイポグラフィの階層: ページタイトル/セクション見出し/本文の差をはっきりさせる */
+.page-title {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.card-heading {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.section-caption {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* 行内の確定操作(保存/削除)を、素のテキストリンクではなく統一されたボタンにする */
+.btn-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color 0.12s ease;
+}
+.btn-row:disabled {
+  opacity: 0.6;
+}
+
+.btn-row-admin {
+  background: var(--accent-admin-soft-bg);
+  color: var(--accent-admin-text);
+}
+.btn-row-admin:hover:not(:disabled) {
+  background: oklch(90% 0.04 255);
+}
+
+.btn-row-group {
+  background: var(--accent-group-soft-bg);
+  color: var(--accent-group-text);
+}
+.btn-row-group:hover:not(:disabled) {
+  background: oklch(90% 0.06 165);
+}
+
+.btn-row-danger {
+  background: var(--status-rejected-bg);
+  color: var(--danger-text);
+}
+.btn-row-danger:hover:not(:disabled) {
+  background: oklch(88% 0.1 30);
+}
+
+/* ブラウザ標準のfile inputを他のカスタムUIと揃える */
+.file-input-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.file-input-wrapper input[type="file"] {
+  font-size: 11.5px;
+  color: var(--muted);
+  max-width: 100%;
+}
+.file-input-wrapper input[type="file"]::file-selector-button {
+  margin-right: 4px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+.file-input-wrapper input[type="file"]::file-selector-button:hover {
+  background: var(--background);
 }
