@@ -15,6 +15,7 @@ export type Affiliation = string;
 export type Area = string;
 export type Genre = string;
 export type ClassificationCategory = "affiliation" | "area" | "genre";
+export type PushSubscriptionKind = "admin" | "group";
 export type ReviewStatus = "pending" | "approved" | "needs_fix";
 export type TodoStatus = "not_started" | "in_progress" | "done";
 export type PreferenceKind = "ng" | "want";
@@ -95,6 +96,41 @@ export interface Database {
           deadline: string;
         };
         Update: Partial<Database["public"]["Tables"]["submission_schedules"]["Row"]>;
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          event_id: string;
+          kind: PushSubscriptionKind;
+          group_id: string | null;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["push_subscriptions"]["Row"]> & {
+          event_id: string;
+          kind: PushSubscriptionKind;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["push_subscriptions"]["Row"]>;
+        Relationships: [];
+      };
+      schedule_reminders_sent: {
+        Row: {
+          id: string;
+          schedule_id: string;
+          threshold: string;
+          sent_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["schedule_reminders_sent"]["Row"]> & {
+          schedule_id: string;
+          threshold: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["schedule_reminders_sent"]["Row"]>;
         Relationships: [];
       };
       classification_options: {

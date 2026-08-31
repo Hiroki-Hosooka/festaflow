@@ -264,6 +264,30 @@ export async function decideSubmission(
   if (error) throw error;
 }
 
+export async function getSubmissionGroupInfo(submissionId: string) {
+  const db = supabaseAdmin();
+  const { data: submission, error: subErr } = await db
+    .from("submissions")
+    .select("group_id, name")
+    .eq("id", submissionId)
+    .maybeSingle();
+  if (subErr) throw subErr;
+  if (!submission) return null;
+
+  const { data: group, error: grpErr } = await db
+    .from("groups")
+    .select("name")
+    .eq("id", submission.group_id)
+    .maybeSingle();
+  if (grpErr) throw grpErr;
+
+  return {
+    groupId: submission.group_id,
+    groupName: group?.name ?? "不明な団体",
+    submissionName: submission.name,
+  };
+}
+
 export async function listBorrowStockStatuses(submissionId: string) {
   const { data, error } = await supabaseAdmin()
     .from("submission_items")

@@ -8,6 +8,8 @@ import { listAttachments } from "@/lib/data/attachments";
 import { daysUntil, formatDateTime, yen } from "@/lib/format";
 import { StatusBadge } from "@/components/StatusBadge";
 import { HubTile } from "@/components/HubTile";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { subscribeGroupPushAction, unsubscribeGroupPushAction } from "./settings/actions";
 
 export default async function GroupHubPage({
   params,
@@ -84,6 +86,15 @@ export default async function GroupHubPage({
           </Link>
         </p>
       )}
+
+      <div className="card px-4 py-3.5 space-y-2">
+        <div className="text-[13px] font-bold">通知</div>
+        <PushNotificationToggle
+          subscribeAction={subscribeGroupPushAction.bind(null, eventSlug)}
+          unsubscribeAction={unsubscribeGroupPushAction.bind(null, eventSlug)}
+          activeButtonClassName="btn-group"
+        />
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <HubTile

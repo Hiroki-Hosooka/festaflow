@@ -3,6 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/session";
 import { updateEventSettings } from "@/lib/data/events";
+import {
+  addAdminPushSubscription,
+  removePushSubscription,
+  type PushSubscriptionInput,
+} from "@/lib/data/pushSubscriptions";
 
 export interface EventSettingsFormState {
   error?: string;
@@ -24,4 +29,14 @@ export async function updateEventSettingsAction(
   await updateEventSettings(auth.eventId, { name, adminLabel });
   revalidatePath(`/${eventSlug}`, "layout");
   return { success: "設定を保存しました。" };
+}
+
+export async function subscribeAdminPushAction(eventSlug: string, sub: PushSubscriptionInput) {
+  const auth = await requireAdminSession(eventSlug);
+  await addAdminPushSubscription(auth.eventId, sub);
+}
+
+export async function unsubscribeAdminPushAction(eventSlug: string, endpoint: string) {
+  await requireAdminSession(eventSlug);
+  await removePushSubscription(endpoint);
 }

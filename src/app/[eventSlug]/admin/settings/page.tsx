@@ -2,7 +2,9 @@ import { requireAdminSession } from "@/lib/session";
 import { getEventBySlug } from "@/lib/data/events";
 import { HubTile } from "@/components/HubTile";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { EventSettingsForm } from "./EventSettingsForm";
+import { subscribeAdminPushAction, unsubscribeAdminPushAction } from "./actions";
 
 export default async function AdminSettingsPage({
   params,
@@ -32,6 +34,18 @@ export default async function AdminSettingsPage({
             adminLabel={event.admin_label}
           />
         )}
+      </div>
+
+      <div className="card p-6 space-y-3">
+        <div className="card-heading">通知</div>
+        <p className="text-[12.5px] text-[var(--muted)]">
+          団体からの個別コメント・締切のリマインドをこの端末に通知します。
+        </p>
+        <PushNotificationToggle
+          subscribeAction={subscribeAdminPushAction.bind(null, eventSlug)}
+          unsubscribeAction={unsubscribeAdminPushAction.bind(null, eventSlug)}
+          activeButtonClassName="btn-admin"
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

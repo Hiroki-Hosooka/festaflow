@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { requireGroupSession } from "@/lib/session";
 import { getGroup, updateGroupPassphrase, updateGroupMemberPassphrase } from "@/lib/data/groups";
 import { hashPassword, verifyPassword } from "@/lib/auth";
+import {
+  addGroupPushSubscription,
+  removePushSubscription,
+  type PushSubscriptionInput,
+} from "@/lib/data/pushSubscriptions";
 
 export interface ChangePassphraseState {
   error?: string;
@@ -71,4 +76,14 @@ export async function setMemberPassphraseAction(
   await updateGroupMemberPassphrase(auth.groupId, await hashPassword(passphrase));
   revalidatePath(`/${eventSlug}/admin/groups`);
   return { success: "一般生徒用合言葉を設定しました。" };
+}
+
+export async function subscribeGroupPushAction(eventSlug: string, sub: PushSubscriptionInput) {
+  const auth = await requireGroupSession(eventSlug);
+  await addGroupPushSubscription(auth.eventId, auth.groupId, sub);
+}
+
+export async function unsubscribeGroupPushAction(eventSlug: string, endpoint: string) {
+  await requireGroupSession(eventSlug);
+  await removePushSubscription(endpoint);
 }

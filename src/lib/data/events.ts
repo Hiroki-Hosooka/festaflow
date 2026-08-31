@@ -14,6 +14,12 @@ export const getEventBySlug = cache(async (slug: string) => {
   return data;
 });
 
+export async function listEvents() {
+  const { data, error } = await supabaseAdmin().from("events").select("*");
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function updateEventSettings(
   eventId: string,
   settings: { name: string; adminLabel: string }
