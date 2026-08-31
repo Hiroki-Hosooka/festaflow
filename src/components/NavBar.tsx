@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Icon } from "@/components/Icons";
 
 export interface NavLinkItem {
   href: string;
@@ -12,10 +13,46 @@ export interface NavLinkItem {
   badgeLabel?: string;
 }
 
+function NavLinkRow({
+  link,
+  active,
+  badgeClass,
+  onClick,
+  className,
+}: {
+  link: NavLinkItem;
+  active: boolean;
+  badgeClass: string;
+  onClick?: () => void;
+  className: string;
+}) {
+  return (
+    <Link
+      href={link.href}
+      onClick={onClick}
+      className={`${className} ${active ? "font-bold" : "text-[var(--muted)]"}`}
+    >
+      {link.icon && (
+        <span aria-hidden="true" className="inline-flex w-4 h-4 flex-none">
+          {link.icon}
+        </span>
+      )}
+      {link.label}
+      {link.badge && (
+        <span
+          className={`w-1.5 h-1.5 rounded-full ${badgeClass}`}
+          aria-label={link.badgeLabel ?? "未読・要対応あり"}
+        />
+      )}
+    </Link>
+  );
+}
+
 export function NavBar({
   brand,
   homeHref,
   links,
+  secondaryLinks = [],
   logoutAction,
   accentTextClass,
   badgeClass,
@@ -23,14 +60,17 @@ export function NavBar({
   brand: React.ReactNode;
   homeHref: string;
   links: NavLinkItem[];
+  secondaryLinks?: NavLinkItem[];
   logoutAction: (formData: FormData) => void | Promise<void>;
   accentTextClass: string;
   badgeClass: string;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const isActive = (href: string) => pathname === href;
+  const hasSecondaryBadge = secondaryLinks.some((l) => l.badge);
 
   return (
     <header className="border-b border-[var(--border)] bg-[var(--surface)] sticky top-0 z-20 print:hidden">
@@ -50,29 +90,49 @@ export function NavBar({
         >
           {brand}
         </Link>
-        <nav className="hidden lg:flex gap-4 text-[13px] flex-1 min-w-0">
+        <nav className="hidden lg:flex items-center gap-4 text-[13px] flex-1 min-w-0">
           {links.map((l) => (
-            <Link
+            <NavLinkRow
               key={l.href}
-              href={l.href}
-              className={`inline-flex items-center gap-1.5 whitespace-nowrap ${
-                isActive(l.href) ? "font-bold" : "text-[var(--muted)]"
-              }`}
-            >
-              {l.icon && (
-                <span aria-hidden="true" className="inline-flex w-4 h-4 flex-none">
-                  {l.icon}
-                </span>
-              )}
-              {l.label}
-              {l.badge && (
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${badgeClass}`}
-                  aria-label={l.badgeLabel ?? "未読・要対応あり"}
-                />
-              )}
-            </Link>
+              link={l}
+              active={isActive(l.href)}
+              badgeClass={badgeClass}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap"
+            />
           ))}
+          {secondaryLinks.length > 0 && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setMoreOpen((v) => !v)}
+                className="inline-flex items-center gap-1.5 whitespace-nowrap text-[var(--muted)]"
+                aria-label={moreOpen ? "その他のメニューを閉じる" : "その他のメニューを開く"}
+                aria-expanded={moreOpen}
+              >
+                <span aria-hidden="true" className="inline-flex w-4 h-4 flex-none">
+                  <Icon name="settings" />
+                </span>
+                その他
+                {hasSecondaryBadge && (
+                  <span className={`w-1.5 h-1.5 rounded-full ${badgeClass}`} aria-hidden="true" />
+                )}
+              </button>
+              {moreOpen && (
+                <nav className="absolute left-0 top-full mt-2 w-44 card p-1.5 flex flex-col text-[13px] shadow-lg">
+                  {secondaryLinks.map((l) => (
+                    <NavLinkRow
+                      key={l.href}
+                      link={l}
+                      active={isActive(l.href)}
+                      badgeClass={badgeClass}
+                      onClick={() => setMoreOpen(false)}
+                      className="inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-2 rounded-md hover:bg-[var(--background)]"
+                    />
+                  ))}
+                </nav>
+              )}
+            </div>
+          )}
         </nav>
         <form action={logoutAction} className="flex-none ml-auto">
           <button className={`text-xs font-semibold ${accentTextClass}`}>ログアウト</button>
@@ -80,28 +140,15 @@ export function NavBar({
       </div>
       {open && (
         <nav className="lg:hidden border-t border-[var(--border)] px-4 py-1.5 flex flex-col text-[13.5px]">
-          {links.map((l) => (
-            <Link
+          {[...links, ...secondaryLinks].map((l) => (
+            <NavLinkRow
               key={l.href}
-              href={l.href}
+              link={l}
+              active={isActive(l.href)}
+              badgeClass={badgeClass}
               onClick={() => setOpen(false)}
-              className={`inline-flex items-center gap-1.5 py-2.5 ${
-                isActive(l.href) ? "font-bold" : "text-[var(--muted)]"
-              }`}
-            >
-              {l.icon && (
-                <span aria-hidden="true" className="inline-flex w-4 h-4 flex-none">
-                  {l.icon}
-                </span>
-              )}
-              {l.label}
-              {l.badge && (
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${badgeClass}`}
-                  aria-label={l.badgeLabel ?? "未読・要対応あり"}
-                />
-              )}
-            </Link>
+              className="inline-flex items-center gap-1.5 py-2.5"
+            />
           ))}
         </nav>
       )}

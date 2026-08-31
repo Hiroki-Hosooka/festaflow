@@ -19,6 +19,7 @@ export default async function LoginPage({
       <LoginForm
         eventSlug={eventSlug}
         eventName={event.name}
+        adminLabel={event.admin_label}
         groups={groups.map((g) => ({ id: g.id, name: g.name }))}
       />
     </main>

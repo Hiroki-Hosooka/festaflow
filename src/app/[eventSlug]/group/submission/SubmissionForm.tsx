@@ -57,6 +57,7 @@ export function SubmissionForm({
   affiliationOptions,
   areaOptions,
   role,
+  adminLabel,
 }: {
   eventSlug: string;
   groupName: string;
@@ -71,6 +72,7 @@ export function SubmissionForm({
   affiliationOptions: string[];
   areaOptions: string[];
   role: "leader" | "member";
+  adminLabel: string;
 }) {
   const boundAction = saveSubmissionAction.bind(null, eventSlug);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
@@ -240,18 +242,18 @@ export function SubmissionForm({
       )}
       {submission.status === "submitted" && (
         <div className="rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-[13px] text-[var(--muted)]">
-          実行委員会の確認をお待ちください。
+          {adminLabel}の確認をお待ちください。
         </div>
       )}
       {submission.status === "approved" && (
         <div className="rounded-xl border border-[oklch(80%_0.1_150)] bg-[var(--status-approved-bg)]/40 px-4 py-3 text-[13px] text-[var(--status-approved-text)]">
-          承認されました。内容の変更が必要な場合は個別コメントで実行委員会にご連絡ください。
+          承認されました。内容の変更が必要な場合は個別コメントで{adminLabel}にご連絡ください。
         </div>
       )}
       {isUntouchedFirstVisit && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--accent-group-soft-bg)]/60 px-4 py-3 text-[13px] text-[var(--foreground)] leading-relaxed">
           はじめまして。ここから企画を提出します。企画名・内容・物品（購入／借用）・場所を入力し、
-          いつでも「下書き保存」で保存できます。準備ができたら「提出する」で実行委員会に送信してください。
+          いつでも「下書き保存」で保存できます。準備ができたら「提出する」で{adminLabel}に送信してください。
         </div>
       )}
 
@@ -327,7 +329,7 @@ export function SubmissionForm({
         <div>
           <label className="block text-xs font-semibold mb-1">物品（購入／借用）</label>
           <p className="text-[11px] text-[var(--muted)] mb-2">
-            「借用」は学校の共有備品から借りる物品です。一覧にない物品は実行委員会に追加を依頼してください。
+            「借用」は学校の共有備品から借りる物品です。一覧にない物品は{adminLabel}に追加を依頼してください。
             「単価」は1個あたりの金額です（借用は通常0円）。小計は自動で計算されます。
           </p>
           <div className="space-y-2.5">
@@ -412,7 +414,7 @@ export function SubmissionForm({
                         if (available >= row.quantity) return null;
                         return (
                           <p className="text-[11px] text-[var(--warn-text)]">
-                            現在の在庫残りは{Math.max(0, available)}個です。希望が競合すると実行委員会の裁定で確保できない場合があります。
+                            現在の在庫残りは{Math.max(0, available)}個です。希望が競合すると{adminLabel}の裁定で確保できない場合があります。
                           </p>
                         );
                       })()}

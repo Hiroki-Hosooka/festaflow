@@ -47,6 +47,18 @@ export function parseJstDatetimeLocal(value: string): string {
   return new Date(`${value}:00+09:00`).toISOString();
 }
 
+const jstDateKeyFormatter = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: "Asia/Tokyo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+// JST基準の日付キー（"YYYY-MM-DD"）。カレンダー表示で締切を日付マスに割り当てるために使う。
+export function toJstDateKey(iso: string): string {
+  return jstDateKeyFormatter.format(new Date(iso));
+}
+
 // 締切までの残り日数（切り上げ）。負の値は締切超過を意味する。
 export function daysUntil(iso: string): number {
   const diffMs = new Date(iso).getTime() - Date.now();

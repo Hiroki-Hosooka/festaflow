@@ -1,4 +1,5 @@
 import { requireGroupSession } from "@/lib/session";
+import { getEventBySlug } from "@/lib/data/events";
 import { getOrCreateSubmission, getSubmissionDetail } from "@/lib/data/submissions";
 import { listInventoryItems, getInventoryUsage } from "@/lib/data/inventory";
 import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
@@ -17,8 +18,9 @@ export default async function GroupHomePage({
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
 
-  const [detail, inventoryItems, usage, schedules, attachments, classificationOptions] =
+  const [event, detail, inventoryItems, usage, schedules, attachments, classificationOptions] =
     await Promise.all([
+      getEventBySlug(eventSlug),
       getSubmissionDetail(submission.id),
       listInventoryItems(auth.eventId),
       getInventoryUsage(auth.eventId),
@@ -27,6 +29,7 @@ export default async function GroupHomePage({
       listAllClassificationOptions(auth.eventId),
     ]);
   const { affiliation, area } = classificationOptions;
+  const adminLabel = event?.admin_label ?? "実行委員会";
 
   if (!detail || !detail.group) {
     throw new Error("企画データの取得に失敗しました。");
@@ -54,11 +57,13 @@ export default async function GroupHomePage({
         affiliationOptions={affiliation.map((o) => o.value)}
         areaOptions={area.map((o) => o.value)}
         role={auth.role}
+        adminLabel={adminLabel}
       />
       <AttachmentsCard
         eventSlug={eventSlug}
         attachments={attachments}
         canEdit={auth.role === "leader"}
+        adminLabel={adminLabel}
       />
     </div>
   );

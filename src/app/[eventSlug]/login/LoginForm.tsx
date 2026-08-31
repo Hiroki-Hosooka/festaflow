@@ -9,10 +9,12 @@ const initialState: LoginState = {};
 export function LoginForm({
   eventSlug,
   eventName,
+  adminLabel,
   groups,
 }: {
   eventSlug: string;
   eventName: string;
+  adminLabel: string;
   groups: { id: string; name: string }[];
 }) {
   const [tab, setTab] = useState<"group" | "admin">("group");
@@ -102,7 +104,7 @@ export function LoginForm({
             {groupPending ? "ログイン中..." : "ログイン"}
           </button>
           <p className="text-center text-[11px] text-[var(--muted-2)] pt-2">
-            合言葉は実行委員会から配布されます
+            合言葉は{adminLabel}から配布されます
           </p>
         </form>
       ) : (

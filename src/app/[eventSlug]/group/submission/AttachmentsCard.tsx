@@ -29,10 +29,12 @@ export function AttachmentsCard({
   eventSlug,
   attachments,
   canEdit,
+  adminLabel,
 }: {
   eventSlug: string;
   attachments: AttachmentRow[];
   canEdit: boolean;
+  adminLabel: string;
 }) {
   const boundUpload = uploadAttachmentAction.bind(null, eventSlug);
   const [state, formAction, pending] = useActionState(boundUpload, initialState);
@@ -42,7 +44,7 @@ export function AttachmentsCard({
       <div>
         <h2 className="text-sm font-bold">添付資料</h2>
         <p className="text-[11.5px] text-[var(--muted)] mt-0.5">
-          設計図など、実行委員会に確認してほしい資料をアップロードできます。ファイルごとに承認・要修正の判定が届きます。
+          設計図など、{adminLabel}に確認してほしい資料をアップロードできます。ファイルごとに承認・要修正の判定が届きます。
         </p>
       </div>
 

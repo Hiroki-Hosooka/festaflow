@@ -48,13 +48,14 @@ export default async function AdminLayout({
             icon: <Icon name="clipboard" />,
           },
           {
-            href: `/${eventSlug}/admin/inbox`,
-            label: "受信箱",
+            href: `/${eventSlug}/admin/messages`,
+            label: "連絡",
             icon: <Icon name="inbox" />,
             badge: hasUnreadInbox,
             badgeLabel: "未読の個別コメントがあります",
           },
-          { href: `/${eventSlug}/admin/broadcasts`, label: "連絡", icon: <Icon name="megaphone" /> },
+        ]}
+        secondaryLinks={[
           {
             href: `/${eventSlug}/admin/inventory`,
             label: "在庫管理",

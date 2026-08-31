@@ -152,7 +152,7 @@ function affiliationAreaLabel(row: SubmissionListRow) {
 function actionHref(eventSlug: string, row: SubmissionListRow) {
   return row.submissionId
     ? `/${eventSlug}/admin/submissions/${row.submissionId}`
-    : `/${eventSlug}/admin/broadcasts?target=unsubmitted`;
+    : `/${eventSlug}/admin/messages?tab=broadcast&target=unsubmitted`;
 }
 
 function TableRow({ eventSlug, row }: { eventSlug: string; row: SubmissionListRow }) {

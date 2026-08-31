@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireGroupSession } from "@/lib/session";
+import { getEventBySlug } from "@/lib/data/events";
 import { getOrCreateSubmission } from "@/lib/data/submissions";
 import { listComments, markCommentsRead } from "@/lib/data/comments";
 import { listBroadcasts } from "@/lib/data/broadcasts";
@@ -47,10 +48,12 @@ export default async function GroupMessagesPage({
   }
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
-  const [, comments] = await Promise.all([
+  const [event, , comments] = await Promise.all([
+    getEventBySlug(eventSlug),
     markCommentsRead(submission.id, "group"),
     listComments(submission.id),
   ]);
+  const adminLabel = event?.admin_label ?? "実行委員会";
 
   return (
     <div className="space-y-5">
@@ -77,7 +80,7 @@ export default async function GroupMessagesPage({
                     {c.body}
                   </div>
                   <div className="text-[10.5px] text-[var(--muted-2)] mt-1">
-                    実行委員会 · {formatTime(c.created_at)}
+                    {adminLabel} · {formatTime(c.created_at)}
                   </div>
                 </div>
               </div>

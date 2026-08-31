@@ -5,8 +5,10 @@ import { listSubmissionsForAdmin } from "@/lib/data/submissions";
 import { listInboxThreads } from "@/lib/data/comments";
 import { getInventoryUsage } from "@/lib/data/inventory";
 import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
-import { daysUntil, formatDateTime } from "@/lib/format";
+import { formatRelativeTime } from "@/lib/format";
 import { HubTile } from "@/components/HubTile";
+import { Icon } from "@/components/Icons";
+import { DeadlineCalendar } from "./DeadlineCalendar";
 
 export default async function AdminHubPage({
   params,
@@ -31,16 +33,14 @@ export default async function AdminHubPage({
     (u) => u.requestedTotal > u.totalQuantity
   );
 
-  const upcoming = [...schedules].sort(
-    (a, b) => daysUntil(a.deadline) - daysUntil(b.deadline)
-  )[0];
+  const latestThreads = inboxThreads.slice(0, 3);
 
   return (
     <div className="space-y-5">
       <div>
         <h1 className="text-lg font-bold">{event?.name ?? "管理画面"}</h1>
         <p className="text-[12.5px] text-[var(--muted)] mt-1">
-          実行委員会向けのホームです。ここから各機能にアクセスできます。
+          {event?.admin_label ?? "実行委員会"}向けのホームです。ここから各機能にアクセスできます。
         </p>
       </div>
 
@@ -63,20 +63,57 @@ export default async function AdminHubPage({
         />
       </div>
 
-      {upcoming && (
-        <div className="card px-4 py-3.5 flex items-center justify-between gap-3 text-[13px] flex-wrap">
-          <span>
-            直近の締切: <strong>{upcoming.title}</strong>
-            <span className="text-[var(--muted)] ml-1.5">{formatDateTime(upcoming.deadline)}</span>
-          </span>
+      <div className="card p-6 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-xs font-bold text-[var(--muted)]">連絡</div>
           <Link
-            href={`/${eventSlug}/admin/submissions`}
-            className="text-[var(--accent-admin-text)] font-semibold text-[12px] whitespace-nowrap"
+            href={`/${eventSlug}/admin/messages`}
+            className="text-[12px] font-semibold text-[var(--accent-admin-text)]"
           >
-            詳細を見る →
+            すべて見る →
           </Link>
         </div>
-      )}
+
+        {latestThreads.length === 0 ? (
+          <p className="text-[12.5px] text-[var(--muted-2)]">まだやりとりはありません。</p>
+        ) : (
+          <div className="space-y-1">
+            {latestThreads.map((t) => (
+              <Link
+                key={t.submissionId}
+                href={`/${eventSlug}/admin/submissions/${t.submissionId}`}
+                className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg hover:bg-[var(--background)] text-[12.5px]"
+              >
+                <span className="truncate inline-flex items-center gap-1.5">
+                  {t.hasUnreadFromGroup && (
+                    <span
+                      className="w-1.5 h-1.5 rounded-full bg-[var(--accent-admin-text)] flex-none"
+                      aria-label="未読"
+                    />
+                  )}
+                  <span className="font-semibold flex-none">{t.groupName}</span>
+                  <span className="text-[var(--muted)] truncate">{t.lastMessage}</span>
+                </span>
+                <span className="text-[10.5px] text-[var(--muted-2)] whitespace-nowrap flex-none">
+                  {formatRelativeTime(t.lastMessageAt)}
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 pt-1 border-t border-[var(--border)]">
+          <Link
+            href={`/${eventSlug}/admin/messages?tab=broadcast`}
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-[var(--accent-admin-text)] pt-2.5"
+          >
+            <span aria-hidden="true" className="inline-flex w-4 h-4">
+              <Icon name="megaphone" />
+            </span>
+            全体連絡を送る
+          </Link>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <HubTile
@@ -89,19 +126,12 @@ export default async function AdminHubPage({
         />
         <HubTile
           accent="admin"
-          href={`/${eventSlug}/admin/inbox`}
+          href={`/${eventSlug}/admin/messages`}
           icon="inbox"
-          label="受信箱"
-          description="団体からの個別コメントを新着順に確認します"
+          label="連絡"
+          description="個別コメントの確認・全体連絡の送信を行います"
           badgeCount={unreadCount}
           badgeTone="danger"
-        />
-        <HubTile
-          accent="admin"
-          href={`/${eventSlug}/admin/broadcasts`}
-          icon="megaphone"
-          label="連絡"
-          description="全体連絡・未提出団体へのリマインドを送ります"
         />
         <HubTile
           accent="admin"
@@ -120,6 +150,8 @@ export default async function AdminHubPage({
           description="団体・予算、提出項目、分類、配布資料を管理します"
         />
       </div>
+
+      <DeadlineCalendar schedules={schedules} />
     </div>
   );
 }

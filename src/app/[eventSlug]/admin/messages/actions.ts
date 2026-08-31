@@ -12,5 +12,5 @@ export async function sendBroadcastAction(eventSlug: string, formData: FormData)
   if (!body) return;
 
   await createBroadcast(auth.eventId, targetType === "unsubmitted" ? "unsubmitted" : "all", body);
-  revalidatePath(`/${eventSlug}/admin/broadcasts`);
+  revalidatePath(`/${eventSlug}/admin/messages`);
 }

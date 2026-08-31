@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireGroupSession } from "@/lib/session";
+import { getEventBySlug } from "@/lib/data/events";
 import { getOrCreateSubmission, getSubmissionDetail, sumItems } from "@/lib/data/submissions";
 import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
 import { hasUnreadForSubmission } from "@/lib/data/comments";
@@ -18,7 +19,8 @@ export default async function GroupHubPage({
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
 
-  const [detail, schedules, hasUnread, attachments] = await Promise.all([
+  const [event, detail, schedules, hasUnread, attachments] = await Promise.all([
+    getEventBySlug(eventSlug),
     getSubmissionDetail(submission.id),
     listSubmissionSchedules(auth.eventId),
     hasUnreadForSubmission(submission.id, "group"),
@@ -27,6 +29,7 @@ export default async function GroupHubPage({
   if (!detail || !detail.group) {
     throw new Error("企画データの取得に失敗しました。");
   }
+  const adminLabel = event?.admin_label ?? "実行委員会";
 
   const plannedTotal = sumItems(
     detail.items.map((i) => ({ quantity: i.quantity, unit_price: i.unit_price }))
@@ -92,7 +95,7 @@ export default async function GroupHubPage({
           href={`/${eventSlug}/group/messages`}
           icon="chat"
           label="連絡・コメント"
-          description="実行委員会とのやり取りを確認します"
+          description={`${adminLabel}とのやり取りを確認します`}
           badgeCount={hasUnread ? 1 : 0}
           badgeTone="danger"
         />
@@ -115,7 +118,7 @@ export default async function GroupHubPage({
           href={`/${eventSlug}/group/documents`}
           icon="document"
           label="配布資料"
-          description="実行委員会からの配布資料を確認します"
+          description={`${adminLabel}からの配布資料を確認します`}
         />
       </div>
     </div>

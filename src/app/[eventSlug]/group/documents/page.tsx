@@ -1,4 +1,5 @@
 import { requireGroupSession } from "@/lib/session";
+import { getEventBySlug } from "@/lib/data/events";
 import { listEventDocuments } from "@/lib/data/documents";
 import { createSignedUrls } from "@/lib/storage";
 import { formatDateTime } from "@/lib/format";
@@ -11,7 +12,11 @@ export default async function GroupDocumentsPage({
 }) {
   const { eventSlug } = await params;
   const auth = await requireGroupSession(eventSlug);
-  const documents = await listEventDocuments(auth.eventId);
+  const [event, documents] = await Promise.all([
+    getEventBySlug(eventSlug),
+    listEventDocuments(auth.eventId),
+  ]);
+  const adminLabel = event?.admin_label ?? "実行委員会";
   const urlsByPath = await createSignedUrls(documents.map((d) => d.storage_path));
   const withUrls = documents.map((d) => ({ ...d, url: urlsByPath.get(d.storage_path) ?? "" }));
 
@@ -23,7 +28,7 @@ export default async function GroupDocumentsPage({
           <EmptyState
             icon="document"
             title="まだ資料はありません"
-            description="実行委員会が資料をアップロードすると、ここに表示されます。"
+            description={`${adminLabel}が資料をアップロードすると、ここに表示されます。`}
           />
         )}
         {withUrls.map((d) => (

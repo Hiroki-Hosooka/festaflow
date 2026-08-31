@@ -1,5 +1,7 @@
 import { requireAdminSession } from "@/lib/session";
+import { getEventBySlug } from "@/lib/data/events";
 import { HubTile } from "@/components/HubTile";
+import { EventSettingsForm } from "./EventSettingsForm";
 
 export default async function AdminSettingsPage({
   params,
@@ -8,6 +10,7 @@ export default async function AdminSettingsPage({
 }) {
   const { eventSlug } = await params;
   await requireAdminSession(eventSlug);
+  const event = await getEventBySlug(eventSlug);
 
   return (
     <div className="space-y-5">
@@ -17,6 +20,18 @@ export default async function AdminSettingsPage({
           団体・予算配分、企画の提出項目、分類の選択肢、配布資料をここから管理できます。
         </p>
       </div>
+
+      <div className="card p-6 space-y-3">
+        <div className="text-xs font-bold text-[var(--muted)]">基本設定</div>
+        {event && (
+          <EventSettingsForm
+            eventSlug={eventSlug}
+            name={event.name}
+            adminLabel={event.admin_label}
+          />
+        )}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <HubTile
           accent="admin"
