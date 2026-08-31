@@ -111,7 +111,7 @@ function ConfigForm({
   return (
     <div className="card p-5 space-y-3 print:hidden">
       <h2 className="text-sm font-bold">シフト設定</h2>
-      <form action={formAction} className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 items-end">
+      <form action={formAction} noValidate className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 items-end">
         <div>
           <label className="block text-[11px] font-semibold mb-1">開始時刻</label>
           <input
@@ -216,7 +216,7 @@ function MemberRoster({
           );
         })}
       </div>
-      <form action={boundAdd} className="flex items-center gap-1.5">
+      <form action={boundAdd} noValidate className="flex items-center gap-1.5">
         <input
           name="name"
           required
@@ -249,7 +249,7 @@ function ShiftCsvControls({ eventSlug }: { eventSlug: string }) {
           CSVをダウンロード
         </a>
       </div>
-      <form action={formAction} className="flex flex-wrap items-center gap-2.5">
+      <form action={formAction} noValidate className="flex flex-wrap items-center gap-2.5">
         <span className="file-input-wrapper">
           <input type="file" name="file" accept=".csv,text/csv" required aria-label="当番表CSVファイルを選択" />
         </span>
@@ -319,7 +319,7 @@ function BindMemberForm({
       <p className="text-[11.5px] text-[var(--muted)]">
         まず名簿から自分の名前を選んでください。一度選ぶと、次回からこの端末では自動で「あなた」として希望を送信できます。
       </p>
-      <form action={formAction} className="flex items-center gap-1.5">
+      <form action={formAction} noValidate className="flex items-center gap-1.5">
         <select
           name="member_id"
           value={selectedMember}

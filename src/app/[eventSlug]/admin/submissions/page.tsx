@@ -110,7 +110,7 @@ function FilterChip({
 }) {
   return (
     <Link
-      href={`/${eventSlug}/admin${value === "all" ? "" : `?filter=${value}`}`}
+      href={`/${eventSlug}/admin/submissions${value === "all" ? "" : `?filter=${value}`}`}
       className={`text-[11.5px] px-3 py-1.5 rounded-full ${
         active
           ? "font-bold text-white bg-[var(--accent-admin-solid)]"

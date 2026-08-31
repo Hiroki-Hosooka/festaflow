@@ -268,7 +268,7 @@ export function SubmissionForm({
 
       <BudgetBar allocated={budgetAllocated} planned={plannedTotal} />
 
-      <form action={formAction} className="card p-6 sm:p-7 space-y-5">
+      <form action={formAction} noValidate className="card p-6 sm:p-7 space-y-5">
         <input type="hidden" name="items_json" value={itemsJson} />
         <input type="hidden" name="field_values_json" value={fieldValuesJson} />
 

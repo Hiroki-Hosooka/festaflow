@@ -10,7 +10,7 @@ export function ChangePassphraseForm({ eventSlug }: { eventSlug: string }) {
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
   return (
-    <form action={formAction} key={state.success} className="space-y-4">
+    <form action={formAction} noValidate key={state.success} className="space-y-4">
       <div>
         <label className="block text-xs font-semibold mb-1.5">現在の合言葉</label>
         <input

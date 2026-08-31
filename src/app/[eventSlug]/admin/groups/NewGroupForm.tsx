@@ -12,6 +12,7 @@ export function NewGroupForm({ eventSlug }: { eventSlug: string }) {
   return (
     <form
       action={formAction}
+      noValidate
       key={state.success}
       className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_120px_auto] gap-2.5 items-start"
     >

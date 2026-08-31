@@ -22,7 +22,7 @@ export function EditFieldForm({
   const currentGenres = field.applicable_genres ?? [];
 
   return (
-    <form action={formAction} className="flex flex-wrap items-center gap-2.5">
+    <form action={formAction} noValidate className="flex flex-wrap items-center gap-2.5">
       <input
         name="label"
         defaultValue={field.label}

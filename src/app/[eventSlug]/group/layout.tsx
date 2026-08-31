@@ -49,7 +49,7 @@ export default async function GroupLayout({
             <BrandMark className="w-[18px] h-[18px]" />
             <span className="font-bold">{auth.groupName}</span>
             <span
-              className={`status-badge ${
+              className={`status-badge hidden sm:inline-flex ${
                 auth.role === "leader"
                   ? "bg-[var(--accent-group-soft-bg)] text-[var(--accent-group-text)]"
                   : "bg-[var(--status-pending-bg)] text-[var(--status-pending-text)]"

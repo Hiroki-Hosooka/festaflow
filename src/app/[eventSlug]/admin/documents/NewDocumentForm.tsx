@@ -10,7 +10,7 @@ export function NewDocumentForm({ eventSlug }: { eventSlug: string }) {
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
   return (
-    <form action={formAction} key={state.success} className="flex items-center gap-2 flex-wrap">
+    <form action={formAction} noValidate key={state.success} className="flex items-center gap-2 flex-wrap">
       <span className="file-input-wrapper">
         <input type="file" name="file" required aria-label="配布資料を選択" />
       </span>

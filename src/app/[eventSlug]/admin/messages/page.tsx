@@ -74,7 +74,7 @@ export default async function AdminMessagesPage({
               </Link>
             </div>
 
-            <form action={boundSend} className="space-y-3.5">
+            <form action={boundSend} noValidate className="space-y-3.5">
               <input type="hidden" name="target_type" value={target} />
               {target === "custom" ? (
                 <div>

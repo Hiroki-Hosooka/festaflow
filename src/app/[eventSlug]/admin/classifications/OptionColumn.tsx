@@ -35,6 +35,7 @@ export function OptionColumn({
       </div>
       <form
         action={formAction}
+        noValidate
         key={state.success}
         className="flex items-center gap-1.5 pt-2 border-t border-[var(--border)]"
       >

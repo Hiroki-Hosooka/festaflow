@@ -10,7 +10,7 @@ export function ImportInventoryCsvForm({ eventSlug }: { eventSlug: string }) {
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
   return (
-    <form action={formAction} className="flex flex-wrap items-center gap-2.5">
+    <form action={formAction} noValidate className="flex flex-wrap items-center gap-2.5">
       <span className="file-input-wrapper">
         <input type="file" name="file" accept=".csv,text/csv" required aria-label="在庫CSVファイルを選択" />
       </span>

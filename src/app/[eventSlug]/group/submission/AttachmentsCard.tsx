@@ -89,7 +89,7 @@ export function AttachmentsCard({
       </div>
 
       {canEdit && (
-        <form action={formAction} className="flex items-center gap-2 flex-wrap">
+        <form action={formAction} noValidate className="flex items-center gap-2 flex-wrap">
           <span className="file-input-wrapper">
             <input type="file" name="file" required aria-label="添付ファイルを選択" />
           </span>
@@ -152,7 +152,7 @@ function AttachmentThread({
         </div>
       ))}
       {canReply && (
-        <form action={boundReply} className="flex items-center gap-1.5 pt-1">
+        <form action={boundReply} noValidate className="flex items-center gap-1.5 pt-1">
           <input
             name="body"
             required

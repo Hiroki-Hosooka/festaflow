@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { groupLoginAction, adminLoginAction, type LoginState } from "./actions";
 import { BrandMark } from "@/components/BrandMark";
 
@@ -29,6 +29,36 @@ export function LoginForm({
     boundAdminAction,
     initialState
   );
+
+  // 失敗時も団体選択・管理者IDは保持し、合言葉・パスワードだけ再入力させる
+  // （毎回すべて入力し直させるのはミスの再発を招きやすいため）。
+  // React 19のフォームActionは、成否にかかわらず送信のたびにネイティブの
+  // form.reset()相当の処理でフォーム部品を初期値に戻してしまう（制御コンポーネントでも
+  // DOM側は直接書き換わる）。そのためstateの値を保持するだけでは不十分で、
+  // コミット後（useEffect内）にrefで明示的にDOMへ値を書き戻す。
+  const [groupId, setGroupId] = useState("");
+  const [passphrase, setPassphrase] = useState("");
+  const groupIdRef = useRef<HTMLSelectElement>(null);
+  const [prevGroupState, setPrevGroupState] = useState(groupState);
+  if (groupState !== prevGroupState) {
+    setPrevGroupState(groupState);
+    if (groupState.error) setPassphrase("");
+  }
+  useEffect(() => {
+    if (groupIdRef.current) groupIdRef.current.value = groupId;
+  }, [groupId, groupState]);
+
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
+  const loginIdRef = useRef<HTMLInputElement>(null);
+  const [prevAdminState, setPrevAdminState] = useState(adminState);
+  if (adminState !== prevAdminState) {
+    setPrevAdminState(adminState);
+    if (adminState.error) setPassword("");
+  }
+  useEffect(() => {
+    if (loginIdRef.current) loginIdRef.current.value = loginId;
+  }, [loginId, adminState]);
 
   return (
     <div className="card w-full max-w-sm p-9 sm:p-10">
@@ -63,15 +93,17 @@ export function LoginForm({
       </div>
 
       {tab === "group" ? (
-        <form action={groupFormAction} className="space-y-4">
+        <form action={groupFormAction} noValidate className="space-y-4">
           <div>
             <label className="block text-xs font-semibold mb-1.5">
               団体を選択
             </label>
             <select
+              ref={groupIdRef}
               name="groupId"
               required
-              defaultValue=""
+              value={groupId}
+              onChange={(e) => setGroupId(e.target.value)}
               className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white"
             >
               <option value="" disabled>
@@ -90,6 +122,8 @@ export function LoginForm({
               type="password"
               name="passphrase"
               required
+              value={passphrase}
+              onChange={(e) => setPassphrase(e.target.value)}
               className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
             />
           </div>
@@ -108,13 +142,16 @@ export function LoginForm({
           </p>
         </form>
       ) : (
-        <form action={adminFormAction} className="space-y-4">
+        <form action={adminFormAction} noValidate className="space-y-4">
           <div>
             <label className="block text-xs font-semibold mb-1.5">管理者ID</label>
             <input
+              ref={loginIdRef}
               name="loginId"
               required
               autoComplete="username"
+              value={loginId}
+              onChange={(e) => setLoginId(e.target.value)}
               className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
             />
           </div>
@@ -125,6 +162,8 @@ export function LoginForm({
               name="password"
               required
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
             />
           </div>

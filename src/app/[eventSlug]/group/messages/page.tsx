@@ -108,7 +108,7 @@ export default async function GroupMessagesPage({
           )}
         </div>
 
-        <form action={boundSend} className="flex gap-2 pt-2">
+        <form action={boundSend} noValidate className="flex gap-2 pt-2">
           <input
             name="body"
             required

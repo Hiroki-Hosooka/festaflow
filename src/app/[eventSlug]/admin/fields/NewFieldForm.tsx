@@ -16,7 +16,7 @@ export function NewFieldForm({
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
   return (
-    <form action={formAction} key={state.success} className="flex flex-col gap-2.5">
+    <form action={formAction} noValidate key={state.success} className="flex flex-col gap-2.5">
       <input
         name="label"
         required

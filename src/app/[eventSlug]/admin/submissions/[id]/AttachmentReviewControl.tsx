@@ -92,7 +92,7 @@ export function AttachmentReviewControl({
         </div>
       )}
 
-      <form action={boundComment} className="flex items-center gap-1.5">
+      <form action={boundComment} noValidate className="flex items-center gap-1.5">
         <input
           name="body"
           required

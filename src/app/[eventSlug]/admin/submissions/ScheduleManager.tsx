@@ -37,7 +37,7 @@ export function ScheduleManager({
         <summary className="cursor-pointer text-[11.5px] text-[var(--accent-admin-text)] font-semibold">
           提出物を追加登録
         </summary>
-        <form action={formAction} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 mt-2">
+        <form action={formAction} noValidate className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 mt-2">
           <input
             name="title"
             required

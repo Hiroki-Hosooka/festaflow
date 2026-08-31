@@ -47,7 +47,7 @@ export function TodoBoard({
     <div className="space-y-4">
       {canEdit && (
         <div className="flex items-center gap-2 flex-wrap">
-          <form action={boundCreateGroup} className="flex items-center gap-1.5">
+          <form action={boundCreateGroup} noValidate className="flex items-center gap-1.5">
             <input
               name="name"
               required
@@ -158,7 +158,7 @@ function TodoGroupCard({
       </div>
 
       {canEdit && (
-        <form action={boundCreateTask} className="flex items-center gap-1.5">
+        <form action={boundCreateTask} noValidate className="flex items-center gap-1.5">
           <input
             name="title"
             required

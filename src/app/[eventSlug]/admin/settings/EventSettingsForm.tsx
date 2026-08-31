@@ -18,7 +18,7 @@ export function EventSettingsForm({
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form action={formAction} noValidate className="space-y-3">
       <div>
         <label className="block text-xs font-semibold mb-1.5">イベント名</label>
         <input
