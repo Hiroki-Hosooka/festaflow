@@ -9,6 +9,7 @@ import {
   getSubmissionGroupInfo,
 } from "@/lib/data/submissions";
 import { addComment } from "@/lib/data/comments";
+import { addCommentAttachments } from "@/lib/data/messageAttachments";
 import { setStockDecision } from "@/lib/data/inventory";
 import { reviewAttachment, addAttachmentComment } from "@/lib/data/attachments";
 import { listGroupPushSubscriptions } from "@/lib/data/pushSubscriptions";
@@ -147,7 +148,11 @@ export async function sendAdminCommentAction(
   const auth = await requireAdminSession(eventSlug);
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
-  await addComment(submissionId, "admin", body);
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  const commentId = await addComment(submissionId, "admin", body);
+  if (files.length > 0) {
+    await addCommentAttachments(commentId, files);
+  }
   after(() => notifyGroup(eventSlug, auth.eventId, submissionId, body));
   revalidatePath(`/${eventSlug}/admin/submissions/${submissionId}`);
 }

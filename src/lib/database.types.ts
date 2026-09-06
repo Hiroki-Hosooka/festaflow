@@ -20,6 +20,13 @@ export type CalendarOwnerKind = "admin" | "group";
 export type ReviewStatus = "pending" | "approved" | "needs_fix";
 export type TodoStatus = "not_started" | "in_progress" | "done";
 export type PreferenceKind = "ng" | "want";
+export type BroadcastSeverity = "normal" | "important" | "urgent";
+export type MessageAttachmentParentKind = "comment" | "broadcast";
+export type ThemeKey = "default" | "autumn" | "sakura" | "ocean" | "mono";
+export interface NavItemConfig {
+  key: string;
+  visible: boolean;
+}
 
 export interface Database {
   public: {
@@ -32,6 +39,9 @@ export interface Database {
           admin_login_id: string;
           admin_password_hash: string;
           admin_label: string;
+          theme: ThemeKey;
+          admin_nav_config: NavItemConfig[] | null;
+          group_nav_config: NavItemConfig[] | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["events"]["Row"]> & {
@@ -256,6 +266,7 @@ export interface Database {
           target_type: BroadcastTarget;
           target_group_ids: string[] | null;
           body: string;
+          severity: BroadcastSeverity;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["broadcasts"]["Row"]> & {
@@ -317,20 +328,22 @@ export interface Database {
         >;
         Relationships: [];
       };
-      event_documents: {
+      message_attachments: {
         Row: {
           id: string;
-          event_id: string;
+          parent_kind: MessageAttachmentParentKind;
+          comment_id: string | null;
+          broadcast_id: string | null;
           file_name: string;
           storage_path: string;
           uploaded_at: string;
         };
-        Insert: Partial<Database["public"]["Tables"]["event_documents"]["Row"]> & {
-          event_id: string;
+        Insert: Partial<Database["public"]["Tables"]["message_attachments"]["Row"]> & {
+          parent_kind: MessageAttachmentParentKind;
           file_name: string;
           storage_path: string;
         };
-        Update: Partial<Database["public"]["Tables"]["event_documents"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["message_attachments"]["Row"]>;
         Relationships: [];
       };
       todo_groups: {

@@ -4,8 +4,11 @@ import { getSubmissionDetail, sumItems } from "@/lib/data/submissions";
 import { getInventoryUsage } from "@/lib/data/inventory";
 import { listComments, markCommentsRead } from "@/lib/data/comments";
 import { listAttachments, listAttachmentCommentsByIds } from "@/lib/data/attachments";
+import { listMessageAttachmentsByCommentIds } from "@/lib/data/messageAttachments";
+import { createSignedUrls } from "@/lib/storage";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BudgetBar } from "@/components/BudgetBar";
+import { MessageAttachmentList } from "@/components/MessageAttachmentList";
 import { formatDateTime, formatTime, yen } from "@/lib/format";
 import { DecisionForm } from "./DecisionForm";
 import { StockDecisionControl } from "./StockDecisionControl";
@@ -41,6 +44,12 @@ export default async function AdminSubmissionDetailPage({
     markCommentsRead(submission.id, "admin"),
     listComments(submission.id),
   ]);
+
+  const messageAttachmentsByComment = await listMessageAttachmentsByCommentIds(
+    comments.map((c) => c.id)
+  );
+  const allMessageAttachments = Array.from(messageAttachmentsByComment.values()).flat();
+  const signedUrlsByPath = await createSignedUrls(allMessageAttachments.map((a) => a.storage_path));
 
   const boundSendComment = sendAdminCommentAction.bind(null, eventSlug, submission.id);
 
@@ -191,8 +200,12 @@ export default async function AdminSubmissionDetailPage({
           {comments.length === 0 && (
             <EmptyState icon="chat" title="まだやりとりはありません" />
           )}
-          {comments.map((c) =>
-            c.sender_type === "group" ? (
+          {comments.map((c) => {
+            const attachmentList = (messageAttachmentsByComment.get(c.id) ?? []).map((a) => ({
+              file_name: a.file_name,
+              url: signedUrlsByPath.get(a.storage_path) ?? "",
+            }));
+            return c.sender_type === "group" ? (
               <div key={c.id} className="flex gap-2.5">
                 <span className="w-7 h-7 rounded-full bg-[var(--background)] border border-[var(--border)] flex-none flex items-center justify-center text-[11px] text-[var(--muted)]">
                   団
@@ -200,6 +213,7 @@ export default async function AdminSubmissionDetailPage({
                 <div>
                   <div className="bg-[var(--background)] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed max-w-sm">
                     {c.body}
+                    <MessageAttachmentList attachments={attachmentList} />
                   </div>
                   <div className="text-[10.5px] text-[var(--muted-2)] mt-1">
                     {group.name} · {formatTime(c.created_at)}
@@ -209,8 +223,9 @@ export default async function AdminSubmissionDetailPage({
             ) : (
               <div key={c.id} className="flex justify-end">
                 <div className="text-right">
-                  <div className="inline-block bg-[var(--accent-admin-soft-bg)] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed max-w-sm">
+                  <div className="inline-block bg-[var(--accent-admin-soft-bg)] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed max-w-sm text-left">
                     {c.body}
+                    <MessageAttachmentList attachments={attachmentList} />
                   </div>
                   <div className="text-[10.5px] text-[var(--muted-2)] mt-1">
                     {c.read_at ? "既読 · " : ""}
@@ -218,17 +233,22 @@ export default async function AdminSubmissionDetailPage({
                   </div>
                 </div>
               </div>
-            )
-          )}
+            );
+          })}
         </div>
-        <form action={boundSendComment} className="flex gap-2 pt-1">
-          <input
-            name="body"
-            required
-            placeholder="メッセージを入力..."
-            className="flex-1 h-10 border border-[var(--border-strong)] rounded-lg px-3.5 text-[13px]"
-          />
-          <button className="btn-admin h-10 px-5 rounded-lg text-[13px] font-bold">送信</button>
+        <form action={boundSendComment} noValidate className="space-y-2 pt-1">
+          <div className="flex gap-2">
+            <input
+              name="body"
+              required
+              placeholder="メッセージを入力..."
+              className="flex-1 h-10 border border-[var(--border-strong)] rounded-lg px-3.5 text-[13px]"
+            />
+            <button className="btn-admin h-10 px-5 rounded-lg text-[13px] font-bold">送信</button>
+          </div>
+          <div className="file-input-wrapper">
+            <input type="file" name="files" multiple />
+          </div>
         </form>
       </div>
     </div>

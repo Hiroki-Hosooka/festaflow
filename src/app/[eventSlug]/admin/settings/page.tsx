@@ -2,8 +2,16 @@ import { requireAdminSession } from "@/lib/session";
 import { getEventBySlug } from "@/lib/data/events";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { NavConfigEditor } from "@/components/NavConfigEditor";
 import { EventSettingsForm } from "./EventSettingsForm";
-import { subscribeAdminPushAction, unsubscribeAdminPushAction } from "./actions";
+import { ThemeForm } from "./ThemeForm";
+import {
+  subscribeAdminPushAction,
+  unsubscribeAdminPushAction,
+  updateAdminNavConfigAction,
+  updateGroupNavConfigAction,
+} from "./actions";
+import { ADMIN_NAV_REGISTRY, GROUP_NAV_REGISTRY, LOCKED_NAV_KEYS, resolveNavConfig } from "@/lib/navRegistry";
 
 export default async function AdminSettingsPage({
   params,
@@ -13,6 +21,9 @@ export default async function AdminSettingsPage({
   const { eventSlug } = await params;
   await requireAdminSession(eventSlug);
   const event = await getEventBySlug(eventSlug);
+
+  const adminNavConfig = resolveNavConfig(ADMIN_NAV_REGISTRY, event?.admin_nav_config ?? null);
+  const groupNavConfig = resolveNavConfig(GROUP_NAV_REGISTRY, event?.group_nav_config ?? null);
 
   return (
     <div className="space-y-5 max-w-xl">
@@ -28,6 +39,42 @@ export default async function AdminSettingsPage({
             adminLabel={event.admin_label}
           />
         )}
+      </div>
+
+      <div className="card p-6 space-y-3">
+        <div className="card-heading">配色テーマ</div>
+        <p className="text-[12.5px] text-[var(--muted)]">
+          管理側・団体側の画面全体の配色を変更します。
+        </p>
+        <ThemeForm eventSlug={eventSlug} theme={event?.theme ?? "default"} />
+      </div>
+
+      <div className="card p-6 space-y-3">
+        <div className="card-heading">管理側ナビゲーション</div>
+        <p className="text-[12.5px] text-[var(--muted)]">
+          管理側のメニューの表示順・表示/非表示を設定します。「設定」は自分自身がここにいるため非表示にできません。
+        </p>
+        <NavConfigEditor
+          action={updateAdminNavConfigAction.bind(null, eventSlug)}
+          registry={ADMIN_NAV_REGISTRY}
+          initialConfig={adminNavConfig}
+          lockedKeys={Array.from(LOCKED_NAV_KEYS)}
+          btnClass="btn-admin"
+        />
+      </div>
+
+      <div className="card p-6 space-y-3">
+        <div className="card-heading">団体側ナビゲーション</div>
+        <p className="text-[12.5px] text-[var(--muted)]">
+          団体側のメニューの表示順・表示/非表示を設定します。
+        </p>
+        <NavConfigEditor
+          action={updateGroupNavConfigAction.bind(null, eventSlug)}
+          registry={GROUP_NAV_REGISTRY}
+          initialConfig={groupNavConfig}
+          lockedKeys={Array.from(LOCKED_NAV_KEYS)}
+          btnClass="btn-admin"
+        />
       </div>
 
       <div className="card p-6 space-y-3">

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { requireAdminSession } from "@/lib/session";
 import { createBroadcast } from "@/lib/data/broadcasts";
+import { addBroadcastAttachments } from "@/lib/data/messageAttachments";
 import { listSubmissionsForAdmin } from "@/lib/data/submissions";
 import {
   listAllGroupPushSubscriptions,
@@ -11,7 +12,7 @@ import {
 } from "@/lib/data/pushSubscriptions";
 import { sendPushToSubscriptions } from "@/lib/push";
 import { getEventBySlug } from "@/lib/data/events";
-import type { BroadcastTarget } from "@/lib/database.types";
+import type { BroadcastSeverity, BroadcastTarget } from "@/lib/database.types";
 
 export async function sendBroadcastAction(eventSlug: string, formData: FormData) {
   const auth = await requireAdminSession(eventSlug);
@@ -19,13 +20,20 @@ export async function sendBroadcastAction(eventSlug: string, formData: FormData)
   const targetTypeRaw = String(formData.get("target_type") ?? "all") as BroadcastTarget;
   const targetType: BroadcastTarget =
     targetTypeRaw === "unsubmitted" || targetTypeRaw === "custom" ? targetTypeRaw : "all";
+  const severityRaw = String(formData.get("severity") ?? "normal");
+  const severity: BroadcastSeverity =
+    severityRaw === "important" || severityRaw === "urgent" ? severityRaw : "normal";
   if (!body) return;
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
 
   const groupIds =
     targetType === "custom" ? formData.getAll("group_ids").map(String).filter(Boolean) : null;
   if (targetType === "custom" && (!groupIds || groupIds.length === 0)) return;
 
-  await createBroadcast(auth.eventId, targetType, body, groupIds);
+  const broadcastId = await createBroadcast(auth.eventId, targetType, body, groupIds, severity);
+  if (files.length > 0) {
+    await addBroadcastAttachments(broadcastId, files);
+  }
   revalidatePath(`/${eventSlug}/admin/messages`);
 
   // Push配信は待ち時間が長く操作の体感速度を落とすため、レスポンスを返した後に
@@ -45,8 +53,10 @@ export async function sendBroadcastAction(eventSlug: string, formData: FormData)
       } else {
         subscriptions = await listAllGroupPushSubscriptions(auth.eventId);
       }
+      const severityPrefix =
+        severity === "urgent" ? "【緊急】" : severity === "important" ? "【重要】" : "";
       await sendPushToSubscriptions(subscriptions, {
-        title: `${event?.admin_label ?? "実行委員会"}からのお知らせ`,
+        title: `${severityPrefix}${event?.admin_label ?? "実行委員会"}からのお知らせ`,
         body,
         url: `/${eventSlug}/group/messages?tab=broadcast`,
       });

@@ -4,6 +4,10 @@ import { listInboxThreads } from "@/lib/data/comments";
 import { listBroadcasts } from "@/lib/data/broadcasts";
 import { listSubmissionsForAdmin } from "@/lib/data/submissions";
 import { listGroups } from "@/lib/data/groups";
+import { listMessageAttachmentsByBroadcastIds } from "@/lib/data/messageAttachments";
+import { createSignedUrls } from "@/lib/storage";
+import { MessageAttachmentList } from "@/components/MessageAttachmentList";
+import { Icon } from "@/components/Icons";
 import { formatRelativeTime, formatDateTime } from "@/lib/format";
 import { EmptyState } from "@/components/EmptyState";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -29,6 +33,11 @@ export default async function AdminMessagesPage({
       listSubmissionsForAdmin(auth.eventId),
       listGroups(auth.eventId),
     ]);
+    const attachmentsByBroadcast = await listMessageAttachmentsByBroadcastIds(
+      broadcasts.map((b) => b.id)
+    );
+    const allAttachments = Array.from(attachmentsByBroadcast.values()).flat();
+    const signedUrlsByPath = await createSignedUrls(allAttachments.map((a) => a.storage_path));
     const groupNameById = new Map((groups ?? []).map((g) => [g.id, g.name]));
     const unsubmittedCount = rows.filter((r) => !r.status || r.status === "draft").length;
     const boundSend = sendBroadcastAction.bind(null, eventSlug);
@@ -105,6 +114,32 @@ export default async function AdminMessagesPage({
                 </div>
               )}
               <div>
+                <label className="block text-xs font-semibold mb-1.5">重要度</label>
+                <div className="flex gap-2">
+                  {(
+                    [
+                      { value: "normal", label: "通常" },
+                      { value: "important", label: "重要" },
+                      { value: "urgent", label: "緊急" },
+                    ] as const
+                  ).map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex-1 h-10 border border-[var(--border-strong)] rounded-lg flex items-center justify-center gap-1.5 text-[13px] cursor-pointer has-[:checked]:bg-[var(--accent-admin-soft-bg)] has-[:checked]:border-[var(--accent-admin-text)] has-[:checked]:font-semibold"
+                    >
+                      <input
+                        type="radio"
+                        name="severity"
+                        value={opt.value}
+                        defaultChecked={opt.value === "normal"}
+                        className="sr-only"
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
                 <label className="block text-xs font-semibold mb-1.5">本文</label>
                 <textarea
                   name="body"
@@ -112,6 +147,12 @@ export default async function AdminMessagesPage({
                   rows={3}
                   className="w-full border border-[var(--border-strong)] rounded-lg px-3.5 py-2.5 text-[13px] leading-relaxed"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1.5">添付ファイル（任意）</label>
+                <div className="file-input-wrapper">
+                  <input type="file" name="files" multiple />
+                </div>
               </div>
               <div className="flex justify-end">
                 <button className="btn-admin h-10 px-6 rounded-lg text-[13px] font-bold">送信</button>
@@ -125,25 +166,44 @@ export default async function AdminMessagesPage({
               {broadcasts.length === 0 && (
                 <EmptyState icon="megaphone" title="まだ送信履歴はありません" />
               )}
-              {broadcasts.map((b) => (
-                <div
-                  key={b.id}
-                  className="py-3 border-b border-[var(--border)] last:border-b-0 flex flex-col gap-1 text-[12.5px]"
-                >
-                  <span>{b.body}</span>
-                  <span className="text-[10.5px] text-[var(--muted-2)]">
-                    {b.target_type === "all"
-                      ? "全体"
-                      : b.target_type === "unsubmitted"
-                      ? "未提出団体"
-                      : `${(b.target_group_ids ?? [])
-                          .map((id) => groupNameById.get(id) ?? "?")
-                          .join("・")}`}
-                    {" ・ "}
-                    {formatDateTime(b.created_at)}
-                  </span>
-                </div>
-              ))}
+              {broadcasts.map((b) => {
+                const attachmentList = (attachmentsByBroadcast.get(b.id) ?? []).map((a) => ({
+                  file_name: a.file_name,
+                  url: signedUrlsByPath.get(a.storage_path) ?? "",
+                }));
+                return (
+                  <div
+                    key={b.id}
+                    className="py-3 border-b border-[var(--border)] last:border-b-0 flex flex-col gap-1 text-[12.5px]"
+                  >
+                    {b.severity !== "normal" && (
+                      <span
+                        className={`status-badge mb-0.5 inline-flex items-center gap-1 w-fit ${
+                          b.severity === "urgent"
+                            ? "bg-[var(--status-rejected-bg)] text-[var(--danger-text)]"
+                            : "bg-[var(--status-unsubmitted-bg)] text-[var(--status-unsubmitted-text)]"
+                        }`}
+                      >
+                        <Icon name="flag" className="w-3 h-3" />
+                        {b.severity === "urgent" ? "緊急" : "重要"}
+                      </span>
+                    )}
+                    <span>{b.body}</span>
+                    <MessageAttachmentList attachments={attachmentList} />
+                    <span className="text-[10.5px] text-[var(--muted-2)]">
+                      {b.target_type === "all"
+                        ? "全体"
+                        : b.target_type === "unsubmitted"
+                        ? "未提出団体"
+                        : `${(b.target_group_ids ?? [])
+                            .map((id) => groupNameById.get(id) ?? "?")
+                            .join("・")}`}
+                      {" ・ "}
+                      {formatDateTime(b.created_at)}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

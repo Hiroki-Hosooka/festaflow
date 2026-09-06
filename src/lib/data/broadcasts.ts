@@ -1,6 +1,6 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase";
-import type { BroadcastTarget } from "@/lib/database.types";
+import type { BroadcastSeverity, BroadcastTarget } from "@/lib/database.types";
 
 export async function listBroadcasts(eventId: string) {
   const { data, error } = await supabaseAdmin()
@@ -16,15 +16,22 @@ export async function createBroadcast(
   eventId: string,
   targetType: BroadcastTarget,
   body: string,
-  targetGroupIds: string[] | null = null
-) {
-  const { error } = await supabaseAdmin().from("broadcasts").insert({
-    event_id: eventId,
-    target_type: targetType,
-    body,
-    target_group_ids: targetType === "custom" ? targetGroupIds : null,
-  });
+  targetGroupIds: string[] | null = null,
+  severity: BroadcastSeverity = "normal"
+): Promise<string> {
+  const { data, error } = await supabaseAdmin()
+    .from("broadcasts")
+    .insert({
+      event_id: eventId,
+      target_type: targetType,
+      body,
+      target_group_ids: targetType === "custom" ? targetGroupIds : null,
+      severity,
+    })
+    .select("id")
+    .single();
   if (error) throw error;
+  return data.id;
 }
 
 export async function listBroadcastsForGroup(

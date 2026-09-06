@@ -2,9 +2,13 @@ import { requireGroupSession } from "@/lib/session";
 import { logoutAction } from "../login/actions";
 import { getOrCreateSubmission } from "@/lib/data/submissions";
 import { hasUnreadForSubmission } from "@/lib/data/comments";
+import { getEventBySlug } from "@/lib/data/events";
 import { NavBar, type NavLinkItem } from "@/components/NavBar";
 import { Icon } from "@/components/Icons";
 import { BrandMark } from "@/components/BrandMark";
+import { GROUP_NAV_REGISTRY, resolveNavConfig } from "@/lib/navRegistry";
+
+const PRIMARY_COUNT = 2;
 
 export default async function GroupLayout({
   children,
@@ -17,31 +21,32 @@ export default async function GroupLayout({
   const auth = await requireGroupSession(eventSlug);
   const boundLogout = logoutAction.bind(null, eventSlug);
 
-  const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
+  const [event, submission] = await Promise.all([
+    getEventBySlug(eventSlug),
+    getOrCreateSubmission(auth.eventId, auth.groupId),
+  ]);
   const hasUnread = await hasUnreadForSubmission(submission.id, "group");
 
-  const links: NavLinkItem[] = [
-    { href: `/${eventSlug}/group/submission`, label: "企画", icon: <Icon name="clipboard" /> },
-    {
-      href: `/${eventSlug}/group/messages`,
-      label: "連絡・コメント",
-      icon: <Icon name="chat" />,
-      badge: hasUnread,
-      badgeLabel: "未読のコメントがあります",
-    },
-  ];
-  const secondaryLinks: NavLinkItem[] = [
-    { href: `/${eventSlug}/group/shifts`, label: "当番シフト", icon: <Icon name="calendar" /> },
-    { href: `/${eventSlug}/group/todos`, label: "ToDoリスト", icon: <Icon name="checkSquare" /> },
-    { href: `/${eventSlug}/group/documents`, label: "配布資料", icon: <Icon name="document" /> },
-  ];
-  if (auth.role === "leader") {
-    secondaryLinks.push({
-      href: `/${eventSlug}/group/settings`,
-      label: "設定",
-      icon: <Icon name="settings" />,
-    });
-  }
+  const badgesByKey: Record<string, { badge: boolean; badgeLabel: string }> = {
+    messages: { badge: hasUnread, badgeLabel: "未読のコメントがあります" },
+  };
+
+  const registryByKey = new Map(GROUP_NAV_REGISTRY.map((item) => [item.key, item]));
+  const config = resolveNavConfig(GROUP_NAV_REGISTRY, event?.group_nav_config ?? null);
+  const orderedLinks: NavLinkItem[] = config
+    .filter((entry) => entry.visible)
+    .filter((entry) => auth.role === "leader" || entry.key !== "settings")
+    .map((entry) => registryByKey.get(entry.key))
+    .filter((item): item is (typeof GROUP_NAV_REGISTRY)[number] => !!item)
+    .map((item) => ({
+      href: `/${eventSlug}${item.hrefSuffix}`,
+      label: item.label,
+      icon: <Icon name={item.icon as React.ComponentProps<typeof Icon>["name"]} />,
+      ...badgesByKey[item.key],
+    }));
+
+  const links = orderedLinks.slice(0, PRIMARY_COUNT);
+  const secondaryLinks = orderedLinks.slice(PRIMARY_COUNT);
 
   return (
     <div className="min-h-screen">

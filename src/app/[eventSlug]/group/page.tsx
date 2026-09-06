@@ -10,6 +10,7 @@ import { listAttachments } from "@/lib/data/attachments";
 import { daysUntil, formatRelativeTime, yen } from "@/lib/format";
 import { StatusBadge } from "@/components/StatusBadge";
 import { HubTile } from "@/components/HubTile";
+import { SmallTile } from "@/components/SmallTile";
 import { Icon } from "@/components/Icons";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { MonthCalendar, type CalendarDeadlineItem } from "@/components/MonthCalendar";
@@ -96,8 +97,26 @@ export default async function GroupHubPage({
         {latestBroadcast ? (
           <Link
             href={`/${eventSlug}/group/messages?tab=broadcast`}
-            className="block rounded-xl bg-[var(--accent-group-soft-bg)] px-4 py-3.5 hover:opacity-90"
+            className={`block rounded-xl px-4 py-3.5 hover:opacity-90 ${
+              latestBroadcast.severity === "urgent"
+                ? "bg-[var(--status-rejected-bg)]"
+                : latestBroadcast.severity === "important"
+                ? "bg-[var(--status-unsubmitted-bg)]"
+                : "bg-[var(--accent-group-soft-bg)]"
+            }`}
           >
+            {latestBroadcast.severity !== "normal" && (
+              <span
+                className={`status-badge mb-1.5 inline-flex items-center gap-1 ${
+                  latestBroadcast.severity === "urgent"
+                    ? "text-[var(--danger-text)]"
+                    : "text-[var(--status-unsubmitted-text)]"
+                }`}
+              >
+                <Icon name="flag" className="w-3 h-3" />
+                {latestBroadcast.severity === "urgent" ? "緊急" : "重要"}
+              </span>
+            )}
             <p className="text-[14px] leading-relaxed font-medium text-[var(--foreground)]">
               {latestBroadcast.body}
             </p>
@@ -165,56 +184,46 @@ export default async function GroupHubPage({
         />
       </div>
 
-      <div>
-        <div className="section-caption mb-2">各機能へ</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <HubTile
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <HubTile
+          accent="group"
+          href={`/${eventSlug}/group/submission`}
+          icon="clipboard"
+          label="企画の提出"
+          description="企画内容・物品・分類を入力します"
+        />
+        <HubTile
+          accent="group"
+          href={`/${eventSlug}/group/messages`}
+          icon="chat"
+          label="連絡・コメント"
+          description={`${adminLabel}とのやり取りを確認します`}
+          badgeCount={hasUnread ? 1 : 0}
+          badgeTone="danger"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <SmallTile
+          accent="group"
+          href={`/${eventSlug}/group/shifts`}
+          icon="calendar"
+          label="当番シフト"
+        />
+        <SmallTile
+          accent="group"
+          href={`/${eventSlug}/group/todos`}
+          icon="checkSquare"
+          label="ToDoリスト"
+        />
+        {auth.role === "leader" && (
+          <SmallTile
             accent="group"
-            href={`/${eventSlug}/group/submission`}
-            icon="clipboard"
-            label="企画の提出"
-            description="企画内容・物品・分類を入力します"
+            href={`/${eventSlug}/group/settings`}
+            icon="settings"
+            label="設定"
           />
-          <HubTile
-            accent="group"
-            href={`/${eventSlug}/group/messages`}
-            icon="chat"
-            label="連絡・コメント"
-            description={`${adminLabel}とのやり取りを確認します`}
-            badgeCount={hasUnread ? 1 : 0}
-            badgeTone="danger"
-          />
-          <HubTile
-            accent="group"
-            href={`/${eventSlug}/group/shifts`}
-            icon="calendar"
-            label="当番シフト"
-            description="当番の希望提出・自動配置を行います"
-          />
-          <HubTile
-            accent="group"
-            href={`/${eventSlug}/group/todos`}
-            icon="checkSquare"
-            label="ToDoリスト"
-            description="準備タスクを班ごとに管理します"
-          />
-          <HubTile
-            accent="group"
-            href={`/${eventSlug}/group/documents`}
-            icon="document"
-            label="配布資料"
-            description={`${adminLabel}からの配布資料を確認します`}
-          />
-          {auth.role === "leader" && (
-            <HubTile
-              accent="group"
-              href={`/${eventSlug}/group/settings`}
-              icon="settings"
-              label="設定"
-              description="ログイン合言葉の変更などを行います"
-            />
-          )}
-        </div>
+        )}
       </div>
 
       <MonthCalendar

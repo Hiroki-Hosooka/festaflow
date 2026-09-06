@@ -8,6 +8,7 @@ import { listSubmissionSchedules } from "@/lib/data/submissionSchedules";
 import { listAdminCalendarEvents } from "@/lib/data/calendarEvents";
 import { formatRelativeTime, daysUntil } from "@/lib/format";
 import { HubTile } from "@/components/HubTile";
+import { SmallTile } from "@/components/SmallTile";
 import { Icon } from "@/components/Icons";
 import { MonthCalendar, type CalendarDeadlineItem } from "@/components/MonthCalendar";
 import { createAdminCalendarEventAction, deleteAdminCalendarEventAction } from "./calendarActions";
@@ -69,7 +70,7 @@ export default async function AdminHubPage({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <StatTile label="提出済み" value={`${submittedCount}/${rows.length}団体`} />
         <StatTile
           label="確認待ち"
@@ -80,11 +81,6 @@ export default async function AdminHubPage({
           label="未読コメント"
           value={`${unreadCount}件`}
           tone={unreadCount > 0 ? "danger" : "neutral"}
-        />
-        <StatTile
-          label="在庫"
-          value={hasInventoryConflict ? "競合あり" : "問題なし"}
-          tone={hasInventoryConflict ? "danger" : "neutral"}
         />
       </div>
 
@@ -143,64 +139,55 @@ export default async function AdminHubPage({
         </div>
       </div>
 
-      <div>
-        <div className="section-caption mb-2">各機能へ</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <HubTile
-            accent="admin"
-            href={`/${eventSlug}/admin/submissions`}
-            icon="clipboard"
-            label="企画一覧"
-            description="団体ごとの提出状況を確認・承認します"
-            badgeCount={pendingCount}
-          />
-          <HubTile
-            accent="admin"
-            href={`/${eventSlug}/admin/messages`}
-            icon="inbox"
-            label="連絡"
-            description="個別コメントの確認・全体連絡の送信を行います"
-            badgeCount={unreadCount}
-            badgeTone="danger"
-          />
-          <HubTile
-            accent="admin"
-            href={`/${eventSlug}/admin/inventory`}
-            icon="package"
-            label="在庫管理"
-            description="借用物品の在庫と希望の競合を管理します"
-            badgeCount={hasInventoryConflict ? 1 : 0}
-            badgeTone="danger"
-          />
-          <HubTile
-            accent="admin"
-            href={`/${eventSlug}/admin/groups`}
-            icon="users"
-            label="団体・予算"
-            description="団体一覧・予算配分・ログイン合言葉を管理します"
-          />
-          <HubTile
-            accent="admin"
-            href={`/${eventSlug}/admin/form-settings`}
-            icon="receipt"
-            label="フォーム設定"
-            description="提出項目・分類（所属区分/エリア）を編集します"
-          />
-          <HubTile
-            accent="admin"
-            href={`/${eventSlug}/admin/documents`}
-            icon="document"
-            label="配布資料"
-            description="団体に配布する資料をアップロードします"
-          />
-          <HubTile
-            accent="admin"
-            href={`/${eventSlug}/admin/settings`}
-            icon="settings"
-            label="設定"
-            description="イベント基本情報・通知設定を管理します"
-          />
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <HubTile
+          accent="admin"
+          href={`/${eventSlug}/admin/submissions`}
+          icon="clipboard"
+          label="企画一覧"
+          description="団体ごとの提出状況を確認・承認します"
+          badgeCount={pendingCount}
+        />
+        <HubTile
+          accent="admin"
+          href={`/${eventSlug}/admin/messages`}
+          icon="inbox"
+          label="連絡"
+          description="個別コメントの確認・全体連絡の送信を行います"
+          badgeCount={unreadCount}
+          badgeTone="danger"
+        />
+        <HubTile
+          accent="admin"
+          href={`/${eventSlug}/admin/groups`}
+          icon="users"
+          label="団体・予算"
+          description="団体一覧・予算配分・ログイン合言葉を管理します"
+        />
+        <HubTile
+          accent="admin"
+          href={`/${eventSlug}/admin/inventory`}
+          icon="package"
+          label="在庫管理"
+          description="借用物品の在庫と希望の競合を管理します"
+          badgeCount={hasInventoryConflict ? 1 : 0}
+          badgeTone="danger"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <SmallTile
+          accent="admin"
+          href={`/${eventSlug}/admin/form-settings`}
+          icon="receipt"
+          label="フォーム設定"
+        />
+        <SmallTile
+          accent="admin"
+          href={`/${eventSlug}/admin/settings`}
+          icon="settings"
+          label="設定"
+        />
       </div>
 
       <MonthCalendar

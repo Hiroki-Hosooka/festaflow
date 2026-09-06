@@ -86,11 +86,14 @@ export async function addComment(
   submissionId: string,
   senderType: CommentSender,
   body: string
-) {
-  const { error } = await supabaseAdmin()
+): Promise<string> {
+  const { data, error } = await supabaseAdmin()
     .from("submission_comments")
-    .insert({ submission_id: submissionId, sender_type: senderType, body });
+    .insert({ submission_id: submissionId, sender_type: senderType, body })
+    .select("id")
+    .single();
   if (error) throw error;
+  return data.id;
 }
 
 // viewerType 側が閲覧した際、相手が送った未読メッセージを既読にする

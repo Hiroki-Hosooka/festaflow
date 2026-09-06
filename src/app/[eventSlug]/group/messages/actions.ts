@@ -5,6 +5,7 @@ import { after } from "next/server";
 import { requireGroupSession } from "@/lib/session";
 import { getOrCreateSubmission } from "@/lib/data/submissions";
 import { addComment } from "@/lib/data/comments";
+import { addCommentAttachments } from "@/lib/data/messageAttachments";
 import { listAdminPushSubscriptions } from "@/lib/data/pushSubscriptions";
 import { sendPushToSubscriptions } from "@/lib/push";
 
@@ -13,9 +14,13 @@ export async function sendGroupCommentAction(eventSlug: string, formData: FormDa
   if (auth.role !== "leader") return;
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
-  await addComment(submission.id, "group", body);
+  const commentId = await addComment(submission.id, "group", body);
+  if (files.length > 0) {
+    await addCommentAttachments(commentId, files);
+  }
   revalidatePath(`/${eventSlug}/group/messages`);
 
   // Push配信は待ち時間が長く操作の体感速度を落とすため、レスポンスを返した後に
