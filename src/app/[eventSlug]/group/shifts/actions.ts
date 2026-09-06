@@ -16,7 +16,7 @@ import {
   setAssignment,
   removeAssignment,
   generateSlots,
-  getOrCreateShiftMember,
+  getOrCreateShiftMembers,
 } from "@/lib/data/shifts";
 import { parseCsv } from "@/lib/csv";
 
@@ -163,15 +163,16 @@ export async function autoAssignAction(
   const auth = await requireLeader(eventSlug);
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
 
-  const config = await getShiftConfig(submission.id);
-  if (!config) {
-    return { error: "先にシフト設定（活動時間・コマ時間）を保存してください。" };
-  }
-
-  const [members, preferences] = await Promise.all([
+  // config は早期returnの判定にのみ使うが、members/preferencesはsubmission.idのみに依存する
+  // 独立したクエリのため、判定を待たず一緒に取得しておく
+  const [config, members, preferences] = await Promise.all([
+    getShiftConfig(submission.id),
     listShiftMembers(submission.id),
     listShiftPreferences(submission.id),
   ]);
+  if (!config) {
+    return { error: "先にシフト設定（活動時間・コマ時間）を保存してください。" };
+  }
   if (members.length === 0) {
     return { error: "名簿にメンバーを追加してください。" };
   }
@@ -249,8 +250,9 @@ export async function importShiftCsvAction(
   const looksLikeHeader = /スロット|slot/i.test(rows[0][0] ?? "");
   const records = looksLikeHeader ? rows.slice(1) : rows;
 
-  const assignments: { slotLabel: string; memberId: string }[] = [];
+  const rowsBySlot: { slotLabel: string; names: string[] }[] = [];
   let invalidSlots = 0;
+  const allNames: string[] = [];
   for (const r of records) {
     const slotLabel = (r[0] ?? "").trim();
     if (!slotLabel) continue;
@@ -262,11 +264,15 @@ export async function importShiftCsvAction(
       .slice(1)
       .map((n) => n.trim())
       .filter(Boolean);
-    for (const name of names) {
-      const memberId = await getOrCreateShiftMember(submission.id, name);
-      assignments.push({ slotLabel, memberId });
-    }
+    rowsBySlot.push({ slotLabel, names });
+    allNames.push(...names);
   }
+
+  // 行ごとに逐次round-tripしないよう、名前解決は一括で行う
+  const memberIdByName = await getOrCreateShiftMembers(submission.id, allNames);
+  const assignments = rowsBySlot.flatMap(({ slotLabel, names }) =>
+    names.map((name) => ({ slotLabel, memberId: memberIdByName.get(name)! }))
+  );
 
   await replaceAssignments(submission.id, assignments);
   revalidatePath(`/${eventSlug}/group/shifts`);

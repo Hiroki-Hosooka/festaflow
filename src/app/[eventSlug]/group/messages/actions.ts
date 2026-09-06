@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { requireGroupSession } from "@/lib/session";
 import { getOrCreateSubmission } from "@/lib/data/submissions";
 import { addComment } from "@/lib/data/comments";
@@ -17,14 +18,18 @@ export async function sendGroupCommentAction(eventSlug: string, formData: FormDa
   await addComment(submission.id, "group", body);
   revalidatePath(`/${eventSlug}/group/messages`);
 
-  try {
-    const subscriptions = await listAdminPushSubscriptions(auth.eventId);
-    await sendPushToSubscriptions(subscriptions, {
-      title: `${auth.groupName}から新着コメント`,
-      body,
-      url: `/${eventSlug}/admin/submissions/${submission.id}`,
-    });
-  } catch {
-    // 通知の送信失敗はコメント送信自体を失敗させない
-  }
+  // Push配信は待ち時間が長く操作の体感速度を落とすため、レスポンスを返した後に
+  // after() でバックグラウンド実行する（コメント送信自体の成否には影響しない）
+  after(async () => {
+    try {
+      const subscriptions = await listAdminPushSubscriptions(auth.eventId);
+      await sendPushToSubscriptions(subscriptions, {
+        title: `${auth.groupName}から新着コメント`,
+        body,
+        url: `/${eventSlug}/admin/submissions/${submission.id}`,
+      });
+    } catch {
+      // 通知の送信失敗はコメント送信自体を失敗させない
+    }
+  });
 }

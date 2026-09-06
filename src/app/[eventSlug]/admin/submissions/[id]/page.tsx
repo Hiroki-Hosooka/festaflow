@@ -33,9 +33,11 @@ export default async function AdminSubmissionDetailPage({
     getInventoryUsage(submission.event_id),
     listAttachments(submission.id),
   ]);
-  const attachmentComments = await listAttachmentCommentsByIds(attachments.map((a) => a.id));
 
-  const [, comments] = await Promise.all([
+  // attachmentComments は attachments の結果に依存するが、markCommentsRead/listComments は
+  // submission.id のみに依存する独立した処理のため、まとめて並列実行する
+  const [attachmentComments, , comments] = await Promise.all([
+    listAttachmentCommentsByIds(attachments.map((a) => a.id)),
     markCommentsRead(submission.id, "admin"),
     listComments(submission.id),
   ]);

@@ -99,17 +99,21 @@ export async function saveSubmissionAction(
 
   const submission = await getOrCreateSubmission(auth.eventId, auth.groupId);
 
-  await updateSubmissionCore(submission.id, {
-    name,
-    content,
-    location,
-    affiliation,
-    area,
-    genre,
-    teacherCheck,
-  });
-  await replaceSubmissionItems(submission.id, items);
-  await replaceFieldValues(submission.id, fieldValues);
+  // submissions / submission_items / submission_field_values はそれぞれ独立したテーブルへの
+  // 書き込みのため並列実行する（直列だと保存ボタンの反映がラウンドトリップ分だけ余計に遅くなる）
+  await Promise.all([
+    updateSubmissionCore(submission.id, {
+      name,
+      content,
+      location,
+      affiliation,
+      area,
+      genre,
+      teacherCheck,
+    }),
+    replaceSubmissionItems(submission.id, items),
+    replaceFieldValues(submission.id, fieldValues),
+  ]);
 
   revalidatePath(`/${eventSlug}/group/submission`);
 

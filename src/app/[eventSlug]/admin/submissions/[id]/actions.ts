@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { requireAdminSession } from "@/lib/session";
 import {
   decideSubmission,
@@ -65,10 +66,15 @@ export async function decideSubmissionAction(
     }
   }
 
-  await decideSubmission(submissionId, decision, comment);
+  // submissions への状態更新・comments への追記は互いに独立しているため並列実行する。
+  // 通知送信はPush配信の待ち時間が長く操作の体感速度を落とすため、レスポンスを返した後に
+  // after() でバックグラウンド実行する（保存自体の成否には影響しない）
+  await Promise.all([
+    decideSubmission(submissionId, decision, comment),
+    ...(comment ? [addComment(submissionId, "admin", comment)] : []),
+  ]);
   if (comment) {
-    await addComment(submissionId, "admin", comment);
-    await notifyGroup(eventSlug, auth.eventId, submissionId, comment);
+    after(() => notifyGroup(eventSlug, auth.eventId, submissionId, comment));
   }
 
   revalidatePath(`/${eventSlug}/admin/submissions/${submissionId}`);
@@ -142,6 +148,6 @@ export async function sendAdminCommentAction(
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
   await addComment(submissionId, "admin", body);
+  after(() => notifyGroup(eventSlug, auth.eventId, submissionId, body));
   revalidatePath(`/${eventSlug}/admin/submissions/${submissionId}`);
-  await notifyGroup(eventSlug, auth.eventId, submissionId, body);
 }

@@ -71,23 +71,35 @@ export async function deleteShiftMember(memberId: string) {
   if (error) throw error;
 }
 
-export async function getOrCreateShiftMember(submissionId: string, name: string): Promise<string> {
+// CSV取り込みなど複数名を一括で解決する用途向け。名前ごとに逐次round-tripしないよう、
+// 既存分の一括取得→未登録分の一括insertの2クエリにまとめる。
+export async function getOrCreateShiftMembers(
+  submissionId: string,
+  names: string[]
+): Promise<Map<string, string>> {
+  const uniqueNames = Array.from(new Set(names));
+  if (uniqueNames.length === 0) return new Map();
+
   const { data: existing, error: selErr } = await supabaseAdmin()
     .from("shift_members")
-    .select("id")
+    .select("id, name")
     .eq("submission_id", submissionId)
-    .eq("name", name)
-    .maybeSingle();
+    .in("name", uniqueNames);
   if (selErr) throw selErr;
-  if (existing) return existing.id;
 
-  const { data: created, error: insErr } = await supabaseAdmin()
-    .from("shift_members")
-    .insert({ submission_id: submissionId, name })
-    .select("id")
-    .single();
-  if (insErr) throw insErr;
-  return created.id;
+  const idByName = new Map((existing ?? []).map((m) => [m.name, m.id]));
+  const missingNames = uniqueNames.filter((n) => !idByName.has(n));
+
+  if (missingNames.length > 0) {
+    const { data: created, error: insErr } = await supabaseAdmin()
+      .from("shift_members")
+      .insert(missingNames.map((name) => ({ submission_id: submissionId, name })))
+      .select("id, name");
+    if (insErr) throw insErr;
+    for (const m of created ?? []) idByName.set(m.name, m.id);
+  }
+
+  return idByName;
 }
 
 export async function listShiftPreferences(submissionId: string) {
