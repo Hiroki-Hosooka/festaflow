@@ -25,7 +25,7 @@ export function EventSettingsForm({
           name="name"
           defaultValue={name}
           required
-          className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3.5 text-[13px]"
+          className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3.5 text-[13px]"
         />
       </div>
       <div>
@@ -37,7 +37,7 @@ export function EventSettingsForm({
           name="admin_label"
           defaultValue={adminLabel}
           required
-          className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3.5 text-[13px]"
+          className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3.5 text-[13px]"
         />
       </div>
       <button

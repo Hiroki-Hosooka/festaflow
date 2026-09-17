@@ -61,7 +61,10 @@ export function LoginForm({
   }, [loginId, adminState]);
 
   return (
-    <div className="card w-full max-w-sm p-9 sm:p-10">
+    <div
+      className="card w-full max-w-sm p-9 sm:p-10"
+      style={{ borderRadius: "16px", boxShadow: "oklch(20% 0 0 / 0.06) 0px 0px 0px 4px" }}
+    >
       <div className="flex items-center gap-2 mb-8 justify-center">
         <BrandMark />
         <span className="text-sm font-bold">{eventName}</span>
@@ -104,7 +107,7 @@ export function LoginForm({
               required
               value={groupId}
               onChange={(e) => setGroupId(e.target.value)}
-              className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white"
+              className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm bg-white"
             >
               <option value="" disabled>
                 選択してください
@@ -124,7 +127,7 @@ export function LoginForm({
               required
               value={passphrase}
               onChange={(e) => setPassphrase(e.target.value)}
-              className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
+              className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm"
             />
           </div>
           {groupState.error && (
@@ -152,7 +155,7 @@ export function LoginForm({
               autoComplete="username"
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
-              className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
+              className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm"
             />
           </div>
           <div>
@@ -164,7 +167,7 @@ export function LoginForm({
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
+              className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm"
             />
           </div>
           {adminState.error && (

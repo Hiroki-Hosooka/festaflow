@@ -63,6 +63,7 @@ export default async function AdminLayout({
         }
         homeHref={`/${eventSlug}/admin`}
         accentTextClass="text-[var(--accent-admin-text)]"
+        activeBgClass="bg-[var(--accent-admin-soft-bg)]"
         badgeClass="bg-[var(--danger-text)]"
         maxWidthClassName="max-w-6xl"
         logoutAction={boundLogout}

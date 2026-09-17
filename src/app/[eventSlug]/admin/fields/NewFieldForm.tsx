@@ -21,13 +21,13 @@ export function NewFieldForm({
         name="label"
         required
         placeholder="項目名（例: 実施日）"
-        className="h-10 w-full border border-[var(--border-strong)] rounded-lg px-3 text-[13px]"
+        className="h-10 w-full border border-[var(--input-border)] rounded-lg px-3 text-[13px]"
       />
       <div className="flex flex-wrap items-center gap-2.5">
         <select
           name="field_type"
           defaultValue="text"
-          className="h-10 border border-[var(--border-strong)] rounded-lg px-3 text-[13px] bg-white"
+          className="h-10 border border-[var(--input-border)] rounded-lg px-3 text-[13px] bg-white"
         >
           <option value="text">一行テキスト</option>
           <option value="textarea">複数行テキスト</option>

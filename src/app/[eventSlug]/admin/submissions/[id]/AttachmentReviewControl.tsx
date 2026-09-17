@@ -97,7 +97,7 @@ export function AttachmentReviewControl({
           name="body"
           required
           placeholder="指導コメントを送る..."
-          className="h-8 flex-1 min-w-[140px] border border-[var(--border-strong)] rounded-md px-2 text-[12px]"
+          className="h-8 flex-1 min-w-[140px] border border-[var(--input-border)] rounded-md px-2 text-[12px]"
         />
         <button className="h-8 px-3 rounded-md text-[11.5px] font-semibold btn-admin">
           送信

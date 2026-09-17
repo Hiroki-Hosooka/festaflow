@@ -35,7 +35,7 @@ export function MemberPassphraseForm({
           name="passphrase"
           autoComplete="off"
           placeholder="空欄のまま保存すると解除されます"
-          className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
+          className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm"
         />
       </div>
       {state.error && (

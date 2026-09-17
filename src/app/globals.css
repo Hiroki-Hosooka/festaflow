@@ -9,6 +9,8 @@
   --surface: oklch(99% 0.004 150);
   --border: oklch(90% 0.012 155);
   --border-strong: oklch(84% 0.015 155);
+  /* 入力欄だけに使う、意図的に濃いボーダー。「フォームは軽視しない」ことを示す視覚的な合図 */
+  --input-border: oklch(20% 0.02 155);
 
   /* 団体側アクセント（若葉：ティールグリーン、単色） */
   --accent-group-solid: oklch(46% 0.09 165);
@@ -99,6 +101,36 @@ body {
   background: var(--accent-approve-solid-hover);
 }
 
+/* 控えめな二次アクション用（白背景+ボーダー+濃い文字）。主要な操作は色付き塗りのbtn-*、
+   それ以外の「やってもいいけど主役ではない」操作はこちらを使う */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--foreground);
+  border-radius: 8px;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.btn-outline:hover:not(:disabled) {
+  background: var(--background);
+  border-color: var(--input-border);
+}
+.btn-outline:disabled {
+  opacity: 0.6;
+}
+
+/* ナビの項目に使う、pill状のghostボタン。既定は背景無し、hoverで背景が浮く */
+.nav-pill {
+  border-radius: 9999px;
+  transition: background-color 0.12s ease;
+}
+.nav-pill:hover {
+  background: var(--background);
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -124,8 +156,8 @@ body {
 .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
-  border-radius: 6px;
+  padding: 3px 11px;
+  border-radius: 9999px;
   font-size: 11px;
   font-weight: 700;
   width: fit-content;
@@ -209,7 +241,7 @@ body {
   margin-right: 4px;
   padding: 7px 14px;
   border-radius: 8px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--input-border);
   background: var(--surface);
   color: var(--foreground);
   font-size: 11.5px;

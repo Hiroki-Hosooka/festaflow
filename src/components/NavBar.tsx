@@ -17,12 +17,16 @@ function NavLinkRow({
   link,
   active,
   badgeClass,
+  accentTextClass,
+  activeBgClass,
   onClick,
   className,
 }: {
   link: NavLinkItem;
   active: boolean;
   badgeClass: string;
+  accentTextClass: string;
+  activeBgClass: string;
   onClick?: () => void;
   className: string;
 }) {
@@ -30,7 +34,9 @@ function NavLinkRow({
     <Link
       href={link.href}
       onClick={onClick}
-      className={`${className} ${active ? "font-bold" : "text-[var(--muted)]"}`}
+      className={`${className} ${
+        active ? `font-bold ${accentTextClass} ${activeBgClass}` : "text-[var(--muted)]"
+      }`}
     >
       {link.icon && (
         <span aria-hidden="true" className="inline-flex w-4 h-4 flex-none">
@@ -55,6 +61,7 @@ export function NavBar({
   secondaryLinks = [],
   logoutAction,
   accentTextClass,
+  activeBgClass = "bg-[var(--background)]",
   badgeClass,
   maxWidthClassName = "max-w-5xl",
 }: {
@@ -64,6 +71,7 @@ export function NavBar({
   secondaryLinks?: NavLinkItem[];
   logoutAction: (formData: FormData) => void | Promise<void>;
   accentTextClass: string;
+  activeBgClass?: string;
   badgeClass: string;
   maxWidthClassName?: string;
 }) {
@@ -92,14 +100,16 @@ export function NavBar({
         >
           {brand}
         </Link>
-        <nav className="hidden lg:flex items-center gap-4 text-[13px] flex-1 min-w-0">
+        <nav className="hidden lg:flex items-center gap-1 text-[13px] flex-1 min-w-0">
           {links.map((l) => (
             <NavLinkRow
               key={l.href}
               link={l}
               active={isActive(l.href)}
               badgeClass={badgeClass}
-              className="inline-flex items-center gap-1.5 whitespace-nowrap"
+              accentTextClass={accentTextClass}
+              activeBgClass={activeBgClass}
+              className="nav-pill inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5"
             />
           ))}
           {secondaryLinks.length > 0 && (
@@ -107,7 +117,7 @@ export function NavBar({
               <button
                 type="button"
                 onClick={() => setMoreOpen((v) => !v)}
-                className="inline-flex items-center gap-1.5 whitespace-nowrap text-[var(--muted)]"
+                className="nav-pill inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-[var(--muted)]"
                 aria-label={moreOpen ? "その他のメニューを閉じる" : "その他のメニューを開く"}
                 aria-expanded={moreOpen}
               >
@@ -127,6 +137,8 @@ export function NavBar({
                       link={l}
                       active={isActive(l.href)}
                       badgeClass={badgeClass}
+                      accentTextClass={accentTextClass}
+                      activeBgClass={activeBgClass}
                       onClick={() => setMoreOpen(false)}
                       className="inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-2 rounded-md hover:bg-[var(--background)]"
                     />
@@ -148,6 +160,8 @@ export function NavBar({
               link={l}
               active={isActive(l.href)}
               badgeClass={badgeClass}
+              accentTextClass={accentTextClass}
+              activeBgClass=""
               onClick={() => setOpen(false)}
               className="inline-flex items-center gap-1.5 py-2.5"
             />

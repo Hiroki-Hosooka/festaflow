@@ -242,7 +242,7 @@ export default async function AdminSubmissionDetailPage({
               name="body"
               required
               placeholder="メッセージを入力..."
-              className="flex-1 h-10 border border-[var(--border-strong)] rounded-lg px-3.5 text-[13px]"
+              className="flex-1 h-10 border border-[var(--input-border)] rounded-lg px-3.5 text-[13px]"
             />
             <button className="btn-admin h-10 px-5 rounded-lg text-[13px] font-bold">送信</button>
           </div>

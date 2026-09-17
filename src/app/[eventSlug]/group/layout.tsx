@@ -68,6 +68,7 @@ export default async function GroupLayout({
         }
         homeHref={`/${eventSlug}/group`}
         accentTextClass="text-[var(--accent-group-text)]"
+        activeBgClass="bg-[var(--accent-group-soft-bg)]"
         badgeClass="bg-[var(--accent-group-text)]"
         logoutAction={boundLogout}
         links={links}

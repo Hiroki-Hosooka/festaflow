@@ -282,7 +282,7 @@ export function SubmissionForm({
             onChange={(e) => setName(e.target.value)}
             disabled={!editable}
             required
-            className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+            className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
           />
         </div>
 
@@ -294,7 +294,7 @@ export function SubmissionForm({
             onChange={(e) => setContent(e.target.value)}
             disabled={!editable}
             rows={3}
-            className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm leading-relaxed disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+            className="w-full border border-[var(--input-border)] rounded-lg px-3 py-2 text-sm leading-relaxed disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
           />
         </div>
 
@@ -305,7 +305,7 @@ export function SubmissionForm({
             value={genre}
             onChange={(e) => setGenre(e.target.value as Genre | "")}
             disabled={!editable}
-            className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+            className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
           >
             <option value="">未選択</option>
             {withCurrentValue(genreOptions, submission.genre ?? "").map((g) => (
@@ -327,7 +327,7 @@ export function SubmissionForm({
               value={affiliation}
               onChange={(e) => setAffiliation(e.target.value as Affiliation | "")}
               disabled={!editable}
-              className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+              className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
             >
               <option value="">未選択</option>
               {withCurrentValue(affiliationOptions, submission.affiliation ?? "").map((a) => (
@@ -344,7 +344,7 @@ export function SubmissionForm({
               value={area}
               onChange={(e) => setArea(e.target.value as Area | "")}
               disabled={!editable}
-              className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+              className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm bg-white disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
             >
               <option value="">未選択</option>
               {withCurrentValue(areaOptions, submission.area ?? "").map((a) => (
@@ -515,7 +515,7 @@ export function SubmissionForm({
                 }
                 disabled={!editable}
                 rows={2}
-                className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2 text-sm disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+                className="w-full border border-[var(--input-border)] rounded-lg px-3 py-2 text-sm disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
               />
             ) : (
               <input
@@ -525,7 +525,7 @@ export function SubmissionForm({
                   setDynamicValues((v) => ({ ...v, [field.id]: e.target.value }))
                 }
                 disabled={!editable}
-                className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+                className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
               />
             )}
           </div>
@@ -538,7 +538,7 @@ export function SubmissionForm({
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             disabled={!editable}
-            className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
+            className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm disabled:bg-[var(--background)] disabled:text-[var(--muted)]"
           />
         </div>
 
@@ -576,7 +576,7 @@ export function SubmissionForm({
               name="intent"
               value="draft"
               disabled={pending}
-              className="flex-1 h-11 rounded-lg border border-[var(--border-strong)] text-sm font-semibold disabled:opacity-60"
+              className="btn-outline flex-1 h-11 rounded-lg text-sm font-semibold disabled:opacity-60"
             >
               下書き保存
             </button>

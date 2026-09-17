@@ -27,7 +27,7 @@ export function EditFieldForm({
         name="label"
         defaultValue={field.label}
         required
-        className="h-9 border border-[var(--border-strong)] rounded-lg px-3 text-[13px]"
+        className="h-9 border border-[var(--input-border)] rounded-lg px-3 text-[13px]"
       />
       <label className="flex items-center gap-1.5 text-[12.5px] text-[var(--muted)] whitespace-nowrap">
         <input type="checkbox" name="required" defaultChecked={field.required} /> 必須

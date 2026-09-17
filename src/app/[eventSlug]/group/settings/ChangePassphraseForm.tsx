@@ -18,7 +18,7 @@ export function ChangePassphraseForm({ eventSlug }: { eventSlug: string }) {
           name="current_passphrase"
           required
           autoComplete="current-password"
-          className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
+          className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm"
         />
       </div>
       <div>
@@ -28,7 +28,7 @@ export function ChangePassphraseForm({ eventSlug }: { eventSlug: string }) {
           name="new_passphrase"
           required
           autoComplete="new-password"
-          className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
+          className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm"
         />
       </div>
       <div>
@@ -38,7 +38,7 @@ export function ChangePassphraseForm({ eventSlug }: { eventSlug: string }) {
           name="confirm_passphrase"
           required
           autoComplete="new-password"
-          className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3 text-sm"
+          className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3 text-sm"
         />
       </div>
       {state.error && (

@@ -123,7 +123,7 @@ function ConfigForm({
             pattern="^([01]\d|2[0-3]):[0-5]\d$"
             title="24時間表記で「時:分」の形式で入力してください（例: 09:00）"
             required
-            className="h-9 w-full border border-[var(--border-strong)] rounded-md px-2 text-[12.5px]"
+            className="h-9 w-full border border-[var(--input-border)] rounded-md px-2 text-[12.5px]"
           />
         </div>
         <div>
@@ -137,7 +137,7 @@ function ConfigForm({
             pattern="^([01]\d|2[0-3]):[0-5]\d$"
             title="24時間表記で「時:分」の形式で入力してください（例: 16:00）"
             required
-            className="h-9 w-full border border-[var(--border-strong)] rounded-md px-2 text-[12.5px]"
+            className="h-9 w-full border border-[var(--input-border)] rounded-md px-2 text-[12.5px]"
           />
         </div>
         <div>
@@ -145,7 +145,7 @@ function ConfigForm({
           <select
             name="slot_minutes"
             defaultValue={config?.slot_minutes ?? 60}
-            className="h-9 w-full border border-[var(--border-strong)] rounded-md px-2 text-[12.5px] bg-white"
+            className="h-9 w-full border border-[var(--input-border)] rounded-md px-2 text-[12.5px] bg-white"
           >
             <option value={30}>30分</option>
             <option value={60}>60分</option>
@@ -160,7 +160,7 @@ function ConfigForm({
             name="people_per_slot"
             min={1}
             defaultValue={config?.people_per_slot ?? 2}
-            className="h-9 w-full border border-[var(--border-strong)] rounded-md px-2 text-[12.5px]"
+            className="h-9 w-full border border-[var(--input-border)] rounded-md px-2 text-[12.5px]"
           />
         </div>
         <button
@@ -221,7 +221,7 @@ function MemberRoster({
           name="name"
           required
           placeholder="名前を追加"
-          className="h-9 border border-[var(--border-strong)] rounded-md px-2.5 text-[12.5px]"
+          className="h-9 border border-[var(--input-border)] rounded-md px-2.5 text-[12.5px]"
         />
         <button className="h-9 px-3 rounded-md text-[12.5px] font-semibold btn-group">
           追加
@@ -325,7 +325,7 @@ function BindMemberForm({
           value={selectedMember}
           onChange={(e) => setSelectedMember(e.target.value)}
           required
-          className="h-9 border border-[var(--border-strong)] rounded-md px-2.5 text-[12.5px] bg-white"
+          className="h-9 border border-[var(--input-border)] rounded-md px-2.5 text-[12.5px] bg-white"
         >
           <option value="">名前を選択...</option>
           {members.map((m) => (

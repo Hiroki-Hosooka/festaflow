@@ -32,7 +32,7 @@ export function DecisionForm({
           onChange={(e) => setComment(e.target.value)}
           rows={2}
           placeholder="コメントを入力..."
-          className="w-full border border-[var(--border-strong)] rounded-lg px-3 py-2.5 text-[12.5px]"
+          className="w-full border border-[var(--input-border)] rounded-lg px-3 py-2.5 text-[12.5px]"
         />
       </div>
       {pendingBorrowNames.length > 0 && (

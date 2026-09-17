@@ -20,13 +20,13 @@ export function NewGroupForm({ eventSlug }: { eventSlug: string }) {
         name="name"
         required
         placeholder="団体名（例: 3年A組）"
-        className="h-10 border border-[var(--border-strong)] rounded-lg px-3 text-[13px]"
+        className="h-10 border border-[var(--input-border)] rounded-lg px-3 text-[13px]"
       />
       <input
         name="passphrase"
         required
         placeholder="合言葉"
-        className="h-10 border border-[var(--border-strong)] rounded-lg px-3 text-[13px]"
+        className="h-10 border border-[var(--input-border)] rounded-lg px-3 text-[13px]"
       />
       <input
         name="budget"
@@ -35,7 +35,7 @@ export function NewGroupForm({ eventSlug }: { eventSlug: string }) {
         defaultValue={0}
         placeholder="予算（円）"
         aria-label="配分予算（円）"
-        className="h-10 border border-[var(--border-strong)] rounded-lg px-3 text-[13px]"
+        className="h-10 border border-[var(--input-border)] rounded-lg px-3 text-[13px]"
       />
       <button
         disabled={pending}

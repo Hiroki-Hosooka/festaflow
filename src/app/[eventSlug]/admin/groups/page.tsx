@@ -72,7 +72,7 @@ function GroupRowCard({ eventSlug, group }: { eventSlug: string; group: GroupRow
             min={0}
             defaultValue={group.budget_allocated}
             aria-label={`${group.name}の配分予算（円）`}
-            className="h-8 w-24 border border-[var(--border-strong)] rounded-md px-2 text-[12.5px]"
+            className="h-8 w-24 border border-[var(--input-border)] rounded-md px-2 text-[12.5px]"
           />
           <span className="text-[11.5px] text-[var(--muted)]">円</span>
           <button className="btn-row btn-row-admin">保存</button>
@@ -90,7 +90,7 @@ function GroupRowCard({ eventSlug, group }: { eventSlug: string; group: GroupRow
               name="passphrase"
               required
               placeholder="新しい合言葉"
-              className="h-8 border border-[var(--border-strong)] rounded-md px-2 text-[12px] w-32"
+              className="h-8 border border-[var(--input-border)] rounded-md px-2 text-[12px] w-32"
             />
             <button className="btn-row btn-row-admin">変更</button>
           </form>
@@ -112,7 +112,7 @@ function GroupRowCard({ eventSlug, group }: { eventSlug: string; group: GroupRow
             <input
               name="passphrase"
               placeholder="新しい合言葉（空欄で解除）"
-              className="h-8 border border-[var(--border-strong)] rounded-md px-2 text-[12px] w-44"
+              className="h-8 border border-[var(--input-border)] rounded-md px-2 text-[12px] w-44"
             />
             <button className="btn-row btn-row-admin">保存</button>
           </form>

@@ -145,7 +145,7 @@ export default async function AdminMessagesPage({
                   name="body"
                   required
                   rows={3}
-                  className="w-full border border-[var(--border-strong)] rounded-lg px-3.5 py-2.5 text-[13px] leading-relaxed"
+                  className="w-full border border-[var(--input-border)] rounded-lg px-3.5 py-2.5 text-[13px] leading-relaxed"
                 />
               </div>
               <div>

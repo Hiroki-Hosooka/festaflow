@@ -359,7 +359,7 @@ function AddEventModal({
             required
             autoFocus
             placeholder="予定の名前（例: 前日準備）"
-            className="w-full h-10 border border-[var(--border-strong)] rounded-md px-2.5 text-[13px]"
+            className="w-full h-10 border border-[var(--input-border)] rounded-md px-2.5 text-[13px]"
           />
           <div className="flex gap-2">
             <input
@@ -368,14 +368,14 @@ function AddEventModal({
               required
               defaultValue={defaultDate}
               aria-label="日付"
-              className="flex-1 h-10 border border-[var(--border-strong)] rounded-md px-2.5 text-[13px]"
+              className="flex-1 h-10 border border-[var(--input-border)] rounded-md px-2.5 text-[13px]"
             />
             <input
               type="color"
               name="color"
               defaultValue="#2563eb"
               aria-label="色"
-              className="h-10 w-10 border border-[var(--border-strong)] rounded-md p-0.5 flex-none"
+              className="h-10 w-10 border border-[var(--input-border)] rounded-md p-0.5 flex-none"
             />
           </div>
           <button

@@ -44,19 +44,19 @@ export function ScheduleManager({
             name="title"
             required
             placeholder="提出物の名前（例: 企画書）"
-            className="h-9 border border-[var(--border-strong)] rounded-md px-2.5 text-[12.5px]"
+            className="h-9 border border-[var(--input-border)] rounded-md px-2.5 text-[12.5px]"
           />
           <input
             type="datetime-local"
             name="deadline"
             required
             aria-label="締切日時（日本時間）"
-            className="h-9 border border-[var(--border-strong)] rounded-md px-2.5 text-[12.5px]"
+            className="h-9 border border-[var(--input-border)] rounded-md px-2.5 text-[12.5px]"
           />
           <input
             name="hint"
             placeholder="提出方法のヒント（任意）"
-            className="h-9 border border-[var(--border-strong)] rounded-md px-2.5 text-[12.5px]"
+            className="h-9 border border-[var(--input-border)] rounded-md px-2.5 text-[12.5px]"
           />
           <button
             disabled={pending}

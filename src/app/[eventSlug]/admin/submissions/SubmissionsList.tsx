@@ -56,7 +56,7 @@ export function SubmissionsList({
         onChange={(e) => setQuery(e.target.value)}
         placeholder="団体名・企画名で検索..."
         aria-label="団体名・企画名で検索"
-        className="w-full h-10 border border-[var(--border-strong)] rounded-lg px-3.5 text-[13px] bg-white"
+        className="w-full h-10 border border-[var(--input-border)] rounded-lg px-3.5 text-[13px] bg-white"
       />
 
       <div className="flex flex-wrap gap-2 items-center text-[11.5px]">

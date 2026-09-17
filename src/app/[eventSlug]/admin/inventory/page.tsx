@@ -86,7 +86,7 @@ export default async function AdminInventoryPage({
                   min={0}
                   defaultValue={item.total_quantity}
                   aria-label={`${item.name}の在庫総数`}
-                  className="h-8 w-16 border border-[var(--border-strong)] rounded-md px-2 text-[12.5px]"
+                  className="h-8 w-16 border border-[var(--input-border)] rounded-md px-2 text-[12.5px]"
                 />
                 <button className="btn-row btn-row-admin">保存</button>
               </form>

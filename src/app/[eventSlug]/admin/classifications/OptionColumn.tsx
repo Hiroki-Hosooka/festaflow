@@ -44,7 +44,7 @@ export function OptionColumn({
           name="value"
           required
           placeholder="新しい選択肢を追加"
-          className="h-9 flex-1 border border-[var(--border-strong)] rounded-md px-2.5 text-[12.5px]"
+          className="h-9 flex-1 border border-[var(--input-border)] rounded-md px-2.5 text-[12.5px]"
         />
         <button
           disabled={pending}

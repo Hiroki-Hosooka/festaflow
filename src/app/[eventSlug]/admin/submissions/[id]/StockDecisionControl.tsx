@@ -56,7 +56,7 @@ export function StockDecisionControl({
           value={secureQty}
           onChange={(e) => setSecureQty(Number(e.target.value))}
           aria-label="確保する数量"
-          className="h-7 w-16 border border-[var(--border-strong)] rounded-md px-1.5 text-[12px]"
+          className="h-7 w-16 border border-[var(--input-border)] rounded-md px-1.5 text-[12px]"
         />
         <button className="h-7 px-2.5 rounded-md text-[11.5px] font-semibold btn-approve">
           確保する

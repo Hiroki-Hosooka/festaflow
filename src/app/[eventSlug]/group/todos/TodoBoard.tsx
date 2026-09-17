@@ -52,14 +52,14 @@ export function TodoBoard({
               name="name"
               required
               placeholder="班の名前（例: 装飾班）"
-              className="h-9 border border-[var(--border-strong)] rounded-md px-2.5 text-[12.5px]"
+              className="h-9 border border-[var(--input-border)] rounded-md px-2.5 text-[12.5px]"
             />
             <button className="h-9 px-3 rounded-md text-[12.5px] font-semibold btn-group">
               班を追加
             </button>
           </form>
           <form action={boundAddTemplate}>
-            <button className="h-9 px-3 rounded-md text-[12.5px] font-semibold border border-[var(--border-strong)] text-[var(--muted)]">
+            <button className="btn-outline h-9 px-3 rounded-md text-[12.5px] font-semibold">
               テンプレートから追加
             </button>
           </form>
@@ -118,7 +118,7 @@ function TodoGroupCard({
               name="name"
               defaultValue={group.name}
               autoFocus
-              className="h-8 border border-[var(--border-strong)] rounded-md px-2 text-[13px] font-semibold"
+              className="h-8 border border-[var(--input-border)] rounded-md px-2 text-[13px] font-semibold"
             />
             <button className="text-[11.5px] text-[var(--accent-group-text)] font-semibold">
               保存

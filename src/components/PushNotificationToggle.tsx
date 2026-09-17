@@ -124,7 +124,7 @@ export function PushNotificationToggle({
         onClick={subscribed ? handleUnsubscribe : handleSubscribe}
         disabled={pending}
         className={`h-9 px-4 rounded-md text-[12.5px] font-semibold disabled:opacity-60 ${
-          subscribed ? "border border-[var(--border-strong)]" : activeButtonClassName
+          subscribed ? "btn-outline" : activeButtonClassName
         }`}
       >
         {pending ? "処理中..." : subscribed ? "通知をオフにする" : "通知をオンにする"}
